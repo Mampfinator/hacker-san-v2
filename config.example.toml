@@ -1,0 +1,10 @@
+[app]
+port = 3000
+domain = "example.com"
+disableServices = [
+    "youtube", # removes YouTube from the active services
+    "twitter", # removes Twitter from the active services
+]
+
+[discord]
+cleanupOldCommands = true # whether or not to clean up old Discord slash commands on startup
