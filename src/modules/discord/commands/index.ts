@@ -1,5 +1,5 @@
-import { SendNotificationHandler } from "./send-notification.handler";
+import { TriggerActionsHandler } from "./trigger-actions.handler";
 
 export const DiscordCommandHandlers = [
-    SendNotificationHandler
+    TriggerActionsHandler
 ];

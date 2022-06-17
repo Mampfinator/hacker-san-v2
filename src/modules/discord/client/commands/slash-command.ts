@@ -53,8 +53,22 @@ export const SlashCommand = (options: SlashCommandOptions) => {
         // very, very, *very* crude validation, but it's gotta do for now.
         if (!commandData.name || !commandData.description) throw new Error(`Invalid commandData passed for ${target.name}`);
 
-        target.prototype[COMMAND_DATA_KEY] = commandData;
-        target.prototype[IS_RESTRICTED_KEY] = (guildId: string) => options.restricted ? guildId : undefined;
+        // TODO: Object.defineProperties instead
+        // target.prototype[COMMAND_DATA_KEY] = commandData;
+        // target.prototype[IS_RESTRICTED_KEY] = (guildId: string) => options.restricted ? guildId : undefined;
+
+        Object.defineProperties(target.prototype, {
+            [COMMAND_DATA_KEY]: {
+                get: () => commandData,
+                enumerable: true,
+                configurable: false,
+            },
+            [IS_RESTRICTED_KEY]: {
+                value: (guildId: string) => options.restricted ? guildId : undefined,
+                enumerable: true,
+                configurable: false,
+            }
+        });
 
         commands.push(target);
     }

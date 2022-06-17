@@ -8,8 +8,9 @@ import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { In } from "typeorm";
 import { CommandBus } from "@nestjs/cqrs";
 import { MessageEmbed } from "discord.js";
-import { SendNotificationCommand } from "src/modules/discord/commands/send-notification.command";
+import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
 import { tryFetchPosts } from "../util";
+import { DiscordUtil } from "src/modules/discord/util";
 
 const sleep = async (ms: number) => new Promise<void>(res => setTimeout(res, ms));
 
@@ -40,7 +41,7 @@ export class YouTubeCommunityPostsService {
 
         if (!channel) return;
 
-        const posts = await tryFetchPosts(channel.channelId, 3, 500);
+        const {posts, channel: channelInfo} = await tryFetchPosts(channel.channelId, 3, 500);
         if (typeof posts === "undefined") return this.logger.warn(`Failed getting community posts for ${channel.channelId}`);
         if (posts.length == 0) return;
 
@@ -55,25 +56,21 @@ export class YouTubeCommunityPostsService {
             });
 
             if (this.hasVisitedAll) {
-                const embed = this.postToEmbed(channel, post);
 
-                const event = new SendNotificationCommand({
+                this.logger.debug(`Sending community TriggerActionsCommand for community post ${post.id}.`);
+                
+                const embed = DiscordUtil.postToEmbed(post, channelInfo);
+
+                const event = new TriggerActionsCommand({
                     embed,
                     channelId: channel.channelId,
-                    eventDescriptor: "youtube:post"
+                    platform: "youtube",
+                    event: "post", 
+                    url: `https://www.youtube.com/post/${post.id}`
                 });
 
                 await this.commandBus.execute(event);
             } 
         }
-    }
-
-    private postToEmbed(channel: YouTubeChannel, post: CommunityPost): MessageEmbed {
-        // TODO: actually implement
-
-        return new MessageEmbed()
-            .setTitle(`${channel.channelName} just posted a new community post!`)
-            .setDescription(`Descriptions are hard. soon:tm:\n Debug stuff: ${post.id} | ${post.attachmentType}`)
-            .setColor("RED");
     }
 }

@@ -12,7 +12,7 @@ import { CommunityPost } from './modules/youtube/community-posts/model/community
 import { RawBodyMiddleware } from './shared/middleware/raw-body.middleware';
 import { JsonBodyMiddleware } from './shared/middleware/json-body.middleware';
 import { YouTubeVideo } from './modules/youtube/model/youtube-video.entity';
-import { Subscription } from './modules/discord/models/subscription.entity';
+import { Action } from './modules/discord/models/action.entity';
 import { TwitterSpace } from './modules/twitter/models/twitter-space.entity';
 import { TwitterModule } from './modules/twitter/twitter.module';
 import { TwitterUser } from './modules/twitter/models/twitter-user.entity';
@@ -37,7 +37,7 @@ import { TwitterUser } from './modules/twitter/models/twitter-user.entity';
           YouTubeChannel,
           CommunityPost,
           YouTubeVideo,
-          Subscription,
+          Action,
           TwitterUser,
           TwitterSpace
         ]

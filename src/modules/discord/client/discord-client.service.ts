@@ -1,14 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ApplicationCommandDataResolvable, Client, CommandInteraction } from "discord.js";
+import { ApplicationCommandDataResolvable, Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
 import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
-import { getCommandMetadata, SlashCommand } from "./slash-command";
+import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { DISCORD_EVENT_NAMES } from "./discord-client-constants";
 import { handleEvent, On } from "./on-event";
 import { InjectCommands } from "./commands/slash-commands.provider";
+import { CommandBus } from "@nestjs/cqrs";
+import { FetchPostCommand } from "src/modules/youtube/community-posts/commands/fetch-post.command";
+import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
+import { DiscordUtil } from "../util";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -17,11 +21,12 @@ export class DiscordClientService extends Client {
 
     constructor(
         private readonly configService: ConfigService,
+        private readonly commandBus: CommandBus,
         @InjectRepository(GuildSettings) private readonly settingsRepository: Repository<GuildSettings>,
         @InjectCommands() slashCommands: SlashCommand[]
     ) {
         super({
-            intents: ["GUILDS"]
+            intents: ["GUILDS", "GUILD_MESSAGES"]
         });
 
         for (const command of slashCommands) {
@@ -92,5 +97,29 @@ export class DiscordClientService extends Client {
     @On("interactionCreate")
     handleAutocomplete(interaction: CommandInteraction) {
         if (!interaction.isAutocomplete()) return;
+    }
+
+    @On("messageCreate")
+    async detectCommunityPostLink(message: Message) {
+        const postIdRegex = /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community?lb=)Ug[A-z0-9_\-]+/g
+        
+        const {content} = message;
+        const ids = postIdRegex.exec(content);
+        if (!ids || ids.length == 0) return;
+
+        const embeds: MessageEmbed[] = [];
+        for (const id of ids) {
+            const {posts, channel} = await this.commandBus.execute<FetchPostCommand, {posts: CommunityPost[], channel: ChannelInfo}>(new FetchPostCommand(id, true));
+            const embed = DiscordUtil.postToEmbed(posts[0], channel);
+
+            this.logger.debug(`Generated embed for ${id}.`);
+            embeds.push(embed);
+        }
+
+        if (embeds.length > 0) {
+            await message.reply({embeds, allowedMentions: {repliedUser: false}});
+        } else {
+            this.logger.error(`Found IDs but did not manage to generate embeds.`);
+        }
     }
 }

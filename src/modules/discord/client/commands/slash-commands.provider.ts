@@ -1,12 +1,11 @@
 import { FactoryProvider, Inject } from "@nestjs/common";
-import { getCommands } from "../slash-command";
+import { getCommands } from "./slash-command";
 
-export const InjectCommands = () => Inject("SLASH_COMMANDS");
+const SLASH_COMMANDS = Symbol("SLASH_COMMANDS");
+export const InjectCommands = () => Inject(SLASH_COMMANDS);
 
 export const slashcommandFactory: FactoryProvider = {
-    provide: "SLASH_COMMANDS",
-    useFactory: (...args) => {
-        return args;
-    },
+    provide: SLASH_COMMANDS,
+    useFactory: (...args) => args,
     inject: getCommands()
 }

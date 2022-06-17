@@ -16,7 +16,7 @@ export class SyncPostsHandler implements IEventHandler {
         if (!channelId && typeof posts !== "object") throw new TypeError("Either channelId or posts needs to be defined.");
 
         if (channelId && !posts) {
-            posts = await tryFetchPosts(channelId, 3, 500);
+            posts = (await tryFetchPosts(channelId, 3, 500)).posts;
         }
 
         for (const post of posts) {

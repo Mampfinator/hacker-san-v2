@@ -5,7 +5,7 @@ import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { google, youtube_v3 } from "googleapis";
 import { YouTubeConfig } from "src/modules/config/config";
-import { SendNotificationCommand } from "src/modules/discord/commands/send-notification.command";
+import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
 import { In, Repository } from "typeorm";
 import { YouTubeLiveStatus, YouTubeVideo } from "../model/youtube-video.entity";
 
@@ -197,15 +197,14 @@ export class YouTubeVideosService {
      * Sends a command to the Discord client to send out a notification. 
      */
     public generateNotif(rawVideo: SimplifiedYouTubeVideo | youtube_v3.Schema$Video, statusChange: YouTubeStatusChange): void {
-        const eventDescriptor: `youtube:${YouTubeStatusChange}` = `youtube:${statusChange}`;
-        
         if ((rawVideo as youtube_v3.Schema$Video).snippet) rawVideo = this.simplifyVideo(rawVideo);
 
         // TypeScript you massive pain in the backside
         const video = rawVideo as SimplifiedYouTubeVideo;
 
-        this.commandBus.execute(new SendNotificationCommand({
-            eventDescriptor: "youtube:post",
+        this.commandBus.execute(new TriggerActionsCommand({
+            event: statusChange,
+            platform: "youtube",
             channelId: video.channelId,
             url: `https://youtube.com/watch?v=${video.id}`
         }));

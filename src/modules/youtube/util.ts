@@ -1,5 +1,5 @@
 import axios from "axios";
-import {extractCommunityPosts} from "yt-scraping-utilities";
+import {extractChannelInfo, extractCommunityPosts} from "yt-scraping-utilities";
 
 export const sleep = (ms: number) => new Promise<void>(res => setTimeout(res, ms));
 
@@ -20,6 +20,11 @@ export const tryFetchPosts = async (channelId: string, retries: number, timeout:
             await sleep(timeout);
         }
     }
+    
+    if (data) {
+        const channel = extractChannelInfo(data);
+        const posts = extractCommunityPosts(data);
 
-    return data ? extractCommunityPosts(data) : undefined;
+        return {channel, posts}
+    }
 }

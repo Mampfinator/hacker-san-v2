@@ -3,20 +3,17 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { CommandInteraction, CacheType, MessageEmbed } from "discord.js";
 import { TwitterConfig, YouTubeConfig } from "src/modules/config/config";
-import { ISlashCommand, SlashCommand } from "../slash-command";
+import { ISlashCommand, SlashCommand } from "./slash-command";
 
 @Injectable()
 @SlashCommand({
     commandData: new SlashCommandBuilder().setName("info").setDescription("Show info about the bot!")
 })
 export class InfoCommand implements ISlashCommand {
-    public static instance: InfoCommand;
 
     constructor(
         private readonly config: ConfigService
-    ) {
-        InfoCommand.instance = this;
-    }
+    ) {}
 
     async execute(interaction: CommandInteraction<CacheType>) {
         const embed = new MessageEmbed()
