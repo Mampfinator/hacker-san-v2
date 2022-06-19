@@ -4,6 +4,9 @@ import { In } from "typeorm";
 
 export class GetSpacesRequest implements ICommand {
     constructor(
-        public readonly filter: Partial<{channelId: string | ReturnType<typeof In>, status: TwitterSpaceStatus | ReturnType<typeof In>}>
+        public readonly filter: Partial<{
+            channelId: string | ReturnType<typeof In>;
+            status: TwitterSpaceStatus | ReturnType<typeof In>;
+        }>,
     ) {}
 }

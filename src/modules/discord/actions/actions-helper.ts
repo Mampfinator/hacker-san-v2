@@ -5,7 +5,6 @@ interface ActionType extends IActionType {
     type: string;
 }
 
-
 const ACTION_TYPES = Symbol("ACTION_TYPES");
 export const InjectActions = () => Inject(ACTION_TYPES);
 export const actionTypeFactory: FactoryProvider = {
@@ -18,5 +17,5 @@ export const actionTypeFactory: FactoryProvider = {
 
         return map;
     },
-    inject: getActions()
-}
+    inject: getActions(),
+};

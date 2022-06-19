@@ -1,7 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ConfigService } from "@nestjs/config";
 import { CommandInteraction } from "discord.js";
-import { DiscordConfig } from "src/modules/config/config";
 
 const commands: CommandClass[] = [];
 export const getCommands = () => [...commands];
@@ -19,22 +17,20 @@ export interface ISlashCommand {
     execute(interaction: CommandInteraction): any;
 }
 
-
 const COMMAND_DATA_KEY = Symbol("COMMAND_DATA");
 const IS_RESTRICTED_KEY = Symbol("IS_RESTRICTED");
 
 // interface that represents commands where the prototype has been modified by @SlashCommand.
 export interface SlashCommand extends ISlashCommand {
     /**
-     * Command data to be sent to the Discord API for registering this command. 
+     * Command data to be sent to the Discord API for registering this command.
      */
     [COMMAND_DATA_KEY]: any;
     /**
      * Returns the guild ID of the owner guild, or undefined if the command is unrestricted.
      */
-    [IS_RESTRICTED_KEY]: (guildId: string) => string | undefined; 
+    [IS_RESTRICTED_KEY]: (guildId: string) => string | undefined;
 }
-
 
 interface CommandClass extends Function {
     new (...args: any[]): ISlashCommand;
@@ -45,17 +41,18 @@ interface CommandClass extends Function {
  */
 export const SlashCommand = (options: SlashCommandOptions) => {
     return (target: CommandClass) => {
+        if (!options.commandData)
+            throw new TypeError("Command data needs to be supplied.");
+        if (!(typeof target.prototype.execute === "function"))
+            throw new TypeError(
+                "SlashCommand decorated class needs an execute function!",
+            );
 
-        if (!options.commandData) throw new TypeError("Command data needs to be supplied.");
-        if (!(typeof target.prototype.execute === "function")) throw new TypeError("SlashCommand decorated class needs an execute function!");
-        
-        const commandData = options.commandData.toJSON?.() ?? options.commandData;
+        const commandData =
+            options.commandData.toJSON?.() ?? options.commandData;
         // very, very, *very* crude validation, but it's gotta do for now.
-        if (!commandData.name || !commandData.description) throw new Error(`Invalid commandData passed for ${target.name}`);
-
-        // TODO: Object.defineProperties instead
-        // target.prototype[COMMAND_DATA_KEY] = commandData;
-        // target.prototype[IS_RESTRICTED_KEY] = (guildId: string) => options.restricted ? guildId : undefined;
+        if (!commandData.name || !commandData.description)
+            throw new Error(`Invalid commandData passed for ${target.name}`);
 
         Object.defineProperties(target.prototype, {
             [COMMAND_DATA_KEY]: {
@@ -64,18 +61,21 @@ export const SlashCommand = (options: SlashCommandOptions) => {
                 configurable: false,
             },
             [IS_RESTRICTED_KEY]: {
-                value: (guildId: string) => options.restricted ? guildId : undefined,
+                value: (guildId: string) =>
+                    options.restricted ? guildId : undefined,
                 enumerable: true,
                 configurable: false,
-            }
+            },
         });
 
         commands.push(target);
-    }
-}
+    };
+};
 
-export const getCommandMetadata = (command: SlashCommand): {commandData: any, forGuild: (guildId: string) => string | undefined } => {
+export const getCommandMetadata = (
+    command: SlashCommand,
+): { commandData: any; forGuild: (guildId: string) => string | undefined } => {
     const commandData = command[COMMAND_DATA_KEY];
     const forGuild = command[IS_RESTRICTED_KEY];
-    return {commandData, forGuild};
-}
+    return { commandData, forGuild };
+};

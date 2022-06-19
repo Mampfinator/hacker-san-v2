@@ -6,12 +6,10 @@ import { UnsubscribeCommand } from "./unsubscribe.command";
 @CommandHandler(UnsubscribeCommand)
 export class UnsubscribeHandler implements ICommandHandler<UnsubscribeCommand> {
     private readonly logger = new Logger(UnsubscribeHandler.name);
-    
-    constructor(
-        private readonly eventSub: YouTubeEventSubService
-    ) {}
 
-    async execute({channelId}: UnsubscribeCommand): Promise<any> {
-        const result = await this.eventSub.unsubscribe(channelId);
+    constructor(private readonly eventSub: YouTubeEventSubService) {}
+
+    async execute({ channelId }: UnsubscribeCommand): Promise<any> {
+        await this.eventSub.unsubscribe(channelId);
     }
 }

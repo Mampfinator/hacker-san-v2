@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ApplicationCommandDataResolvable, Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
+import { Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
 import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
@@ -22,27 +22,33 @@ export class DiscordClientService extends Client {
     constructor(
         private readonly configService: ConfigService,
         private readonly commandBus: CommandBus,
-        @InjectRepository(GuildSettings) private readonly settingsRepository: Repository<GuildSettings>,
-        @InjectCommands() slashCommands: SlashCommand[]
+        @InjectRepository(GuildSettings)
+        private readonly settingsRepository: Repository<GuildSettings>,
+        @InjectCommands() slashCommands: SlashCommand[],
     ) {
         super({
-            intents: ["GUILDS", "GUILD_MESSAGES"]
+            intents: ["GUILDS", "GUILD_MESSAGES"],
         });
 
         for (const command of slashCommands) {
             const { commandData } = getCommandMetadata(command);
-            this.commands.set(commandData.name, command)
+            this.commands.set(commandData.name, command);
         }
     }
 
     public login(token?: string): Promise<string> {
-        for (const event of DISCORD_EVENT_NAMES) this.on(event, (...args) => this.handleEvent(event, ...args));
-        this.logger.debug(`Found ${this.commands.size} commands: ${[...this.commands.keys()]}.`)
+        for (const event of DISCORD_EVENT_NAMES)
+            this.on(event, (...args) => this.handleEvent(event, ...args));
+        this.logger.debug(
+            `Found ${this.commands.size} commands: ${[
+                ...this.commands.keys(),
+            ]}.`,
+        );
         return super.login(token);
     }
 
     private handleEvent(event: string, ...args: any[]): void {
-        const {success, errors} = handleEvent(event, this, args);
+        const { success, errors } = handleEvent(event, this, args);
         if (!success) {
             this.logger.debug("handleEvent failed.");
             for (const error of errors) this.logger.error(error);
@@ -51,20 +57,20 @@ export class DiscordClientService extends Client {
         }
     }
 
-
     @On("ready")
     async ready() {
         await this.guilds.fetch();
         for (const guild of this.guilds.cache.values()) {
-            const existing = await this.settingsRepository.findOne({where: {id: guild.id}});
+            const existing = await this.settingsRepository.findOne({
+                where: { id: guild.id },
+            });
             if (!existing) {
                 this.logger.log(`Found new guild ${guild.name} (${guild.id})`);
                 await this.settingsRepository.insert({
-                    id: guild.id
+                    id: guild.id,
                 });
             }
         }
-
 
         await this.application.fetch();
         if (this.configService.get<DiscordConfig>("DISCORD").cleanUpOnStart) {
@@ -74,11 +80,20 @@ export class DiscordClientService extends Client {
             for (const commandId of this.application.commands.cache.keys()) {
                 await this.application.commands.delete(commandId);
             }
-        } 
+        }
 
         for (const command of this.commands.values()) {
-            const {commandData, forGuild} = getCommandMetadata(command);
-            await this.application.commands.create(commandData, process.env.NODE_ENV === "production" ? forGuild(this.configService.get<DiscordConfig>("DISCORD").ownerGuild) : this.configService.get<DiscordConfig>("DISCORD").testGuildId);
+            const { commandData, forGuild } = getCommandMetadata(command);
+            await this.application.commands.create(
+                commandData,
+                process.env.NODE_ENV === "production"
+                    ? forGuild(
+                          this.configService.get<DiscordConfig>("DISCORD")
+                              .ownerGuild,
+                      )
+                    : this.configService.get<DiscordConfig>("DISCORD")
+                          .testGuildId,
+            );
             this.logger.debug(`Created command for ${commandData.name}`);
         }
     }
@@ -87,9 +102,9 @@ export class DiscordClientService extends Client {
     handleSlashCommand(interaction: CommandInteraction) {
         if (!interaction.isApplicationCommand()) return;
 
-        const {commandName} = interaction;
-        const handler = this.commands.get(commandName); 
-        
+        const { commandName } = interaction;
+        const handler = this.commands.get(commandName);
+
         if (!handler) return interaction.reply("Command not found!");
         handler.execute(interaction);
     }
@@ -101,15 +116,19 @@ export class DiscordClientService extends Client {
 
     @On("messageCreate")
     async detectCommunityPostLink(message: Message) {
-        const postIdRegex = /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community?lb=)Ug[A-z0-9_\-]+/g
-        
-        const {content} = message;
+        const postIdRegex =
+            /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community?lb=)Ug[A-z0-9_\-]+/g;
+
+        const { content } = message;
         const ids = postIdRegex.exec(content);
         if (!ids || ids.length == 0) return;
 
         const embeds: MessageEmbed[] = [];
         for (const id of ids) {
-            const {posts, channel} = await this.commandBus.execute<FetchPostCommand, {posts: CommunityPost[], channel: ChannelInfo}>(new FetchPostCommand(id, true));
+            const { posts, channel } = await this.commandBus.execute<
+                FetchPostCommand,
+                { posts: CommunityPost[]; channel: ChannelInfo }
+            >(new FetchPostCommand(id, true));
             const embed = DiscordUtil.postToEmbed(posts[0], channel);
 
             this.logger.debug(`Generated embed for ${id}.`);
@@ -117,9 +136,14 @@ export class DiscordClientService extends Client {
         }
 
         if (embeds.length > 0) {
-            await message.reply({embeds, allowedMentions: {repliedUser: false}});
+            await message.reply({
+                embeds,
+                allowedMentions: { repliedUser: false },
+            });
         } else {
-            this.logger.error(`Found IDs but did not manage to generate embeds.`);
+            this.logger.error(
+                `Found IDs but did not manage to generate embeds.`,
+            );
         }
     }
 }

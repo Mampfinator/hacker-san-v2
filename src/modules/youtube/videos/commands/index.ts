@@ -10,5 +10,5 @@ export const YouTubeCommandHandlers = [
     SubscribeHandler,
     UnsubscribeHandler,
     SyncPostsHandler,
-    FetchPostsHandler
-]
+    FetchPostsHandler,
+];

@@ -9,13 +9,16 @@ export class TwitterSpace {
 
     @Column({
         type: "enum",
-        enum: ["live", "offline", "scheduled"]
+        enum: ["live", "offline", "scheduled"],
     })
-    status: TwitterSpaceStatus
+    status: TwitterSpaceStatus;
 
     @Column()
     channelId: string;
 
-    // @Column()
-    // archived: boolean;
+    @Column()
+    title: string;
+
+    @Column({ nullable: true })
+    scheduledStart?: number;
 }

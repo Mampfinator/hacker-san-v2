@@ -25,7 +25,7 @@ import { actionTypeFactory } from "./actions/actions-helper";
         ...getCommands(),
         ...getActions(),
         actionTypeFactory,
-        ...DiscordCommandHandlers
-    ]
+        ...DiscordCommandHandlers,
+    ],
 })
 export class DiscordModule {}

@@ -5,6 +5,6 @@ export class TwitterUser {
     @PrimaryColumn()
     id: string;
 
-    @Column()
-    name: string;
+    @Column({ nullable: true })
+    name?: string;
 }

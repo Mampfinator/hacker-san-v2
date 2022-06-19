@@ -1,7 +1,6 @@
-import { FactoryProvider, Inject } from "@nestjs/common";
-import { Client, GuildChannel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
-import { TriggerActionsCommand } from "../commands/trigger-actions.command"
-import { Action } from "../models/action.entity"
+import { Client, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+import { TriggerActionsCommand } from "../commands/trigger-actions.command";
+import { Action } from "../models/action.entity";
 
 export interface ActionPayload {
     data: any;
@@ -26,40 +25,40 @@ interface ActionClass extends Function {
 
 export const ActionType = (type: string) => {
     return (target: ActionClass) => {
-        Object.defineProperty(
-            target.prototype, 
-            "type", 
-            {
-                enumerable: true,
-                configurable: false, 
-                get: () => type
-            }
-        );
+        Object.defineProperty(target.prototype, "type", {
+            enumerable: true,
+            configurable: false,
+            get: () => type,
+        });
 
         actions.push(target);
-    }
-}
+    };
+};
 
-export async function handleAction<T extends Client>(client: T, actionTypes: Map<string, ActionType>, command: TriggerActionsCommand, action: Action) {
-    const {
+export async function handleAction<T extends Client>(
+    client: T,
+    actionTypes: Map<string, ActionType>,
+    command: TriggerActionsCommand,
+    action: Action,
+) {
+    const { discordChannelId, discordThreadId, data } = action;
+
+    const channel = await (client.channels.fetch(
         discordChannelId,
-        discordThreadId,
-        data
-    } = action;
-    
-    
-    const channel = await (client.channels.fetch(discordChannelId) as Promise<NonThreadGuildBasedChannel>);
+    ) as Promise<NonThreadGuildBasedChannel>);
+
     let thread: ThreadChannel;
-    if (channel.isText() && discordThreadId) thread = await channel.threads.fetch(discordThreadId);
+    if (channel.isText() && discordThreadId)
+        thread = await channel.threads.fetch(discordThreadId);
 
     const actionType = actionTypes.get(action.type);
     if (!actionType) {
-        throw new Error(`Could not find actionType ${action.type}.`); 
+        throw new Error(`Could not find actionType ${action.type}.`);
     }
 
     await actionType.execute({
         data,
-        channel,
-        command
+        channel: thread ?? channel,
+        command,
     });
 }

@@ -12,14 +12,15 @@ export class YouTubeService {
     constructor(
         private readonly eventSub: YouTubeEventSubService,
         private readonly videos: YouTubeVideosService,
-        @InjectRepository(YouTubeChannel) private readonly channels: Repository<YouTubeChannel>
+        @InjectRepository(YouTubeChannel)
+        private readonly channels: Repository<YouTubeChannel>,
     ) {}
 
     public async init() {
         this.logger.log(`Initializing...`);
 
         const channels = await this.channels.find();
-        for (const {channelId} of channels) {
+        for (const { channelId } of channels) {
             await this.eventSub.subscribe(channelId);
         }
     }

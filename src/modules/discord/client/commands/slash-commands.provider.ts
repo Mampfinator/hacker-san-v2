@@ -7,5 +7,5 @@ export const InjectCommands = () => Inject(SLASH_COMMANDS);
 export const slashcommandFactory: FactoryProvider = {
     provide: SLASH_COMMANDS,
     useFactory: (...args) => args,
-    inject: getCommands()
-}
+    inject: getCommands(),
+};

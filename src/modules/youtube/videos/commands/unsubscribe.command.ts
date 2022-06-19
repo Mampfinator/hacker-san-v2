@@ -1,5 +1,3 @@
 export class UnsubscribeCommand {
-    constructor(
-        public readonly channelId: string
-    ) {}
+    constructor(public readonly channelId: string) {}
 }

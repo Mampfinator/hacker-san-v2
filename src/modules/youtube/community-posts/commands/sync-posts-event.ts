@@ -8,6 +8,6 @@ import { CommunityPost } from "yt-scraping-utilities";
 export class SyncPostsCommand implements ICommand {
     constructor(
         public readonly channelId?: string,
-        public readonly posts?: CommunityPost[]
+        public readonly posts?: CommunityPost[],
     ) {}
 }

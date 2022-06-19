@@ -1,5 +1,3 @@
 import { TriggerActionsHandler } from "./trigger-actions.handler";
 
-export const DiscordCommandHandlers = [
-    TriggerActionsHandler
-];
+export const DiscordCommandHandlers = [TriggerActionsHandler];

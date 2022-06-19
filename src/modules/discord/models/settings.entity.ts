@@ -1,4 +1,4 @@
-import {Entity, PrimaryColumn, Column} from "typeorm";
+import { Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class GuildSettings {
@@ -6,6 +6,6 @@ export class GuildSettings {
     id: string;
 
     testId() {
-        return `${this.id} is saved :)`
+        return `${this.id} is saved :)`;
     }
 }

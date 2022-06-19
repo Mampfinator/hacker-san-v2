@@ -1,12 +1,19 @@
 import axios from "axios";
-import {extractChannelInfo, extractCommunityPosts} from "yt-scraping-utilities";
+import {
+    extractChannelInfo,
+    extractCommunityPosts,
+} from "yt-scraping-utilities";
 
-export const sleep = (ms: number) => new Promise<void>(res => setTimeout(res, ms));
+export const sleep = (ms: number) =>
+    new Promise<void>(res => setTimeout(res, ms));
 
+export const tryFetchPosts = async (
+    channelId: string,
+    retries: number,
+    timeout: number,
+) => {
+    const url = `https://youtube.com/channel/${channelId}/community`;
 
-export const tryFetchPosts = async (channelId: string, retries: number, timeout: number) => {
-    const url = `https://youtube.com/channel/${channelId}/community`; 
-    
     const errors: Error[] = [];
 
     let data: any;
@@ -20,11 +27,11 @@ export const tryFetchPosts = async (channelId: string, retries: number, timeout:
             await sleep(timeout);
         }
     }
-    
+
     if (data) {
         const channel = extractChannelInfo(data);
         const posts = extractCommunityPosts(data);
 
-        return {channel, posts}
+        return { channel, posts };
     }
-}
+};

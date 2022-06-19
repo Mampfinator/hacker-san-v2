@@ -13,7 +13,7 @@ export interface DiscordConfig {
     cleanUpOnStart: boolean;
     testGuildId?: string;
     ownerGuild?: string;
-    ownerId?: string; 
+    ownerId?: string;
 }
 
 export interface YouTubeConfig extends PlatformConfig {
@@ -40,58 +40,65 @@ interface TOMLConfig {
         domain: string;
         disableServices?: string[];
         https?: boolean;
-    }
+    };
 
     discord: {
         cleanupOldCommands?: boolean;
         testGuildId?: string;
         ownerId?: string;
         ownerGuild?: string;
-    }
+    };
 }
 
 export default () => {
-    const tomlConfigFile = readFileSync(join(__dirname, "..", "..", "..", "config.toml"));
+    const tomlConfigFile = readFileSync(
+        join(__dirname, "..", "..", "..", "config.toml"),
+    );
     const tomlOptions: TOMLConfig = parseToml(tomlConfigFile.toString());
     const envConfig = {
         ...process.env,
-        ...parseEnv<envConfig>(readFileSync(join(__dirname, "..", "..", "..", ".env"))),
+        ...parseEnv<envConfig>(
+            readFileSync(join(__dirname, "..", "..", "..", ".env")),
+        ),
     };
 
-    if (!envConfig.DISCORD_TOKEN) throw new Error("DISCORD_TOKEN not found in environment variables");
-    if (!envConfig.DATABASE_URL) throw new Error("DATABASE_URL not found in environment variables");
+    if (!envConfig.DISCORD_TOKEN)
+        throw new Error("DISCORD_TOKEN not found in environment variables");
+    if (!envConfig.DATABASE_URL)
+        throw new Error("DATABASE_URL not found in environment variables");
 
     const YOUTUBE: YouTubeConfig = {
         active: !tomlOptions.app?.disableServices?.includes("youtube"),
         apiKey: envConfig.YOUTUBE_API_KEY,
-        secret: envConfig.YOUTUBE_SECRET
+        secret: envConfig.YOUTUBE_SECRET,
     };
     const TWITTER: TwitterConfig = {
         active: !tomlOptions.app?.disableServices?.includes("twitter"),
-        token: envConfig.TWITTER_TOKEN
+        token: envConfig.TWITTER_TOKEN,
     };
     const DISCORD: DiscordConfig = {
         token: envConfig.DISCORD_TOKEN,
-        cleanUpOnStart: tomlOptions.discord.cleanupOldCommands ?? DISCORD_COMMAND_CLEANUP_DEFAULT,
+        cleanUpOnStart:
+            tomlOptions.discord.cleanupOldCommands ??
+            DISCORD_COMMAND_CLEANUP_DEFAULT,
         testGuildId: tomlOptions.discord.testGuildId,
         ownerId: tomlOptions.discord.ownerId,
-        ownerGuild: tomlOptions.discord.ownerGuild
-    }
+        ownerGuild: tomlOptions.discord.ownerGuild,
+    };
 
     const PORT = tomlOptions.app.port ?? DEFAULT_PORT;
-    const {DATABASE_URL} = envConfig;
+    const { DATABASE_URL } = envConfig;
 
-
-    const URL = `http${
-        (tomlOptions.app.https ?? true) ? "s" : ""
-    }://${tomlOptions.app.domain}${tomlOptions.app.includePortInUrl ? `:${PORT}` : ""}`;
+    const URL = `http${tomlOptions.app.https ?? true ? "s" : ""}://${
+        tomlOptions.app.domain
+    }${tomlOptions.app.includePortInUrl ? `:${PORT}` : ""}`;
 
     return {
         YOUTUBE,
         TWITTER,
         DISCORD,
         PORT,
-        DATABASE_URL, 
-        URL
+        DATABASE_URL,
+        URL,
     };
-}
+};

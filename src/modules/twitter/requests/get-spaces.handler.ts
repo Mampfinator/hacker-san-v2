@@ -7,10 +7,11 @@ import { InjectRepository } from "@nestjs/typeorm";
 @CommandHandler(GetSpacesRequest)
 export class GetSpacesHandler implements ICommandHandler {
     constructor(
-        @InjectRepository(TwitterSpace) private readonly spaces: Repository<TwitterSpace>
+        @InjectRepository(TwitterSpace)
+        private readonly spaces: Repository<TwitterSpace>,
     ) {}
-    
-    async execute({filter}: GetSpacesRequest): Promise<TwitterSpace[]> {
-        return await this.spaces.find({where: {...filter}});
+
+    async execute({ filter }: GetSpacesRequest): Promise<TwitterSpace[]> {
+        return await this.spaces.find({ where: { ...filter } });
     }
 }

@@ -6,12 +6,10 @@ import { SubscribeCommand } from "./subscribe.command";
 @CommandHandler(SubscribeCommand)
 export class SubscribeHandler implements ICommandHandler<SubscribeCommand> {
     private readonly logger = new Logger(SubscribeHandler.name);
-    
-    constructor(
-        private readonly eventSub: YouTubeEventSubService
-    ) {}
 
-    async execute({channelId}: SubscribeCommand): Promise<any> {
-        const result = await this.eventSub.subscribe(channelId);
+    constructor(private readonly eventSub: YouTubeEventSubService) {}
+
+    async execute({ channelId }: SubscribeCommand): Promise<any> {
+        await this.eventSub.subscribe(channelId);
     }
 }

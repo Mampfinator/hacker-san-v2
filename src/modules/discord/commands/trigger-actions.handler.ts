@@ -10,48 +10,54 @@ import { InjectActions } from "../actions/actions-helper";
 import { DiscordUtil } from "../util";
 
 @CommandHandler(TriggerActionsCommand)
-export class TriggerActionsHandler implements ICommandHandler<TriggerActionsCommand> {
+export class TriggerActionsHandler
+    implements ICommandHandler<TriggerActionsCommand>
+{
     private readonly logger = new Logger(TriggerActionsHandler.name);
-    
+
     constructor(
         private readonly client: DiscordClientService,
-        @InjectRepository(Action) private readonly actionsRepo: Repository<Action>, 
-        @InjectActions() private readonly actions: Map<string, IActionType & {type: String}>
+        @InjectRepository(Action)
+        private readonly actionsRepo: Repository<Action>,
+        @InjectActions()
+        private readonly actions: Map<string, IActionType & { type: string }>,
     ) {}
-    
-    async execute(command: TriggerActionsCommand) {
-        this.logger.debug(`Got TriggerActionsCommand for ${command.options.channelId} (${command.options.platform}, ${command.options.event})`);
 
-        const {
-            platform,
-            event,
-            url,
-            channelId,
-            embed
-        } = command.options;
-        
+    async execute(command: TriggerActionsCommand) {
+        this.logger.debug(
+            `Got TriggerActionsCommand for ${command.options.channelId} (${command.options.platform}, ${command.options.event})`,
+        );
+
+        const { platform, event, channelId } = command.options;
 
         const actions = await this.actionsRepo.find({
             where: {
                 platform,
-                channelId, 
-                onEvent: event
-            } 
+                channelId,
+                onEvent: event,
+            },
         });
+
+        this.logger.debug(`Found ${actions.length} actions.`);
 
         for (const action of actions) {
             const actionType = this.actions.get(action.type);
             if (!actionType) {
-                this.logger.error(`Could not find @ActionType for ${action.type}.`);
+                this.logger.error(
+                    `Could not find @ActionType for ${action.type}.`,
+                );
                 continue;
             }
 
-            const channel = await DiscordUtil.fetchChannelOrThread(action, this.client);
+            const channel = await DiscordUtil.fetchChannelOrThread(
+                action,
+                this.client,
+            );
 
             await actionType.execute({
-                channel, 
+                channel,
                 command,
-                data: action.data
+                data: action.data,
             });
         }
     }

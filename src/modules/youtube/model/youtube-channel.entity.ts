@@ -5,6 +5,6 @@ export class YouTubeChannel {
     @PrimaryColumn()
     channelId: string;
 
-    @Column()
-    channelName: string;
+    @Column({ nullable: true })
+    channelName?: string;
 }

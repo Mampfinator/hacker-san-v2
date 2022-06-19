@@ -3,9 +3,8 @@ import { Entity, PrimaryColumn, Column } from "typeorm";
 export enum YouTubeLiveStatus {
     Live = "live",
     Upcoming = "upcoming",
-    Offline = "offline"
+    Offline = "offline",
 }
-
 
 @Entity()
 export class YouTubeVideo {
@@ -14,7 +13,7 @@ export class YouTubeVideo {
 
     @Column({
         type: "enum",
-        enum: YouTubeLiveStatus
+        enum: YouTubeLiveStatus,
     })
     status: YouTubeLiveStatus;
 
