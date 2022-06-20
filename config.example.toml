@@ -1,10 +1,16 @@
 [app]
 port = 3000
-domain = "example.com"
+includePortInUrl = true # for eventsub, whether to send requests to :80/:443 or the port specified above.
+domain = "example.com" # for eventsub, where to send the notifications
+https = true # for eventsub, whether to enable HTTPs. IMPORTANT: required for Twitch (soon:tm:).
+# the above would result in notifications being sent to https://example.com:3000/
+
+# comment out what you *don't* want to disable.
 disableServices = [
-    "youtube", # removes YouTube from the active services
-    "twitter", # removes Twitter from the active services
+    "youtube", # Community Posts, videos/streams
+    "twitter", # Spaces
 ]
 
 [discord]
 cleanupOldCommands = true # whether or not to clean up old Discord slash commands on startup
+testGuildId = "<Guild ID>" # if set, will only deploy slash commands to this guild. Useful for debugging, not so useful otherwise.

@@ -2,3 +2,4 @@
 import "./info.command";
 //import "./track.command";
 import "./action.command";
+import "./settings.command";

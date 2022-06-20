@@ -4,6 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { Logger } from "@nestjs/common";
+import { AppService } from "./app.service";
 
 (async () => {
     const app = await NestFactory.create(AppModule, { bodyParser: false });
@@ -17,4 +18,7 @@ import { Logger } from "@nestjs/common";
             "PORT",
         )}. Requests expected at ${config.get("URL")}`,
     );
+
+    const appService = app.get(AppService);
+    appService.triggerListen();
 })();

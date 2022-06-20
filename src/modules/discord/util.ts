@@ -1,4 +1,6 @@
 import {
+    Channel,
+    CommandInteraction,
     MessageEmbed,
     NonThreadGuildBasedChannel,
     TextChannel,
@@ -14,6 +16,7 @@ import {
 } from "yt-scraping-utilities";
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./client/discord-client.service";
+import { IsNull } from "typeorm";
 
 export namespace DiscordUtil {
     export function postsToEmbed(data?: ytInitialData): MessageEmbed[] {
@@ -102,5 +105,19 @@ export namespace DiscordUtil {
                   action.discordThreadId,
               )
             : (channel as NonThreadGuildBasedChannel);
+    }
+
+    export function getChannelIds(channel: Channel): {discordChannelId: string, discordThreadId: string | null} {
+        if (channel.isThread()) {
+            return {
+                discordThreadId: channel.id,
+                discordChannelId: channel.parentId
+            }
+        } else {
+            return {
+                discordThreadId: null,
+                discordChannelId: channel.id
+            }
+        }
     }
 }

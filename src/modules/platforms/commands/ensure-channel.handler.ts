@@ -11,6 +11,7 @@ export interface IEnsureChannelCommand {
 export interface EnsureChannelResult {
     success: boolean;
     error?: any;
+    channelId?: string;
 }
 
 @CommandHandler(EnsureChannelCommand)

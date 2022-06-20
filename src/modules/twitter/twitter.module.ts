@@ -8,8 +8,6 @@ import { GetSpacesHandler } from "./requests/get-spaces.handler";
 import { TwitterSpacesService } from "./spaces/twitter-spaces.service";
 import { TwitterApiService } from "./twitter-api.service";
 
-// TODO: refactor; TwitterApiService that extends the TwitterClient.
-
 @Module({
     imports: [
         TypeOrmModule.forFeature([TwitterUser, TwitterSpace]),

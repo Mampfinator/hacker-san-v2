@@ -72,7 +72,7 @@ export class YouTubeVideosController {
         @RawBody() rawBody,
         @Headers("x-hub-signature") hubSignature: string,
         @Headers("link") link: string,
-        @Headers("hub.topic") topic: string,
+        @Query("hub.topic") topic: string,
     ) {
         this.logger.debug(
             `Got YouTube EventSub POST: ${hubSignature} for ${topic}.`,
@@ -81,7 +81,10 @@ export class YouTubeVideosController {
 
         const { secret } =
             this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
-        if (secret && !hubSignature) throw new ForbiddenException();
+        if (secret && !hubSignature) {
+            this.logger.log(`Expected hub signature, got none.`);
+            throw new ForbiddenException();
+        }
 
         if (secret) {
             const [algo, signature] = hubSignature.split("=");
@@ -100,11 +103,12 @@ export class YouTubeVideosController {
                 throw new HttpException("Invalid signature", 204); // as per PubSubHubbub spec
         }
 
-        const videoId = xmlBody.feed.entry["yt:videoId"];
-        if (!videoId)
+        const videoId = xmlBody.feed?.entry?.["yt:videoId"];
+        if (!videoId) {
             return this.logger.log(
                 `No videoId provided: ${xmlBody.feed.entry}`,
-            ); // for yt:deleted notifications..
+            ); 
+        }
 
         const { inserted, video } = await this.videos.process(videoId);
 

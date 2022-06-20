@@ -138,7 +138,7 @@ export class TwitterSpacesService {
             })
             .setTitle(`${userName} ${eventText}`)
             .setColor("BLUE")
-            .addField("Title", `\`\`\`\n${space.title}\`\`\``)
+            .addField("Title", `\`\`\`\n${space?.title ?? "No title"}\`\`\``)
             .addField("Link", `[Join here](${url})`)
             .setThumbnail(author.profile_image_url);
 

@@ -1,17 +1,16 @@
-import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { YouTubeConfig } from "./modules/config/config";
-import { YouTubeService } from "./modules/youtube/youtube.service";
+import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
+import { ListenEvent } from "./events/listen.event";
 
 @Injectable()
-export class AppService implements OnApplicationBootstrap {
+export class AppService {
+    private readonly logger = new Logger(AppService.name);
+    
     constructor(
-        private readonly config: ConfigService,
-        private readonly youtube: YouTubeService,
+        private readonly eventBus: EventBus,
     ) {}
 
-    async onApplicationBootstrap() {
-        if (this.config.get<YouTubeConfig>("YOUTUBE").active)
-            await this.youtube.init();
+    public async triggerListen() {
+        this.eventBus.publish(new ListenEvent());
     }
 }

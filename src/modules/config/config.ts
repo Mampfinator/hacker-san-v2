@@ -67,15 +67,20 @@ export default () => {
     if (!envConfig.DATABASE_URL)
         throw new Error("DATABASE_URL not found in environment variables");
 
+    // TODO: actually implement disabling services.
+    // maybe look into a dynamic module and make the platform module responsible for conditionally importing the YouTube-/Twitter-/etc modules.
+
     const YOUTUBE: YouTubeConfig = {
         active: !tomlOptions.app?.disableServices?.includes("youtube"),
         apiKey: envConfig.YOUTUBE_API_KEY,
         secret: envConfig.YOUTUBE_SECRET,
     };
+
     const TWITTER: TwitterConfig = {
         active: !tomlOptions.app?.disableServices?.includes("twitter"),
         token: envConfig.TWITTER_TOKEN,
     };
+
     const DISCORD: DiscordConfig = {
         token: envConfig.DISCORD_TOKEN,
         cleanUpOnStart:

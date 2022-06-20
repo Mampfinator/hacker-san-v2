@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { CqrsModule } from "@nestjs/cqrs";
 import { CommunityPost } from "./community-posts/model/community-post.entity";
 import { YouTubeChannel } from "./model/youtube-channel.entity";
-import { CqrsModule } from "@nestjs/cqrs";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { YouTubeEventSubService } from "./videos/youtube-eventsub.service";
 import { YouTubeVideosService } from "./videos/youtube-video.service";
@@ -13,8 +13,8 @@ import { YouTubeVideo } from "./model/youtube-video.entity";
 import { YouTubeService } from "./youtube.service";
 import { EnsureYouTubeChannelHandler } from "./commands/ensure-youtube-channel.handler";
 import { YouTubeApiService } from "./youtube-api.service";
-
-//TODO: refactor; YouTubeAPIService that extends youtube_v3.Youtube (if possible...?)
+import { SyncVideosHandler } from "./videos/commands/sync-videos.handler";
+import { YouTubeListenHandler } from "./events/listen.handler";
 
 @Module({
     imports: [
@@ -30,6 +30,8 @@ import { YouTubeApiService } from "./youtube-api.service";
         YouTubeVideosService,
         ...YouTubeCommandHandlers,
         EnsureYouTubeChannelHandler,
+        SyncVideosHandler,
+        YouTubeListenHandler
     ],
     controllers: [YouTubeVideosController],
     exports: [YouTubeService],

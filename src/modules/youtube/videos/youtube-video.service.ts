@@ -156,6 +156,9 @@ export class YouTubeVideosService {
 
             this.logger.debug(`Old: ${oldStatus}, new: ${newStatus}`);
 
+            // this is not the prettiest solution but it's gotta work for now.
+
+
             if (newStatus) {
                 await this.videoRepo.update(
                     {
@@ -166,11 +169,12 @@ export class YouTubeVideosService {
                     },
                 );
 
+                // ignore changes we don't generate notifs for
+                if (
+                    newStatus == "offline" && oldStatus == "upcoming"
+                ) return;
+
                 this.generateNotif(apiVideo, newStatus);
-            } else {
-                throw new Error(
-                    `WHAT. WHY. ${id}, ${newStatus}, ${oldStatus}.`,
-                );
             }
         }
     }

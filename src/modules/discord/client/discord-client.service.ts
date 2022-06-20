@@ -128,7 +128,7 @@ export class DiscordClientService extends Client {
             const { posts, channel } = await this.commandBus.execute<
                 FetchPostCommand,
                 { posts: CommunityPost[]; channel: ChannelInfo }
-            >(new FetchPostCommand(id, true));
+            >(new FetchPostCommand(id, { includeChannelInfo: true }));
             const embed = DiscordUtil.postToEmbed(posts[0], channel);
 
             this.logger.debug(`Generated embed for ${id}.`);

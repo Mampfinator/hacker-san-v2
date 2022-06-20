@@ -1,8 +1,12 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EnsureChannelResult } from "src/modules/shared/commands/ensure-channel.handler";
+import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
 import { Repository } from "typeorm";
+import { SyncPostsCommand } from "../community-posts/commands/sync-posts-event";
 import { YouTubeChannel } from "../model/youtube-channel.entity";
+import { SyncVideosCommand } from "../videos/commands/sync-videos.command";
+import { YouTubeEventSubService } from "../videos/youtube-eventsub.service";
+import { YouTubeApiService } from "../youtube-api.service";
 import { EnsureYouTubeChannelCommand } from "./ensure-youtube-channel.command";
 
 @CommandHandler(EnsureYouTubeChannelCommand)
@@ -12,21 +16,36 @@ export class EnsureYouTubeChannelHandler
     constructor(
         @InjectRepository(YouTubeChannel)
         private readonly channelRepo: Repository<YouTubeChannel>,
+        private readonly eventSub: YouTubeEventSubService,
+        private readonly api: YouTubeApiService,
+        private readonly commandBus: CommandBus
     ) {}
 
     async execute({
         channelId,
     }: EnsureYouTubeChannelCommand): Promise<EnsureChannelResult> {
         try {
+            channelId = channelId.trim(); // just to make sure
+            if (!/UC[A-z0-9\-_]*/.test(channelId)) return { success: false };
+            const {data: channels} = await this.api.channels.list({id: [channelId], part: ["snippet"]});
+            const [channel] = channels.items;
+            if (!channel) return { success: false };
+
+
             const exists = await this.channelRepo.findOne({
                 where: { channelId },
             });
 
-            // TODO: ID validation here.
+
             if (!exists) {
                 await this.channelRepo.save({
                     channelId,
+                    channelName: channel.snippet.title // in case we ever need it
                 });
+
+                await this.eventSub.subscribe(channelId);
+                await this.commandBus.execute(new SyncPostsCommand({channelId}));
+                await this.commandBus.execute(new SyncVideosCommand(channelId));
             }
 
             return { success: true };

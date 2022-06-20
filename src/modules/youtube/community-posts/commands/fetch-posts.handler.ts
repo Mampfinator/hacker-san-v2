@@ -10,9 +10,12 @@ import {
     extractCommunityPosts,
 } from "yt-scraping-utilities";
 import axios from "axios";
+import { CacheCollection } from "src/shared/util/cache-collection";
 
 @CommandHandler(FetchPostCommand)
 export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
+    private readonly cache = new CacheCollection<string, string>()
+
     constructor(
         @InjectRepository(CommunityPostEntity)
         private readonly postRepo: Repository<CommunityPostEntity>,
@@ -21,11 +24,16 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
     async execute({
         postId: id,
         includeChannelInfo,
+        force
     }: FetchPostCommand): Promise<
         CommunityPost[] | { posts: CommunityPost[]; channel: ChannelInfo }
     > {
-        // TODO: cache results.
-        const { data } = await axios.get(`https://youtube.com/post/${id}`);
+        let data: string;
+
+        if (!force && this.cache.has(id)) data = this.cache.get(id);
+        else data = (await axios.get(`https://youtube.com/post/${id}`)).data;
+
+        
         const posts = extractCommunityPosts(data);
         const channel = includeChannelInfo
             ? extractChannelInfo(data)

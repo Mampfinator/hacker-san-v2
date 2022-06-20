@@ -1,3 +1,4 @@
+import { EmbedField } from "discord.js";
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { getActions } from "../actions/action";
 export type Platform = "youtube" | "twitter";
@@ -16,6 +17,14 @@ const actionEnum: string[] = getActions().map(action => action.prototype.type);
 ])
 //@Check("'platform' <> 'youtube' AND 'onEvent' = 'post'")
 export class Action {
+    public toEmbedField(inline?: boolean): EmbedField {
+        return {
+            name: `${this.type} - ${this.platform} | ${this.channelId}`,
+            value: `ID: \`${this.id}\``,
+            inline: inline ?? false,
+        };
+    }
+
     @PrimaryGeneratedColumn("uuid")
     id: string;
 

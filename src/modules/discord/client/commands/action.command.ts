@@ -11,7 +11,7 @@ import {
     TextChannel,
     ThreadChannel,
 } from "discord.js";
-import { EnsureChannelCommand } from "src/modules/shared/commands/ensure-channel.command";
+import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { Repository } from "typeorm";
 import { Action, Platform } from "../../models/action.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
@@ -228,33 +228,38 @@ export class ActionCommand implements ISlashCommand {
             ? (channel as ThreadChannel).id
             : undefined;
 
-        const channelId = options.getString("channel");
+        let channelId = options.getString("channel");
         const platform = options.getString("platform") as Platform;
 
-        const { success, error } = await this.commandBus.execute(
+        const { success, error, channelId: newChannelId } = await this.commandBus.execute(
             new EnsureChannelCommand(channelId, platform),
         );
 
-        if (success) {
-            return {
-                type: options.getSubcommand(),
-                guildId,
-                discordChannelId,
-                discordThreadId,
-                onEvent: options.getString("event"),
-                platform,
-                channelId,
-            };
-        } else {
-            this.logger.debug(`Failed to insert channel ID: ${error}`);
+        channelId = newChannelId ?? channelId; // make things like passing Twitter users by @handle possible.
+
+        if (!success) {
             await interaction.reply({
                 embeds: [
                     new MessageEmbed()
                         .setColor("RED")
                         .setDescription("Error: invalid channel ID"),
                 ],
+                ephemeral: true
             });
+
+            this.logger.debug(`Failed to insert channel ID: ${error ?? "Invalid ID."}`);
+            return;
         }
+
+        return {
+            type: options.getSubcommand(),
+            guildId,
+            discordChannelId,
+            discordThreadId,
+            onEvent: options.getString("event"),
+            platform,
+            channelId,
+        };
     }
 
     handleLock({ options }: CommandInteraction): { data: any } {

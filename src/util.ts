@@ -6,4 +6,12 @@ export namespace Util {
 
         return base;
     }
+
+    export function batch<T>(input: T[], batchSize: number = 10) {
+        const batches: T[][] = [];
+        for (let i = 0; i < input.length; i += batchSize) {
+            batches.push(input.slice(i, i + batchSize));
+        }
+        return batches;
+    }
 }
