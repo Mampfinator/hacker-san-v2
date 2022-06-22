@@ -14,7 +14,7 @@ export class TwitterChannelsHandler
         private readonly userRepo: Repository<TwitterUser>,
     ) {}
 
-    async execute(query: TwitterChannelsQuery): Promise<ChannelsQueryResult> {
+    async execute(_query: TwitterChannelsQuery): Promise<ChannelsQueryResult> {
         const users = await this.userRepo.find();
 
         const channels = users.map(user => ({

@@ -1,5 +1,4 @@
 import { AutocompleteInteraction } from "discord.js";
-import { DiscordClientService } from "../discord-client.service";
 import { ISlashCommand } from "./slash-command";
 
 const autocompleteKey = Symbol("AUTOCOMPLETE");
@@ -10,7 +9,7 @@ export const Autocomplete =
     (
         target: { new (...args: any[]): ISlashCommand },
         key: string,
-        descriptor,
+        _descriptor,
     ) => {
         if (!Reflect.hasMetadata(autocompleteKey, target))
             Reflect.defineMetadata(autocompleteKey, new Map(), target);

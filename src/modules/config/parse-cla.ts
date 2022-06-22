@@ -5,8 +5,10 @@ export const COMMANDLINE_OPTION_DEFINITIONS: commandLineArgs.OptionDefinition[] 
         { name: "no-youtube", type: Boolean, defaultValue: false },
         { name: "no-twitter", type: Boolean, defaultValue: false },
         { name: "no-login", type: Boolean, defaultValue: false },
-        { name: "port", type: Number },
-        { name: "always-dm", type: Boolean}
+        { name: "port", alias: "p", type: Number },
+        { name: "always-dm", type: Boolean },
+        { name: "print-config", type: Boolean },
+        { name: "skip-sync", type: Boolean },
     ];
 
 export interface CommandLineOptions {
@@ -15,6 +17,7 @@ export interface CommandLineOptions {
     noLogin?: boolean;
     port?: number;
     dmOwnerOnError?: boolean;
+    skipSync?: boolean;
 }
 
 export function parseCommandLineArgs(): CommandLineOptions {
@@ -23,6 +26,7 @@ export function parseCommandLineArgs(): CommandLineOptions {
         "no-twitter": noTwitter,
         "no-login": noLogin,
         "always-dm": dmOwnerOnError,
+        "skip-sync": skipSync,
         port,
     } = commandLineArgs(COMMANDLINE_OPTION_DEFINITIONS);
 
@@ -31,6 +35,7 @@ export function parseCommandLineArgs(): CommandLineOptions {
         noTwitter,
         noLogin,
         port,
-        dmOwnerOnError
+        dmOwnerOnError,
+        skipSync,
     };
 }

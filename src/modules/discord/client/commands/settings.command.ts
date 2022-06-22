@@ -17,8 +17,6 @@ import { GuildSettings } from "../../models/settings.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
-import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
-import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -73,13 +71,14 @@ import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.hand
                                 "The channel's platform.",
                             ).setRequired(true),
                         )
-                        .addStringOption(channelId =>
-                            channelId
-                                .setName("channel-id")
+                        .addStringOption(channel =>
+                            channel
+                                .setName("channel")
                                 .setDescription(
                                     "The channel's ID or, for Twitter, @handle.",
                                 )
-                                .setRequired(true),
+                                .setRequired(true)
+                                .setAutocomplete(true),
                         ),
                 )
                 .addSubcommand(remove =>
@@ -92,13 +91,14 @@ import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.hand
                                 "The channel's platform.",
                             ).setRequired(true),
                         )
-                        .addStringOption(channelId =>
-                            channelId
-                                .setName("channel-id")
+                        .addStringOption(channel =>
+                            channel
+                                .setName("channel")
                                 .setDescription(
                                     "The channel's ID or, for Twitter, @handle.",
                                 )
-                                .setRequired(true),
+                                .setRequired(true)
+                                .setAutocomplete(true),
                         ),
                 ),
         ),
@@ -298,25 +298,11 @@ export class SettingsCommand implements ISlashCommand {
     @Autocomplete("channel")
     private async getChannel(
         current: string,
-        { options }: AutocompleteInteraction,
+        interaction: AutocompleteInteraction,
     ): Promise<AutocompleteReturn> {
-        const platform = options.getString("platform", false) as
-            | Platform
-            | undefined;
-        if (!platform) return [];
-
-        const input = (options.getFocused() as string).trim();
-
-        const { channels } = await this.queryBus.execute<
-            ChannelsQuery,
-            ChannelsQueryResult
-        >(new ChannelsQuery(platform));
-
-        return channels
-            .filter(
-                channel =>
-                    channel.name.includes(input) || channel.id.includes(input),
-            )
-            .map(channel => ({ name: channel.name, value: channel.id }));
+        return DiscordUtil.handleChannelAutocomplete(
+            interaction,
+            this.queryBus,
+        );
     }
 }

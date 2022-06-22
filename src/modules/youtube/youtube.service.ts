@@ -11,10 +11,12 @@ import { SyncPostsCommand } from "./community-posts/commands/sync-posts-event";
 import { COMMUNITY_POST_SLEEP_TIME, EVENTSUB_SLEEP_TIME } from "./constants";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { SchedulerRegistry } from "@nestjs/schedule";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class YouTubeService {
     private readonly logger = new Logger(YouTubeService.name);
+    private readonly skipSync: boolean;
 
     constructor(
         @InjectRepository(YouTubeChannel)
@@ -24,21 +26,31 @@ export class YouTubeService {
         private readonly eventSub: YouTubeEventSubService,
         private readonly videos: YouTubeVideosService,
         private readonly postService: YouTubeCommunityPostsService,
-    ) {}
+        config: ConfigService,
+    ) {
+        this.skipSync = config.getOrThrow<boolean>("SKIP_SYNC");
+    }
 
     public async init() {
-        this.logger.log("Starting...");
-
         const channels = await this.channels.find();
         const channelLoggers = channels.map(
             ({ channelId }) => new Logger(`YouTubeStartup:${channelId}`),
         );
 
+        if (this.skipSync) this.logger.log("Skipping synchronization.");
+        else {
+            this.logger.log(
+                `Starting synchronization tasks. This will take approximately ${
+                    (channels.length * COMMUNITY_POST_SLEEP_TIME) / 1000
+                }s for full synchronization.`,
+            );
+        }
+
         const subscriptionPromises: Promise<any>[] = [];
         const communitypostPromises: Promise<any>[] = [];
 
         for (let i = 0; i < channels.length; i++) {
-            const { channelId, channelName } = channels[i];
+            const { channelId } = channels[i];
             const logger = channelLoggers[i];
 
             logger.debug(`Scheduling startup tasks.`);
@@ -50,19 +62,22 @@ export class YouTubeService {
                 }),
             );
 
-            communitypostPromises.push(
-                sleep(COMMUNITY_POST_SLEEP_TIME * i).then(async () => {
-                    logger.debug("Syncing community posts.");
-                    await this.commandBus.execute(
-                        new SyncPostsCommand({ channelId }),
-                    );
-                    logger.debug("Synced community posts.");
-                }),
-            );
+            if (!this.skipSync)
+                communitypostPromises.push(
+                    sleep(COMMUNITY_POST_SLEEP_TIME * i).then(async () => {
+                        logger.debug("Syncing community posts.");
+                        await this.commandBus.execute(
+                            new SyncPostsCommand({ channelId }),
+                        );
+                        logger.debug("Synced community posts.");
+                    }),
+                );
 
-            logger.debug("Syncing videos.");
-            await this.commandBus.execute(new SyncVideosCommand(channelId));
-            logger.debug("Synced videos.");
+            if (!this.skipSync) {
+                logger.debug("Syncing videos.");
+                await this.commandBus.execute(new SyncVideosCommand(channelId));
+                logger.debug("Synced videos.");
+            }
         }
 
         const subResults = await Promise.allSettled(subscriptionPromises);
@@ -99,11 +114,11 @@ export class YouTubeService {
             const postResult = postResults[i];
             const logger = channelLoggers[i];
 
-            if (subResult.status == "rejected") {
+            if (subResult?.status == "rejected") {
                 logger.warn(`Failed to set up: ${subResult.reason}`);
             }
 
-            if (postResult.status == "rejected") {
+            if (postResult?.status == "rejected") {
                 logger.warn(`Failed to set up: ${postResult.reason}`);
             }
         }

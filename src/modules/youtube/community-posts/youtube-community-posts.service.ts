@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommunityPost as CommunityPostEntitiy } from "./model/community-post.entity";
 import { Repository } from "typeorm";

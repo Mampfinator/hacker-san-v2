@@ -15,7 +15,7 @@ let exceptionFilter: GlobalExceptionFilter;
 
     const config = app.get(ConfigService);
     const discordClientService = app.get(DiscordClientService);
-    
+
     exceptionFilter = new GlobalExceptionFilter(discordClientService, config);
     app.useGlobalFilters(exceptionFilter);
 
@@ -32,13 +32,13 @@ let exceptionFilter: GlobalExceptionFilter;
     appService.triggerListen();
 })();
 
-// Yes, I'm going to assume resuming the application is fine. 
+// Yes, I'm going to assume resuming the application is fine.
 // No, I don't really care if this is "best practice" or not. :)
 process.on("uncaughtException", error => {
     console.log(`Got uncaught exception: ${error.toString?.() ?? error}`);
-    exceptionFilter.catch(error, null)
+    exceptionFilter.catch(error, null);
 });
 process.on("unhandledRejection", reason => {
     console.log(`Got unhandled rejection: ${reason}`);
-    exceptionFilter.catch(reason, null)
+    exceptionFilter.catch(reason, null);
 });

@@ -1,12 +1,5 @@
 import { EmbedField } from "discord.js";
-import {
-    BeforeInsert,
-    Column,
-    Entity,
-    PrimaryColumn,
-    PrimaryGeneratedColumn,
-    Unique,
-} from "typeorm";
+import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { getActions } from "../actions/action";
 export type Platform = "youtube" | "twitter";
 export type Event = "live" | "upload" | "offline" | "upcoming";
@@ -38,14 +31,6 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
 });
 
 @Entity()
-@Unique("IDENTICAL_ACTIONS", [
-    "guildId",
-    "discordChannelId",
-    "discordThreadId",
-    "channelId",
-    "platform",
-    "onEvent",
-])
 export class Action {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
@@ -57,8 +42,15 @@ export class Action {
         };
     }
 
-    @PrimaryColumn("varchar", { default: () => `'${nanoid()}'` }) // shorter IDs than UUIDs for better readability, since Action IDs are exposed publicly.
+    @PrimaryColumn("varchar") // shorter IDs than UUIDs for better readability, since Action IDs are exposed publicly.
     id: string;
+
+    @BeforeInsert()
+    private beforeInsert(): void {
+        if (!this.id) {
+            this.id = nanoid();
+        }
+    }
 
     @Column()
     guildId: string;

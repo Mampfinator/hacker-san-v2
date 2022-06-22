@@ -60,10 +60,10 @@ export class EnsureTwitterChannelHandler
                     name: username,
                 });
 
-                return { success: true, channelId: id };
+                return { success: true, channelId: id, name: username };
             }
 
-            return { success: true };
+            return { success: true, channelId: exists.id, name: exists.name };
         } catch (error) {
             return { error, success: false };
         }

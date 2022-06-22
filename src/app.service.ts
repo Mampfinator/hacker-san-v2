@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnApplicationBootstrap } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { ListenEvent } from "./events/listen.event";
 

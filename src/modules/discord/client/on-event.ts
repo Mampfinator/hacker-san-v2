@@ -10,6 +10,11 @@ const getEvents = (target: object) => {
     >;
 };
 
+/**
+ *
+ * @param event The event to listen to.
+ * @returns
+ */
 export const On =
     (event: string): MethodDecorator =>
     (target, propertyKey) => {

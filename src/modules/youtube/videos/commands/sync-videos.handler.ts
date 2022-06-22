@@ -2,10 +2,7 @@ import { Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import {
-    YouTubeLiveStatus,
-    YouTubeVideo,
-} from "../../model/youtube-video.entity";
+import { YouTubeVideo } from "../../model/youtube-video.entity";
 import { YouTubeApiService } from "../../youtube-api.service";
 import { YouTubeVideosService } from "../youtube-video.service";
 import { SyncVideosCommand } from "./sync-videos.command";

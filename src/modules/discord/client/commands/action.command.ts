@@ -3,9 +3,10 @@ import {
     SlashCommandSubcommandBuilder,
 } from "@discordjs/builders";
 import { Logger } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
+    AutocompleteInteraction,
     CommandInteraction,
     MessageEmbed,
     TextChannel,
@@ -14,6 +15,8 @@ import {
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { Repository } from "typeorm";
 import { Action, Platform } from "../../models/action.entity";
+import { DiscordUtil } from "../../util";
+import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 
 function addShared(
@@ -50,7 +53,8 @@ function addShared(
             channel
                 .setName("channel")
                 .setDescription("The channel. For YouTube, actual ID required.")
-                .setRequired(true),
+                .setRequired(true)
+                .setAutocomplete(true),
         )
         .addChannelOption(channel =>
             channel
@@ -164,6 +168,7 @@ export class ActionCommand implements ISlashCommand {
         @InjectRepository(Action)
         private readonly actionRepo: Repository<Action>,
         private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
     ) {}
 
     private readonly actionMethods = {
@@ -326,5 +331,16 @@ export class ActionCommand implements ISlashCommand {
                     .setDescription(`Removed action with ID ${id}.`),
             ],
         });
+    }
+
+    @Autocomplete("channel")
+    private async getChannel(
+        current: string,
+        interaction: AutocompleteInteraction,
+    ): Promise<AutocompleteReturn> {
+        return DiscordUtil.handleChannelAutocomplete(
+            interaction,
+            this.queryBus,
+        );
     }
 }

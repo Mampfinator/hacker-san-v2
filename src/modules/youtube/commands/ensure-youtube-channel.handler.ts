@@ -28,20 +28,28 @@ export class EnsureYouTubeChannelHandler
     }: EnsureYouTubeChannelCommand): Promise<EnsureChannelResult> {
         try {
             const channelId = rawChannelId.trim().match(channelIdRegex)?.[0];
-            if (!channelId) return { success: false };
-
-            const { data: channels } = await this.api.channels.list({
-                id: [channelId],
-                part: ["snippet"],
-            });
-            const [channel] = channels.items;
-            if (!channel) return { success: false };
+            if (!channelId)
+                return {
+                    success: false,
+                    error: new Error("Invalid channel ID format."),
+                };
 
             const exists = await this.channelRepo.findOne({
                 where: { channelId },
             });
 
             if (!exists) {
+                const { data: channels } = await this.api.channels.list({
+                    id: [channelId],
+                    part: ["snippet"],
+                });
+                const [channel] = channels.items;
+                if (!channel)
+                    return {
+                        success: false,
+                        error: new Error("Channel not found."),
+                    };
+
                 await this.channelRepo.save({
                     channelId,
                     channelName: channel.snippet.title, // in case we ever need it
@@ -52,9 +60,15 @@ export class EnsureYouTubeChannelHandler
                     new SyncPostsCommand({ channelId }),
                 );
                 await this.commandBus.execute(new SyncVideosCommand(channelId));
+
+                return {
+                    success: true,
+                    channelId,
+                    name: channel.snippet.title,
+                };
             }
 
-            return { success: true };
+            return { success: true, channelId, name: exists.channelName };
         } catch (error) {
             return { error, success: false };
         }

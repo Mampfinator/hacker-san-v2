@@ -7,3 +7,4 @@ import "./action.command";
 import "./help.command";
 import "./settings.command";
 import "./overview.command";
+import "./quick-setup.command";

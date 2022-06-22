@@ -14,7 +14,7 @@ export class YouTubeChannelsHandler
         private readonly channelRepo: Repository<YouTubeChannel>,
     ) {}
 
-    async execute(query: YouTubeChannelsQuery): Promise<ChannelsQueryResult> {
+    async execute(_query: YouTubeChannelsQuery): Promise<ChannelsQueryResult> {
         const allChannels = await this.channelRepo.find();
 
         const channels = allChannels.map(channel => ({

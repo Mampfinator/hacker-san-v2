@@ -24,6 +24,7 @@ import { Interval } from "@nestjs/schedule";
 import { SUPPORTED_PLATFORMS } from "src/constants";
 import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
 import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
+import { Util } from "src/util";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -191,11 +192,20 @@ export class DiscordClientService extends Client {
             type: "WATCHING",
             name: `${channels} channels in ${this.guilds.cache.size} servers.`
         });*/
+        const guilds = this.guilds.cache.size;
 
         this.user.setPresence({
             activities: [
                 {
-                    name: "${channels} channels in ${this.guilds.cache.size} servers.",
+                    name: `${channels} ${Util.pluralize(
+                        channels,
+                        "channel",
+                        "channels",
+                    )} in ${guilds} ${Util.pluralize(
+                        guilds,
+                        "server",
+                        "servers",
+                    )}.`,
                     type: "WATCHING",
                 },
             ],

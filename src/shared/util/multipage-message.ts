@@ -1,6 +1,5 @@
 import {
     CommandInteraction,
-    Interaction,
     InteractionCollector,
     Message,
     MessageActionRow,

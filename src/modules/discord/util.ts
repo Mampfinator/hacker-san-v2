@@ -1,12 +1,12 @@
 import {
+    AutocompleteInteraction,
     Channel,
-    CommandInteraction,
     MessageEmbed,
     NonThreadGuildBasedChannel,
     TextChannel,
     ThreadChannel,
 } from "discord.js";
-import { Action } from "./models/action.entity";
+import { Action, Platform } from "./models/action.entity";
 import {
     AttachmentType,
     ChannelInfo,
@@ -16,8 +16,10 @@ import {
 } from "yt-scraping-utilities";
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./client/discord-client.service";
-import { IsNull } from "typeorm";
 import { SlashCommandStringOption } from "@discordjs/builders";
+import { QueryBus } from "@nestjs/cqrs";
+import { ChannelsQuery } from "../platforms/queries/channels.query";
+import { ChannelsQueryResult } from "../platforms/queries/channels.handler";
 
 export namespace DiscordUtil {
     export function postsToEmbed(data?: ytInitialData): MessageEmbed[] {
@@ -131,10 +133,35 @@ export namespace DiscordUtil {
     ) {
         return builder
             .setName("platform")
-            .setDescription("The platform.")
+            .setDescription(description ?? "The platform.")
             .setChoices(
                 { name: "YouTube", value: "youtube" },
                 { name: "Twitter", value: "twitter" },
             );
+    }
+
+    export async function handleChannelAutocomplete(
+        { options }: AutocompleteInteraction,
+        queryBus: QueryBus,
+    ) {
+        const platform = options.getString("platform", false) as
+            | Platform
+            | undefined;
+        if (!platform) return [];
+
+        const input = (options.getFocused() as string).trim();
+
+        const { channels } = await queryBus.execute<
+            ChannelsQuery,
+            ChannelsQueryResult
+        >(new ChannelsQuery(platform));
+
+        //? TODO: find an SQL only option.
+        return channels
+            .filter(
+                channel =>
+                    channel.name.includes(input) || channel.id.includes(input),
+            )
+            .map(channel => ({ name: channel.name, value: channel.id }));
     }
 }

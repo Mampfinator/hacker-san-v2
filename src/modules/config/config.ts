@@ -58,7 +58,8 @@ export default () => {
         ownerId: tomlOptions.discord.ownerId,
         ownerGuild: tomlOptions.discord.ownerGuild,
         doLogin: !claConfig.noLogin,
-        dmOwnerOnError: claConfig.dmOwnerOnError ?? process.env.NODE_ENV === "production"
+        dmOwnerOnError:
+            claConfig.dmOwnerOnError ?? process.env.NODE_ENV === "production",
     };
 
     const PORT = claConfig.port ?? tomlOptions.app.port ?? DEFAULT_PORT;
@@ -74,5 +75,6 @@ export default () => {
         PORT,
         DATABASE_URL,
         URL,
+        SKIP_SYNC: claConfig.skipSync ?? false,
     };
 };

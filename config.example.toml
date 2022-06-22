@@ -12,5 +12,6 @@ disableServices = [
 ]
 
 [discord]
+ownerId = "<Your Discord ID Here>" # If the bot encounters an error in production, you will be the first to know.
 cleanupOldCommands = true # whether or not to clean up old Discord slash commands on startup
 testGuildId = "<Guild ID>" # if set, will only deploy slash commands to this guild. Useful for debugging, not so useful otherwise.
