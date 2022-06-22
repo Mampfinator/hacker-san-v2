@@ -17,7 +17,7 @@ export class DiscordService implements OnApplicationBootstrap {
     }
 
     public async start() {
-        const { token } = this.config.get<DiscordConfig>("DISCORD");
-        await this.client.login(token);
+        const { token, doLogin } = this.config.get<DiscordConfig>("DISCORD");
+        if (doLogin) await this.client.login(token);
     }
 }

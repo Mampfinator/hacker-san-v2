@@ -9,6 +9,8 @@ import { YouTubeEventSubService } from "../videos/youtube-eventsub.service";
 import { YouTubeApiService } from "../youtube-api.service";
 import { EnsureYouTubeChannelCommand } from "./ensure-youtube-channel.command";
 
+const channelIdRegex = /^UC[A-z0-9\-_]{22}$/;
+
 @CommandHandler(EnsureYouTubeChannelCommand)
 export class EnsureYouTubeChannelHandler
     implements ICommandHandler<EnsureYouTubeChannelCommand>
@@ -18,33 +20,37 @@ export class EnsureYouTubeChannelHandler
         private readonly channelRepo: Repository<YouTubeChannel>,
         private readonly eventSub: YouTubeEventSubService,
         private readonly api: YouTubeApiService,
-        private readonly commandBus: CommandBus
+        private readonly commandBus: CommandBus,
     ) {}
 
     async execute({
-        channelId,
+        channelId: rawChannelId,
     }: EnsureYouTubeChannelCommand): Promise<EnsureChannelResult> {
         try {
-            channelId = channelId.trim(); // just to make sure
-            if (!/UC[A-z0-9\-_]*/.test(channelId)) return { success: false };
-            const {data: channels} = await this.api.channels.list({id: [channelId], part: ["snippet"]});
+            const channelId = rawChannelId.trim().match(channelIdRegex)?.[0];
+            if (!channelId) return { success: false };
+
+            const { data: channels } = await this.api.channels.list({
+                id: [channelId],
+                part: ["snippet"],
+            });
             const [channel] = channels.items;
             if (!channel) return { success: false };
-
 
             const exists = await this.channelRepo.findOne({
                 where: { channelId },
             });
 
-
             if (!exists) {
                 await this.channelRepo.save({
                     channelId,
-                    channelName: channel.snippet.title // in case we ever need it
+                    channelName: channel.snippet.title, // in case we ever need it
                 });
 
                 await this.eventSub.subscribe(channelId);
-                await this.commandBus.execute(new SyncPostsCommand({channelId}));
+                await this.commandBus.execute(
+                    new SyncPostsCommand({ channelId }),
+                );
                 await this.commandBus.execute(new SyncVideosCommand(channelId));
             }
 

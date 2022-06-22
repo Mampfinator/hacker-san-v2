@@ -1,4 +1,5 @@
 import {
+    Logger,
     MiddlewareConsumer,
     Module,
     NestModule,
@@ -23,6 +24,7 @@ import { PlatformModule } from "./modules/platforms/platform.module";
 import { YouTubeModule } from "./modules/youtube/youtube.module";
 import { TwitterModule } from "./modules/twitter/twitter.module";
 import { CqrsModule } from "@nestjs/cqrs";
+import { GlobalExceptionFilter } from "./global-exception.filter";
 
 @Module({
     imports: [
@@ -57,7 +59,9 @@ import { CqrsModule } from "@nestjs/cqrs";
         YouTubeModule,
         TwitterModule,
     ],
-    providers: [AppService],
+    providers: [
+        AppService
+    ],
 })
 export class AppModule implements NestModule {
     public configure(consumer: MiddlewareConsumer) {

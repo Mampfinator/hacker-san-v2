@@ -1,7 +1,13 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Client, CommandInteraction, Message, MessageEmbed } from "discord.js";
+import {
+    AutocompleteInteraction,
+    Client,
+    CommandInteraction,
+    Message,
+    MessageEmbed,
+} from "discord.js";
 import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
@@ -9,10 +15,15 @@ import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { DISCORD_EVENT_NAMES } from "./discord-client-constants";
 import { handleEvent, On } from "./on-event";
 import { InjectCommands } from "./commands/slash-commands.provider";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { FetchPostCommand } from "src/modules/youtube/community-posts/commands/fetch-post.command";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
+import { handleAutocomplete } from "./commands/autocomplete";
+import { Interval } from "@nestjs/schedule";
+import { SUPPORTED_PLATFORMS } from "src/constants";
+import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
+import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -22,6 +33,7 @@ export class DiscordClientService extends Client {
     constructor(
         private readonly configService: ConfigService,
         private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
         @InjectRepository(GuildSettings)
         private readonly settingsRepository: Repository<GuildSettings>,
         @InjectCommands() slashCommands: SlashCommand[],
@@ -36,7 +48,7 @@ export class DiscordClientService extends Client {
         }
     }
 
-    public login(token?: string): Promise<string> {
+    public async login(token?: string): Promise<string> {
         for (const event of DISCORD_EVENT_NAMES)
             this.on(event, (...args) => this.handleEvent(event, ...args));
         this.logger.debug(
@@ -44,16 +56,16 @@ export class DiscordClientService extends Client {
                 ...this.commands.keys(),
             ]}.`,
         );
-        return super.login(token);
+        const ret = await super.login(token);
+        await this.refreshPresence();
+        return ret;
     }
 
     private handleEvent(event: string, ...args: any[]): void {
         const { success, errors } = handleEvent(event, this, args);
         if (!success) {
-            this.logger.debug("handleEvent failed.");
+            this.logger.warn("handleEvent failed.");
             for (const error of errors) this.logger.error(error);
-        } else {
-            this.logger.debug(`Handled ${event}.`);
         }
     }
 
@@ -99,19 +111,36 @@ export class DiscordClientService extends Client {
     }
 
     @On("interactionCreate")
-    handleSlashCommand(interaction: CommandInteraction) {
+    async handleSlashCommand(interaction: CommandInteraction) {
         if (!interaction.isApplicationCommand()) return;
 
         const { commandName } = interaction;
+        this.logger.debug(`Received slash command for ${commandName}.`);
         const handler = this.commands.get(commandName);
 
         if (!handler) return interaction.reply("Command not found!");
-        handler.execute(interaction);
+        await handler.execute(interaction);
+
+        if (!interaction.replied) {
+            this.logger.warn(
+                `${commandName} (${interaction.id}) never got a reply!`,
+            );
+        }
     }
 
     @On("interactionCreate")
-    handleAutocomplete(interaction: CommandInteraction) {
+    handleAutocomplete(interaction: AutocompleteInteraction) {
         if (!interaction.isAutocomplete()) return;
+
+        const { commandName, options } = interaction;
+        const { name } = options.getFocused(true);
+        const command = this.commands.get(commandName);
+
+        if (!command)
+            return this.logger.warn(
+                `Could not handle autocomplete for ${commandName} - ${name}: Command not found.`,
+            );
+        handleAutocomplete(interaction, command);
     }
 
     @On("messageCreate")
@@ -145,5 +174,32 @@ export class DiscordClientService extends Client {
                 `Found IDs but did not manage to generate embeds.`,
             );
         }
+    }
+
+    @Interval(60000)
+    private async refreshPresence() {
+        let channels = 0;
+        for (const platform of SUPPORTED_PLATFORMS) {
+            const response = await this.queryBus.execute<
+                ChannelsQuery,
+                ChannelsQueryResult
+            >(new ChannelsQuery(platform));
+            channels += response.channels.length;
+        }
+
+        /*this.user.setActivity({
+            type: "WATCHING",
+            name: `${channels} channels in ${this.guilds.cache.size} servers.`
+        });*/
+
+        this.user.setPresence({
+            activities: [
+                {
+                    name: "${channels} channels in ${this.guilds.cache.size} servers.",
+                    type: "WATCHING",
+                },
+            ],
+            status: "dnd",
+        });
     }
 }

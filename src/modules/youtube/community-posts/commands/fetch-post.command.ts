@@ -7,11 +7,11 @@ export interface FetchPostCommandOptions {
 
 export class FetchPostCommand implements ICommand {
     public readonly includeChannelInfo?: boolean;
-    public readonly force?: boolean; 
+    public readonly force?: boolean;
 
     constructor(
         public readonly postId: string,
-        options: FetchPostCommandOptions = {}
+        options: FetchPostCommandOptions = {},
     ) {
         this.includeChannelInfo = options.includeChannelInfo;
         this.force = options.force;

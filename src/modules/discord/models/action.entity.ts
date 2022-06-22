@@ -1,10 +1,41 @@
 import { EmbedField } from "discord.js";
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import {
+    BeforeInsert,
+    Column,
+    Entity,
+    PrimaryColumn,
+    PrimaryGeneratedColumn,
+    Unique,
+} from "typeorm";
 import { getActions } from "../actions/action";
 export type Platform = "youtube" | "twitter";
 export type Event = "live" | "upload" | "offline" | "upcoming";
 
 const actionEnum: string[] = getActions().map(action => action.prototype.type);
+const firstUpperCase = (value: string): string => {
+    const [first, ...rest] = Array.from(value);
+    return `${first.toUpperCase()}${rest.join("")}`;
+};
+
+const descriptify = (input: Record<string, string>, joiner = "\n"): string => {
+    let output = "";
+
+    for (const [key, value] of Object.entries(input)) {
+        output += `**${firstUpperCase(key)}**: ${value ?? "`None`"}${joiner}`;
+    }
+
+    return output;
+};
+
+// This is stupid. But it's the only workaround I could find.
+// We can assume nanoid to be imported before an Action is created.
+let nanoid: () => string;
+Function('return import("nanoid")')().then(({ customAlphabet }) => {
+    nanoid = customAlphabet(
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-",
+        9,
+    );
+});
 
 @Entity()
 @Unique("IDENTICAL_ACTIONS", [
@@ -15,17 +46,18 @@ const actionEnum: string[] = getActions().map(action => action.prototype.type);
     "platform",
     "onEvent",
 ])
-//@Check("'platform' <> 'youtube' AND 'onEvent' = 'post'")
 export class Action {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
-            name: `${this.type} - ${this.platform} | ${this.channelId}`,
-            value: `ID: \`${this.id}\``,
+            name: `${this.id} - ${firstUpperCase(this.type)}`,
+            value: `${this.platform} (${this.channelId})\n**Channel**: <#${
+                this.discordThreadId ?? this.discordChannelId
+            }> \n ${this.data ? descriptify(this.data) : ""}`,
             inline: inline ?? false,
         };
     }
 
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryColumn("varchar", { default: () => `'${nanoid()}'` }) // shorter IDs than UUIDs for better readability, since Action IDs are exposed publicly.
     id: string;
 
     @Column()
@@ -33,7 +65,7 @@ export class Action {
 
     @Column({
         type: "enum",
-        enum: actionEnum, // for some reason this doesn't work. Probably something to do with the order in which decorators are evaluated?
+        enum: actionEnum,
     })
     type: string;
 

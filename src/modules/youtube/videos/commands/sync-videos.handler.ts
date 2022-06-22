@@ -2,7 +2,10 @@ import { Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { YouTubeLiveStatus, YouTubeVideo } from "../../model/youtube-video.entity";
+import {
+    YouTubeLiveStatus,
+    YouTubeVideo,
+} from "../../model/youtube-video.entity";
 import { YouTubeApiService } from "../../youtube-api.service";
 import { YouTubeVideosService } from "../youtube-video.service";
 import { SyncVideosCommand } from "./sync-videos.command";
@@ -12,15 +15,26 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
     private readonly logger = new Logger(SyncVideosHandler.name);
 
     constructor(
-        @InjectRepository(YouTubeVideo) public readonly videoRepo: Repository<YouTubeVideo>,
+        @InjectRepository(YouTubeVideo)
+        public readonly videoRepo: Repository<YouTubeVideo>,
         private readonly api: YouTubeApiService,
         private readonly videoService: YouTubeVideosService,
     ) {}
-    
-    async execute({channelId}: SyncVideosCommand): Promise<any> {
-        const { data: playlistData } = await this.api.playlistItems.list({playlistId: `UU${channelId.substring(2)}`, part: ["id", "snippet"], maxResults: 50});
-        const videoIds = playlistData.items.map(item => item.snippet.resourceId.videoId);
-        const { data: videoData } = await this.api.videos.list({id: videoIds, part: ["snippet", "liveStreamingDetails"], maxResults: 50});
+
+    async execute({ channelId }: SyncVideosCommand): Promise<any> {
+        const { data: playlistData } = await this.api.playlistItems.list({
+            playlistId: `UU${channelId.substring(2)}`,
+            part: ["id", "snippet"],
+            maxResults: 50,
+        });
+        const videoIds = playlistData.items.map(
+            item => item.snippet.resourceId.videoId,
+        );
+        const { data: videoData } = await this.api.videos.list({
+            id: videoIds,
+            part: ["snippet", "liveStreamingDetails"],
+            maxResults: 50,
+        });
         const { items: videos } = videoData;
 
         for (const video of videos) {
@@ -39,13 +53,12 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
                 await this.videoRepo.update(
                     {
                         id,
-                    }, 
+                    },
                     {
-                        status
-                    }
-                )
+                        status,
+                    },
+                );
             }
-
         }
     }
 }

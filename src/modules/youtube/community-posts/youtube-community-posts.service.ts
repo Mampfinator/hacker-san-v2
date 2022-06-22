@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Interval } from "@nestjs/schedule";
+import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommunityPost as CommunityPostEntitiy } from "./model/community-post.entity";
 import { Repository } from "typeorm";
@@ -15,7 +15,8 @@ export class YouTubeCommunityPostsService {
     private readonly logger = new Logger(YouTubeCommunityPostsService.name);
 
     private pointer = 0;
-    private hasVisitedAll = false;
+
+    private started = false;
 
     constructor(
         @InjectRepository(YouTubeChannel)
@@ -25,16 +26,12 @@ export class YouTubeCommunityPostsService {
         private readonly commandBus: CommandBus,
     ) {}
 
-    @Interval("CHECK_COMMUNITY_POSTS", 1500)
-    async checkPosts() {
+    public async checkPosts() {
         // very naive implementation. Gotta do for now.
         const channels = await this.channelRepo.find();
 
         const channel = channels[this.pointer++];
-        if (this.pointer >= channels.length) {
-            this.pointer = 0;
-            this.hasVisitedAll = true;
-        }
+        if (this.pointer >= channels.length) this.pointer = 0;
 
         if (!channel) return;
 
@@ -65,23 +62,21 @@ export class YouTubeCommunityPostsService {
                 id: post.id,
             });
 
-            if (this.hasVisitedAll) {
-                this.logger.debug(
-                    `Sending community TriggerActionsCommand for community post ${post.id}.`,
-                );
+            this.logger.debug(
+                `Sending community TriggerActionsCommand for community post ${post.id}.`,
+            );
 
-                const embed = DiscordUtil.postToEmbed(post, channelInfo);
+            const embed = DiscordUtil.postToEmbed(post, channelInfo);
 
-                const event = new TriggerActionsCommand({
-                    embed,
-                    channelId: channel.channelId,
-                    platform: "youtube",
-                    event: "post",
-                    url: `https://www.youtube.com/post/${post.id}`,
-                });
+            const event = new TriggerActionsCommand({
+                embed,
+                channelId: channel.channelId,
+                platform: "youtube",
+                event: "post",
+                url: `https://www.youtube.com/post/${post.id}`,
+            });
 
-                await this.commandBus.execute(event);
-            }
+            await this.commandBus.execute(event);
         }
     }
 }

@@ -17,7 +17,7 @@ export class EnsureTwitterChannelHandler
     constructor(
         @InjectRepository(TwitterUser)
         private readonly userRepo: Repository<TwitterUser>,
-        private readonly apiService: TwitterApiService
+        private readonly apiService: TwitterApiService,
     ) {}
 
     async execute({
@@ -29,27 +29,35 @@ export class EnsureTwitterChannelHandler
             const exists = await this.userRepo.findOne({
                 where: [
                     { id: channelId },
-                    { name: channelId.replace("@", "") }
+                    { name: channelId.replace("@", "") },
                 ],
             });
             if (!exists) {
                 let user: UserV2;
                 switch (true) {
                     case /^[0-9]+$/.test(channelId):
-                        user = await this.apiService.fetchUserById(channelId).catch(); break;
+                        user = await this.apiService
+                            .fetchUserById(channelId)
+                            .catch();
+                        break;
                     case channelId.startsWith("@"):
-                        user = await this.apiService.fetchUserByName(channelId.replace("@", "")).catch(); break;
+                        user = await this.apiService
+                            .fetchUserByName(channelId.replace("@", ""))
+                            .catch();
+                        break;
                     default:
-                        this.logger.debug(`Got invalid channelId: ${channelId}.`);
+                        this.logger.debug(
+                            `Got invalid channelId: ${channelId}.`,
+                        );
                 }
 
-                if (!user) return { success: false};
+                if (!user) return { success: false };
 
-                const {id, username} = user;
+                const { id, username } = user;
 
                 await this.userRepo.save({
                     id,
-                    name: username
+                    name: username,
                 });
 
                 return { success: true, channelId: id };

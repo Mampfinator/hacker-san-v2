@@ -27,5 +27,8 @@ import { actionTypeFactory } from "./actions/actions-helper";
         actionTypeFactory,
         ...DiscordCommandHandlers,
     ],
+    exports: [
+        DiscordClientService
+    ]
 })
 export class DiscordModule {}

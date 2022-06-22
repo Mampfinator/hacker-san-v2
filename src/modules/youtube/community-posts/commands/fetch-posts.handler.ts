@@ -14,7 +14,7 @@ import { CacheCollection } from "src/shared/util/cache-collection";
 
 @CommandHandler(FetchPostCommand)
 export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
-    private readonly cache = new CacheCollection<string, string>()
+    private readonly cache = new CacheCollection<string, string>();
 
     constructor(
         @InjectRepository(CommunityPostEntity)
@@ -24,7 +24,7 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
     async execute({
         postId: id,
         includeChannelInfo,
-        force
+        force,
     }: FetchPostCommand): Promise<
         CommunityPost[] | { posts: CommunityPost[]; channel: ChannelInfo }
     > {
@@ -33,7 +33,6 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
         if (!force && this.cache.has(id)) data = this.cache.get(id);
         else data = (await axios.get(`https://youtube.com/post/${id}`)).data;
 
-        
         const posts = extractCommunityPosts(data);
         const channel = includeChannelInfo
             ? extractChannelInfo(data)

@@ -17,6 +17,7 @@ import {
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./client/discord-client.service";
 import { IsNull } from "typeorm";
+import { SlashCommandStringOption } from "@discordjs/builders";
 
 export namespace DiscordUtil {
     export function postsToEmbed(data?: ytInitialData): MessageEmbed[] {
@@ -107,17 +108,33 @@ export namespace DiscordUtil {
             : (channel as NonThreadGuildBasedChannel);
     }
 
-    export function getChannelIds(channel: Channel): {discordChannelId: string, discordThreadId: string | null} {
+    export function getChannelIds(channel: Channel): {
+        discordChannelId: string;
+        discordThreadId: string | null;
+    } {
         if (channel.isThread()) {
             return {
                 discordThreadId: channel.id,
-                discordChannelId: channel.parentId
-            }
+                discordChannelId: channel.parentId,
+            };
         } else {
             return {
                 discordThreadId: null,
-                discordChannelId: channel.id
-            }
+                discordChannelId: channel.id,
+            };
         }
+    }
+
+    export function makePlatformOption(
+        builder: SlashCommandStringOption,
+        description?: string,
+    ) {
+        return builder
+            .setName("platform")
+            .setDescription("The platform.")
+            .setChoices(
+                { name: "YouTube", value: "youtube" },
+                { name: "Twitter", value: "twitter" },
+            );
     }
 }

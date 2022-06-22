@@ -1,18 +1,31 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CommandInteraction, GuildBasedChannel, MessageEmbed } from "discord.js";
+import {
+    AutocompleteInteraction,
+    CommandInteraction,
+    GuildBasedChannel,
+    MessageEmbed,
+} from "discord.js";
 import { FindOperator, IsNull, Repository } from "typeorm";
 import { Action, Platform } from "../../models/action.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 import { Util } from "src/util";
-import { execPath } from "process";
 import { MultipageMessage } from "src/shared/util/multipage-message";
 import { DiscordUtil } from "../../util";
+import { Autocomplete, AutocompleteReturn } from "./autocomplete";
+import { GuildSettings } from "../../models/settings.entity";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
+import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
+import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
+import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
         .setName("settings")
         .setDescription("Admin command to manage this guild's settings.")
+        .setDMPermission(false)
+        .setDefaultMemberPermissions(0)
         .addSubcommand(actions =>
             actions
                 .setName("actions")
@@ -40,6 +53,52 @@ import { DiscordUtil } from "../../util";
                         .setName("channel")
                         .setDescription(
                             "The platform channel to retrieve actions for. Requires platform to be specified.",
+                        )
+                        .setAutocomplete(true),
+                ),
+        )
+        .addSubcommandGroup(channels =>
+            channels
+                .setName("channels")
+                .setDescription("Manage this guild's primary channels.")
+                .addSubcommand(add =>
+                    add
+                        .setName("add")
+                        .setDescription(
+                            "Add a primary channel. These are used for /overview.",
+                        )
+                        .addStringOption(platform =>
+                            DiscordUtil.makePlatformOption(
+                                platform,
+                                "The channel's platform.",
+                            ).setRequired(true),
+                        )
+                        .addStringOption(channelId =>
+                            channelId
+                                .setName("channel-id")
+                                .setDescription(
+                                    "The channel's ID or, for Twitter, @handle.",
+                                )
+                                .setRequired(true),
+                        ),
+                )
+                .addSubcommand(remove =>
+                    remove
+                        .setName("remove")
+                        .setDescription("Remove a primary channel.")
+                        .addStringOption(platform =>
+                            DiscordUtil.makePlatformOption(
+                                platform,
+                                "The channel's platform.",
+                            ).setRequired(true),
+                        )
+                        .addStringOption(channelId =>
+                            channelId
+                                .setName("channel-id")
+                                .setDescription(
+                                    "The channel's ID or, for Twitter, @handle.",
+                                )
+                                .setRequired(true),
                         ),
                 ),
         ),
@@ -48,6 +107,10 @@ export class SettingsCommand implements ISlashCommand {
     constructor(
         @InjectRepository(Action)
         private readonly actionRepo: Repository<Action>,
+        @InjectRepository(GuildSettings)
+        private readonly settingsRepo: Repository<GuildSettings>,
+        private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
     ) {}
 
     async execute(interaction: CommandInteraction) {
@@ -67,13 +130,16 @@ export class SettingsCommand implements ISlashCommand {
 
         switch (subcommand) {
             case "view":
-                this.viewSettings(interaction);
+                await this.viewSettings(interaction);
                 break;
             case "edit":
-                this.editSettings(interaction);
+                await this.editSettings(interaction);
                 break;
             case "actions":
-                this.viewActions(interaction);
+                await this.viewActions(interaction);
+                break;
+            case "channels":
+                await this.handlePrimaryChannel(interaction);
                 break;
         }
     }
@@ -83,17 +149,24 @@ export class SettingsCommand implements ISlashCommand {
     async editSettings(interaction: CommandInteraction) {}
 
     async viewActions(interaction: CommandInteraction) {
-        const { options, guildId } = interaction;
+        const { options, guildId, guild } = interaction;
         const channelId = options.getString("channel", false),
-            discordChannel = options.getChannel("for-channel", false) as GuildBasedChannel,
+            discordChannel = options.getChannel(
+                "for-channel",
+                false,
+            ) as GuildBasedChannel,
             platform = options.getString("platform", false) as Platform;
 
         let channels = {};
         if (discordChannel) {
-            let {discordThreadId, discordChannelId} = DiscordUtil.getChannelIds(discordChannel) as {discordThreadId: string | null | FindOperator<any>, discordChannelId: string};
+            let { discordThreadId, discordChannelId } =
+                DiscordUtil.getChannelIds(discordChannel) as {
+                    discordThreadId: string | null | FindOperator<any>;
+                    discordChannelId: string;
+                };
             discordThreadId = discordThreadId ?? IsNull();
 
-            channels = {discordThreadId, discordChannelId};
+            channels = { discordThreadId, discordChannelId };
         }
 
         const actions = await this.actionRepo.find({
@@ -101,7 +174,7 @@ export class SettingsCommand implements ISlashCommand {
                 guildId,
                 channelId,
                 platform,
-                ...channels
+                ...channels,
             },
         });
 
@@ -115,23 +188,135 @@ export class SettingsCommand implements ISlashCommand {
             });
         }
 
+        let description = "";
+        if (channelId) description += `\n Channel: ${channelId} (${platform})`;
+        if (discordChannel) description += `\n In: ${discordChannel}`;
+
+        if (description.length > 0) description = "**Filters**: " + description;
+
         const pagefields = Util.batch(
-            actions.map(action => action.toEmbedField()),
+            actions.map((action, i) => action.toEmbedField(i % 2 == 0)),
         );
 
         const message = new MultipageMessage({ interaction });
 
+        let i = 0;
         for (const fields of pagefields) {
+            i++;
+
             message.addPage({
                 embeds: [
-                    new MessageEmbed()
+                    new MessageEmbed({ description })
+                        .setTitle(
+                            `Actions for ${guild.name} (${i}/${pagefields.length})`,
+                        )
+                        .setThumbnail(guild.iconURL())
+                        .setDescription(description)
                         .setColor("BLUE")
-                        .setDescription(`Viewing actions in guild ${guildId}`)
                         .addFields(fields),
                 ],
             });
         }
 
         await message.send();
+    }
+
+    async handlePrimaryChannel(interaction: CommandInteraction) {
+        const settings = await this.settingsRepo.findOne({
+            where: { id: interaction.guildId },
+        });
+
+        const id = interaction.options.getString("channel-id"),
+            platform = interaction.options.getString("platform") as Platform;
+
+        const mode = interaction.options.getSubcommand() as "add" | "remove";
+
+        if (mode == "add") {
+            const alreadyExists = settings.addPrimaryChannel(id, platform);
+            if (!alreadyExists)
+                return await interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor("RED")
+                            .setDescription(
+                                "Channel is already one of this server's primary channels!",
+                            ),
+                    ],
+                    ephemeral: true,
+                });
+
+            const { success } = await this.commandBus.execute<
+                EnsureChannelCommand,
+                EnsureChannelResult
+            >(new EnsureChannelCommand(id, platform));
+            if (!success)
+                return await interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor("RED")
+                            .setDescription("Invalid ID."),
+                    ],
+                    ephemeral: true,
+                });
+
+            await this.settingsRepo.save(settings);
+            return interaction.reply({
+                embeds: [
+                    new MessageEmbed()
+                        .setColor("GREEN")
+                        .setDescription(
+                            `Successfully added ${id} (${platform}) to this server's primary channels.`,
+                        ),
+                ],
+            });
+        } else if (mode == "remove") {
+            const removed = settings.removePrimaryChannel(id, platform);
+            if (!removed)
+                return interaction.reply({
+                    embeds: [
+                        new MessageEmbed()
+                            .setColor("RED")
+                            .setDescription(
+                                "Channel is not a primary channel of this server.",
+                            ),
+                    ],
+                    ephemeral: true,
+                });
+
+            interaction.reply({
+                embeds: [
+                    new MessageEmbed()
+                        .setColor("GREEN")
+                        .setDescription(
+                            `Successfully removed ${id} (${platform} from this server's primary channels.)`,
+                        ),
+                ],
+            });
+        }
+    }
+
+    @Autocomplete("channel")
+    private async getChannel(
+        current: string,
+        { options }: AutocompleteInteraction,
+    ): Promise<AutocompleteReturn> {
+        const platform = options.getString("platform", false) as
+            | Platform
+            | undefined;
+        if (!platform) return [];
+
+        const input = (options.getFocused() as string).trim();
+
+        const { channels } = await this.queryBus.execute<
+            ChannelsQuery,
+            ChannelsQueryResult
+        >(new ChannelsQuery(platform));
+
+        return channels
+            .filter(
+                channel =>
+                    channel.name.includes(input) || channel.id.includes(input),
+            )
+            .map(channel => ({ name: channel.name, value: channel.id }));
     }
 }

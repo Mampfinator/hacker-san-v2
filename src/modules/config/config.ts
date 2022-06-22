@@ -1,8 +1,7 @@
-import { parse as parseToml } from "toml";
-import { readFileSync } from "fs";
-import { join } from "path";
-import { parse as parseEnv, DotenvParseOutput } from "dotenv";
 import { DEFAULT_PORT, DISCORD_COMMAND_CLEANUP_DEFAULT } from "./defaults";
+import { parseCommandLineArgs } from "./parse-cla";
+import { parseEnv } from "./parse-env";
+import { parseTOML } from "./parse-toml";
 
 interface PlatformConfig {
     active: boolean;
@@ -14,6 +13,8 @@ export interface DiscordConfig {
     testGuildId?: string;
     ownerGuild?: string;
     ownerId?: string;
+    doLogin?: boolean;
+    dmOwnerOnError: boolean;
 }
 
 export interface YouTubeConfig extends PlatformConfig {
@@ -25,59 +26,26 @@ export interface TwitterConfig extends PlatformConfig {
     token?: string;
 }
 
-interface envConfig extends DotenvParseOutput {
-    DATABASE_URL: string;
-    DISCORD_TOKEN: string;
-    YOUTUBE_API_KEY?: string;
-    YOUTUBE_SECRET?: string;
-    TWITTER_TOKEN?: string;
-}
-
-interface TOMLConfig {
-    app: {
-        port: number;
-        includePortInUrl?: boolean;
-        domain: string;
-        disableServices?: string[];
-        https?: boolean;
-    };
-
-    discord: {
-        cleanupOldCommands?: boolean;
-        testGuildId?: string;
-        ownerId?: string;
-        ownerGuild?: string;
-    };
-}
-
 export default () => {
-    const tomlConfigFile = readFileSync(
-        join(__dirname, "..", "..", "..", "config.toml"),
-    );
-    const tomlOptions: TOMLConfig = parseToml(tomlConfigFile.toString());
-    const envConfig = {
-        ...process.env,
-        ...parseEnv<envConfig>(
-            readFileSync(join(__dirname, "..", "..", "..", ".env")),
-        ),
-    };
-
-    if (!envConfig.DISCORD_TOKEN)
-        throw new Error("DISCORD_TOKEN not found in environment variables");
-    if (!envConfig.DATABASE_URL)
-        throw new Error("DATABASE_URL not found in environment variables");
+    const tomlOptions = parseTOML();
+    const envConfig = parseEnv();
+    const claConfig = parseCommandLineArgs();
 
     // TODO: actually implement disabling services.
     // maybe look into a dynamic module and make the platform module responsible for conditionally importing the YouTube-/Twitter-/etc modules.
 
     const YOUTUBE: YouTubeConfig = {
-        active: !tomlOptions.app?.disableServices?.includes("youtube"),
+        active:
+            claConfig.noYoutube ??
+            !tomlOptions.app?.disableServices?.includes("youtube"),
         apiKey: envConfig.YOUTUBE_API_KEY,
         secret: envConfig.YOUTUBE_SECRET,
     };
 
     const TWITTER: TwitterConfig = {
-        active: !tomlOptions.app?.disableServices?.includes("twitter"),
+        active:
+            claConfig.noTwitter ??
+            !tomlOptions.app?.disableServices?.includes("twitter"),
         token: envConfig.TWITTER_TOKEN,
     };
 
@@ -89,15 +57,16 @@ export default () => {
         testGuildId: tomlOptions.discord.testGuildId,
         ownerId: tomlOptions.discord.ownerId,
         ownerGuild: tomlOptions.discord.ownerGuild,
+        doLogin: !claConfig.noLogin,
+        dmOwnerOnError: claConfig.dmOwnerOnError ?? process.env.NODE_ENV === "production"
     };
 
-    const PORT = tomlOptions.app.port ?? DEFAULT_PORT;
+    const PORT = claConfig.port ?? tomlOptions.app.port ?? DEFAULT_PORT;
     const { DATABASE_URL } = envConfig;
 
     const URL = `http${tomlOptions.app.https ?? true ? "s" : ""}://${
         tomlOptions.app.domain
     }${tomlOptions.app.includePortInUrl ? `:${PORT}` : ""}`;
-
     return {
         YOUTUBE,
         TWITTER,

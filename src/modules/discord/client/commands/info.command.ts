@@ -9,7 +9,8 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
 @SlashCommand({
     commandData: new SlashCommandBuilder()
         .setName("info")
-        .setDescription("Show info about the bot!"),
+        .setDescription("Show info about the bot!")
+        .setDMPermission(true),
 })
 export class InfoCommand implements ISlashCommand {
     constructor(private readonly config: ConfigService) {}

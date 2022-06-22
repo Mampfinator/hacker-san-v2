@@ -4,10 +4,8 @@ import { YouTubeService } from "../youtube.service";
 
 @EventsHandler(ListenEvent)
 export class YouTubeListenHandler implements IEventHandler<ListenEvent> {
-    constructor(
-        private readonly service: YouTubeService
-    ) {}
-    
+    constructor(private readonly service: YouTubeService) {}
+
     async handle() {
         await this.service.init();
     }

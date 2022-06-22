@@ -66,6 +66,8 @@ function addShared(
     commandData: new SlashCommandBuilder()
         .setName("action")
         .setDescription("Manage actions")
+        .setDMPermission(false)
+        .setDefaultMemberPermissions(0)
         .addSubcommand(remove =>
             remove
                 .setName("remove")
@@ -231,7 +233,11 @@ export class ActionCommand implements ISlashCommand {
         let channelId = options.getString("channel");
         const platform = options.getString("platform") as Platform;
 
-        const { success, error, channelId: newChannelId } = await this.commandBus.execute(
+        const {
+            success,
+            error,
+            channelId: newChannelId,
+        } = await this.commandBus.execute(
             new EnsureChannelCommand(channelId, platform),
         );
 
@@ -244,10 +250,12 @@ export class ActionCommand implements ISlashCommand {
                         .setColor("RED")
                         .setDescription("Error: invalid channel ID"),
                 ],
-                ephemeral: true
+                ephemeral: true,
             });
 
-            this.logger.debug(`Failed to insert channel ID: ${error ?? "Invalid ID."}`);
+            this.logger.debug(
+                `Failed to insert channel ID: ${error ?? "Invalid ID."}`,
+            );
             return;
         }
 
@@ -297,7 +305,9 @@ export class ActionCommand implements ISlashCommand {
 
     async handleRemove(interaction: CommandInteraction) {
         const id = interaction.options.getString("action-id");
-        const action = await this.actionRepo.find({ where: { id } });
+        const action = await this.actionRepo.find({
+            where: { id, guildId: interaction.guildId },
+        });
         if (!action)
             return interaction.reply({
                 embeds: [

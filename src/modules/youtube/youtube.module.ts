@@ -15,6 +15,7 @@ import { EnsureYouTubeChannelHandler } from "./commands/ensure-youtube-channel.h
 import { YouTubeApiService } from "./youtube-api.service";
 import { SyncVideosHandler } from "./videos/commands/sync-videos.handler";
 import { YouTubeListenHandler } from "./events/listen.handler";
+import { YouTubeChannelsHandler } from "./queries/youtube-channels.handler";
 
 @Module({
     imports: [
@@ -31,7 +32,8 @@ import { YouTubeListenHandler } from "./events/listen.handler";
         ...YouTubeCommandHandlers,
         EnsureYouTubeChannelHandler,
         SyncVideosHandler,
-        YouTubeListenHandler
+        YouTubeListenHandler,
+        YouTubeChannelsHandler,
     ],
     controllers: [YouTubeVideosController],
     exports: [YouTubeService],

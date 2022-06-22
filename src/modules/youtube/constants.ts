@@ -1,0 +1,2 @@
+export const EVENTSUB_SLEEP_TIME = 100;
+export const COMMUNITY_POST_SLEEP_TIME = 1000;

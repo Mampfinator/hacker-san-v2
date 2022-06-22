@@ -107,7 +107,7 @@ export class YouTubeVideosController {
         if (!videoId) {
             return this.logger.log(
                 `No videoId provided: ${xmlBody.feed.entry}`,
-            ); 
+            );
         }
 
         const { inserted, video } = await this.videos.process(videoId);
