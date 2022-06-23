@@ -29,13 +29,16 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
             maxResults: 50,
         });
 
-        const { data: rawXml } = await axios.get(`${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`);
+        const { data: rawXml } = await axios.get(
+            `${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`,
+        );
         const xml = this.xmlParser.parse(rawXml);
         const xmlVideoIds = xml.feed.entry.map(entry => entry["yt:videoId"]);
 
-        const videoIds = [...xmlVideoIds, ...playlistData.items.map(
-            item => item.snippet.resourceId.videoId,
-        )].filter(id => id);
+        const videoIds = [
+            ...xmlVideoIds,
+            ...playlistData.items.map(item => item.snippet.resourceId.videoId),
+        ].filter(id => id);
 
         const { data: videoData } = await this.api.videos.list({
             id: [...new Set(videoIds)].slice(0, 50),
@@ -47,7 +50,6 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
         for (const video of videos) {
             const { id } = video;
             const status = this.videoService.getStatus(video);
-
 
             if (status !== "offline") {
                 // we don't particularly care about past uploads & offline streams; save some space on the poor DB.

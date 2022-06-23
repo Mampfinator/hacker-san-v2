@@ -95,8 +95,13 @@ export class DiscordClientService extends Client {
             }
         }
 
-        const {deployGlobalCommands, testGuildId} = this.configService.get<DiscordConfig>("DISCORD");
-        this.logger.debug(`Deploying slash commands ${deployGlobalCommands ? "globally" : `to ${testGuildId}`}.`);
+        const { deployGlobalCommands, testGuildId } =
+            this.configService.get<DiscordConfig>("DISCORD");
+        this.logger.debug(
+            `Deploying slash commands ${
+                deployGlobalCommands ? "globally" : `to ${testGuildId}`
+            }.`,
+        );
 
         for (const command of this.commands.values()) {
             const { commandData, forGuild } = getCommandMetadata(command);

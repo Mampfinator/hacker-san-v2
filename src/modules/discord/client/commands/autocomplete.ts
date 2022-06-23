@@ -40,7 +40,11 @@ export const handleAutocomplete = async (
             `Error handling autocomplete: Could not find key for option ${name} in instance.`,
         );
 
-    const response: AutocompleteReturn = await Reflect.apply(instance[key], instance, [interaction]);
+    const response: AutocompleteReturn = await Reflect.apply(
+        instance[key],
+        instance,
+        [interaction],
+    );
     if (!response)
         throw new Error(
             `Error handling autocomplete ${name}: Got no response object.`,

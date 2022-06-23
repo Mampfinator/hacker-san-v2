@@ -165,7 +165,9 @@ function addShared(
 export class ActionCommand implements ISlashCommand {
     private readonly logger = new Logger(ActionCommand.name);
 
-    private readonly actionMethods: {[key: string]: (interaction: CommandInteraction) => any | Promise<any>} = {};
+    private readonly actionMethods: {
+        [key: string]: (interaction: CommandInteraction) => any | Promise<any>;
+    } = {};
 
     constructor(
         @InjectRepository(Action)
@@ -173,11 +175,16 @@ export class ActionCommand implements ISlashCommand {
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
     ) {
-        this.actionMethods.lock = (interaction: CommandInteraction) => this.handleLock(interaction);
-        this.actionMethods.rename = (interaction: CommandInteraction) => this.handleRename(interaction);
-        this.actionMethods.echo = (interaction: CommandInteraction) => this.handleEcho(interaction);
-        this.actionMethods.notify = (interaction: CommandInteraction) => this.handleNotify(interaction);
-        this.actionMethods.remove = (interaction: CommandInteraction) => this.handleRemove(interaction);
+        this.actionMethods.lock = (interaction: CommandInteraction) =>
+            this.handleLock(interaction);
+        this.actionMethods.rename = (interaction: CommandInteraction) =>
+            this.handleRename(interaction);
+        this.actionMethods.echo = (interaction: CommandInteraction) =>
+            this.handleEcho(interaction);
+        this.actionMethods.notify = (interaction: CommandInteraction) =>
+            this.handleNotify(interaction);
+        this.actionMethods.remove = (interaction: CommandInteraction) =>
+            this.handleRemove(interaction);
     }
 
     async execute(interaction: CommandInteraction) {
@@ -201,10 +208,12 @@ export class ActionCommand implements ISlashCommand {
             const options = await this.getBasicOptions(interaction);
             if (!options) return; // getBasicOptions handles the reply in this case.
             try {
-                const action = await this.actionRepo.save(this.actionRepo.create({
-                    ...options,
-                    ...dataOption,
-                }));
+                const action = await this.actionRepo.save(
+                    this.actionRepo.create({
+                        ...options,
+                        ...dataOption,
+                    }),
+                );
                 await interaction.reply({
                     embeds: [
                         new MessageEmbed()
@@ -337,16 +346,31 @@ export class ActionCommand implements ISlashCommand {
     }
 
     @Autocomplete("action")
-    private async getActionsWithMatchingIds(interaction: AutocompleteInteraction): Promise<AutocompleteReturn> {
+    private async getActionsWithMatchingIds(
+        interaction: AutocompleteInteraction,
+    ): Promise<AutocompleteReturn> {
         const value = interaction.options.getFocused() as string;
-        
-        const actions = await this.actionRepo.find({where: {guildId: interaction.guildId}});
 
-        const actionToLabel = (action: Action) => `${action.id} - ${action.type} (${action.channelId}, ${action.platform})`;
+        const actions = await this.actionRepo.find({
+            where: { guildId: interaction.guildId },
+        });
 
-        return actions.filter(action => {
-            return action.id.toLowerCase().includes(value.toLowerCase()) || value.includes(action.type) || action.channelId.toLowerCase().includes(value.toLowerCase()) || action.platform.toLowerCase().includes(value.toLowerCase());
-        }).map(action => ({name: actionToLabel(action), value: action.id}));
+        const actionToLabel = (action: Action) =>
+            `${action.id} - ${action.type} (${action.channelId}, ${action.platform})`;
+
+        return actions
+            .filter(action => {
+                return (
+                    action.id.toLowerCase().includes(value.toLowerCase()) ||
+                    value.includes(action.type) ||
+                    action.channelId
+                        .toLowerCase()
+                        .includes(value.toLowerCase()) ||
+                    action.platform.toLowerCase().includes(value.toLowerCase())
+                );
+            })
+            .map(action => ({ name: actionToLabel(action), value: action.id }))
+            .slice(0, 25);
     }
 
     @Autocomplete("channel")

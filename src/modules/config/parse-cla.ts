@@ -9,7 +9,7 @@ export const COMMANDLINE_OPTION_DEFINITIONS: commandLineArgs.OptionDefinition[] 
         { name: "always-dm", type: Boolean },
         { name: "print-config", type: Boolean },
         { name: "skip-sync", type: Boolean },
-        { name: "deploy-global-commands", type: Boolean }
+        { name: "deploy-global-commands", type: Boolean },
     ];
 
 export interface CommandLineOptions {

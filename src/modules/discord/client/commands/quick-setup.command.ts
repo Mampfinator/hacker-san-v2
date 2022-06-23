@@ -30,54 +30,68 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
         .setDescription(
             "Quick setup for default configuration. Creates multiple actions.",
         )
-        .addSubcommand(general => general
-            .setName("general")
-            .setDescription("General setup for a channel.")        
-            .addStringOption(platform =>
-                DiscordUtil.makePlatformOption(platform).setRequired(true),
-            )
-            .addStringOption(channel =>
-                channel
-                    .setName("channel")
-                    .setDescription("The channel's ID or handle.")
-                    .setRequired(true)
-                    .setAutocomplete(true),
-            )
-            .addRoleOption(pingRole =>
-                pingRole
-                    .setName("ping-role")
-                    .setDescription("The role to ping on certain events."),
-            )
-            .addChannelOption(notificationChannel =>
-                notificationChannel
-                    .setName("notif-channel")
-                    .setDescription(
-                        "The notification channel that should be used.",
-                    ),
-            )
-            .addChannelOption(streamChat =>
-                streamChat
-                    .setName("stream-chat")
-                    .setDescription(
-                        "The stream chat. Will be unlocked on live, locked on offline.",
-                    ),
-            )
-            .addChannelOption(tagsChannel =>
-                tagsChannel
-                    .setName("tags-channel")
-                    .setDescription(
-                        "The tags channel. !tags {link} will be sent here on offline.",
-                    ),
-            ),
+        .addSubcommand(general =>
+            general
+                .setName("general")
+                .setDescription("General setup for a channel.")
+                .addStringOption(platform =>
+                    DiscordUtil.makePlatformOption(platform).setRequired(true),
+                )
+                .addStringOption(channel =>
+                    channel
+                        .setName("channel")
+                        .setDescription("The channel's ID or handle.")
+                        .setRequired(true)
+                        .setAutocomplete(true),
+                )
+                .addRoleOption(pingRole =>
+                    pingRole
+                        .setName("ping-role")
+                        .setDescription("The role to ping on certain events."),
+                )
+                .addChannelOption(notificationChannel =>
+                    notificationChannel
+                        .setName("notif-channel")
+                        .setDescription(
+                            "The notification channel that should be used.",
+                        ),
+                )
+                .addChannelOption(streamChat =>
+                    streamChat
+                        .setName("stream-chat")
+                        .setDescription(
+                            "The stream chat. Will be unlocked on live, locked on offline.",
+                        ),
+                )
+                .addChannelOption(tagsChannel =>
+                    tagsChannel
+                        .setName("tags-channel")
+                        .setDescription(
+                            "The tags channel. !tags {link} will be sent here on offline.",
+                        ),
+                ),
         )
-        .addSubcommand(rename => rename
-            .setName("rename")
-            .setDescription("Configure rename actions for live & offline.")
-            .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true))
-            .addStringOption(channel => channel.setName("channel").setDescription("The channel ID or handle.").setRequired(true).setAutocomplete(true))
-            .addStringOption(name => name.setName("name").setDescription("This channel's base name.").setRequired(true))
-        )
-
+        .addSubcommand(rename =>
+            rename
+                .setName("rename")
+                .setDescription("Configure rename actions for live & offline.")
+                .addStringOption(platform =>
+                    DiscordUtil.makePlatformOption(platform).setRequired(true),
+                )
+                .addStringOption(channel =>
+                    channel
+                        .setName("channel")
+                        .setDescription("The channel ID or handle.")
+                        .setRequired(true)
+                        .setAutocomplete(true),
+                )
+                .addStringOption(name =>
+                    name
+                        .setName("name")
+                        .setDescription("This channel's base name.")
+                        .setRequired(true),
+                ),
+        ),
 })
 export class QuickSetupCommand implements ISlashCommand {
     private readonly logger = new Logger(QuickSetupCommand.name);
@@ -122,73 +136,79 @@ export class QuickSetupCommand implements ISlashCommand {
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === "general") {
-            await this.handleGeneral(interaction); 
+            await this.handleGeneral(interaction);
         } else if (subcommand === "rename") {
             await this.handleRename(interaction);
         }
-
-        
     }
-    
+
     async handleRename(interaction: CommandInteraction<CacheType>) {
         const { options, channel } = interaction;
 
         const { channelId, platform } = this.getOptions(interaction);
         const name = interaction.options.getString("name");
 
-
-        const { success, channelId: guaranteedChannelId, name: channelName } = await this.commandBus.execute<EnsureChannelCommand, EnsureChannelResult>(new EnsureChannelCommand(channelId, platform));
+        const {
+            success,
+            channelId: guaranteedChannelId,
+            name: channelName,
+        } = await this.commandBus.execute<
+            EnsureChannelCommand,
+            EnsureChannelResult
+        >(new EnsureChannelCommand(channelId, platform));
         if (!success) {
-            return interaction.reply({content: "Channel not found.", ephemeral: true});
+            return interaction.reply({
+                content: "Channel not found.",
+                ephemeral: true,
+            });
         }
 
-        const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(channel);
+        const { discordChannelId, discordThreadId } =
+            DiscordUtil.getChannelIds(channel);
 
-        
-
-        const savedActions = await this.actionsRepo.save(
-            [
-                this.actionsRepo.create({
-                    guildId: interaction.guildId,
-                    discordChannelId,
-                    discordThreadId,
-                    channelId,
-                    platform,
-                    type: "rename",
-                    onEvent: "live",
-                    data: {
-                        name: `🔴 ${name}`
-                    },
-                }),
-                this.actionsRepo.create({
-                    guildId: interaction.guildId,
-                    discordChannelId,
-                    discordThreadId,
-                    channelId,
-                    platform,
-                    type: "rename",
-                    onEvent: "offline",
-                    data: {
-                        name: `⚫ ${name}`,
-                    },
-                })
-            ]
-        )
+        const savedActions = await this.actionsRepo.save([
+            this.actionsRepo.create({
+                guildId: interaction.guildId,
+                discordChannelId,
+                discordThreadId,
+                channelId,
+                platform,
+                type: "rename",
+                onEvent: "live",
+                data: {
+                    name: `🔴 ${name}`,
+                },
+            }),
+            this.actionsRepo.create({
+                guildId: interaction.guildId,
+                discordChannelId,
+                discordThreadId,
+                channelId,
+                platform,
+                type: "rename",
+                onEvent: "offline",
+                data: {
+                    name: `⚫ ${name}`,
+                },
+            }),
+        ]);
 
         this.logger.debug(`Saved ${savedActions.length} actions.`);
         return interaction.reply({
             embeds: [
                 new MessageEmbed()
                     .setTitle("Quick Setup")
-                    .setDescription(`Configured rename actions for ${channelName} (${guaranteedChannelId})`)
+                    .setDescription(
+                        `Configured rename actions for ${channelName} (${guaranteedChannelId})`,
+                    )
                     .setColor("GREEN")
                     .addFields(
-                        savedActions.map(action => action.toEmbedField())
-                    )
-            ]
-        })
+                        savedActions.map(action => action.toEmbedField()),
+                    ),
+            ],
+        });
     }
-    
+
     async handleGeneral(interaction: CommandInteraction<CacheType>) {
         this.optionMap.set(interaction.id, {
             "convenience-options": new Set(),
@@ -400,7 +420,9 @@ export class QuickSetupCommand implements ISlashCommand {
 
         if (selectedOptions.has("live-and-uploads")) {
             const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(notificationChannel as GuildBasedChannel);
+                DiscordUtil.getChannelIds(
+                    notificationChannel as GuildBasedChannel,
+                );
 
             actions.push({
                 id: nanoid(),
@@ -539,8 +561,9 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         if (selectedOptions.has("auto-korotagger")) {
-            const {discordChannelId, discordThreadId} = DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
-            
+            const { discordChannelId, discordThreadId } =
+                DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
+
             actions.push({
                 id: nanoid(),
                 discordChannelId,

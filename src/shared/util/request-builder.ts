@@ -6,10 +6,8 @@ export class RequestBuilder {
     private readonly params: Record<string, string> = {};
     private readonly headers: Record<string, string> = {};
     private url: string;
-    
-    constructor(
-        baseUrl: string,
-    ) {
+
+    constructor(baseUrl: string) {
         this.url = baseUrl;
     }
 
@@ -17,7 +15,7 @@ export class RequestBuilder {
         this.method = method;
         return this;
     }
-    
+
     public addParam(key: string, value: string): this {
         this.params[key] = value;
         return this;
@@ -39,7 +37,10 @@ export class RequestBuilder {
     }
 
     public setBasicAuth(clientId: string, secret: string): this {
-        this.addHeader("Authorization", `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`);
+        this.addHeader(
+            "Authorization",
+            `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`,
+        );
         return this;
     }
 
@@ -47,7 +48,7 @@ export class RequestBuilder {
         this.url = join(this.url, path);
         return this;
     }
-    
+
     public send(): Promise<any> {
         return axios({
             method: this.method,

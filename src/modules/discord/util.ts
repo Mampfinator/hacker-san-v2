@@ -162,6 +162,7 @@ export namespace DiscordUtil {
                 channel =>
                     channel.name.includes(input) || channel.id.includes(input),
             )
-            .map(channel => ({ name: channel.name, value: channel.id }));
+            .map(channel => ({ name: channel.name, value: channel.id }))
+            .slice(0, 25); // limit to 25 results because Discord has a limit of 25 autocomplete suggestions.
     }
 }
