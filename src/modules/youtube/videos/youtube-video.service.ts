@@ -218,7 +218,7 @@ export class YouTubeVideosService {
                 event: statusChange,
                 platform: "youtube",
                 channelId: video.channelId,
-                url: `https://youtube.com/watch?v=${video.id}`,
+                url: `https://www.youtube.com/watch?v=${video.id}`,
             }),
         );
     }

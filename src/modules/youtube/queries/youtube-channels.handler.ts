@@ -20,7 +20,7 @@ export class YouTubeChannelsHandler
         const channels = allChannels.map(channel => ({
             name: channel.channelName,
             id: channel.channelId,
-            url: `https://youtube.com/channel/${channel.channelId}`,
+            url: `https://www.youtube.com/channel/${channel.channelId}`,
         }));
 
         return {
