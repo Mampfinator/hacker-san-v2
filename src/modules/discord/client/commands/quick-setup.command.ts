@@ -547,7 +547,7 @@ export class QuickSetupCommand implements ISlashCommand {
                 discordThreadId,
                 channelId,
                 platform,
-                type: "korotagger",
+                type: "echo",
                 onEvent: "live",
                 guildId: interaction.guildId,
                 data: {
