@@ -201,10 +201,10 @@ export class ActionCommand implements ISlashCommand {
             const options = await this.getBasicOptions(interaction);
             if (!options) return; // getBasicOptions handles the reply in this case.
             try {
-                const action = await this.actionRepo.save({
+                const action = await this.actionRepo.save(this.actionRepo.create({
                     ...options,
                     ...dataOption,
-                });
+                }));
                 await interaction.reply({
                     embeds: [
                         new MessageEmbed()

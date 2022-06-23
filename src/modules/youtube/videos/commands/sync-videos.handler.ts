@@ -1,15 +1,19 @@
 import { Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
+import axios from "axios";
+import { XMLParser } from "fast-xml-parser";
 import { Repository } from "typeorm";
 import { YouTubeVideo } from "../../model/youtube-video.entity";
 import { YouTubeApiService } from "../../youtube-api.service";
+import { YOUTUBE_VIDEO_FEED_URL } from "../constants";
 import { YouTubeVideosService } from "../youtube-video.service";
 import { SyncVideosCommand } from "./sync-videos.command";
 
 @CommandHandler(SyncVideosCommand)
 export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
     private readonly logger = new Logger(SyncVideosHandler.name);
+    private readonly xmlParser = new XMLParser();
 
     constructor(
         @InjectRepository(YouTubeVideo)
@@ -24,11 +28,17 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
             part: ["id", "snippet"],
             maxResults: 50,
         });
-        const videoIds = playlistData.items.map(
+
+        const { data: rawXml } = await axios.get(`${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`);
+        const xml = this.xmlParser.parse(rawXml);
+        const xmlVideoIds = xml.feed.entry.map(entry => entry["yt:videoId"]);
+
+        const videoIds = [...xmlVideoIds, ...playlistData.items.map(
             item => item.snippet.resourceId.videoId,
-        );
+        )].filter(id => id);
+
         const { data: videoData } = await this.api.videos.list({
-            id: videoIds,
+            id: [...new Set(videoIds)].slice(0, 50),
             part: ["snippet", "liveStreamingDetails"],
             maxResults: 50,
         });
@@ -38,8 +48,10 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
             const { id } = video;
             const status = this.videoService.getStatus(video);
 
+
             if (status !== "offline") {
                 // we don't particularly care about past uploads & offline streams; save some space on the poor DB.
+                this.logger.debug(`Found ${status} video: ${id}`);
                 await this.videoRepo.save({
                     id,
                     status,
