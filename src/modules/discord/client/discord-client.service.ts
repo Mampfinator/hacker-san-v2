@@ -95,11 +95,14 @@ export class DiscordClientService extends Client {
             }
         }
 
+        const {deployGlobalCommands, testGuildId} = this.configService.get<DiscordConfig>("DISCORD");
+        this.logger.debug(`Deploying slash commands ${deployGlobalCommands ? "globally" : `to ${testGuildId}`}.`);
+
         for (const command of this.commands.values()) {
             const { commandData, forGuild } = getCommandMetadata(command);
             await this.application.commands.create(
                 commandData,
-                process.env.NODE_ENV === "production"
+                deployGlobalCommands
                     ? forGuild(
                           this.configService.get<DiscordConfig>("DISCORD")
                               .ownerGuild,

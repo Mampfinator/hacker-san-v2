@@ -35,6 +35,7 @@ The app also has a few command line options you can pass:
 | --no-twitter   | /     | Overrides disabled/enabled in config.toml for "twitter".                                                                                                                 |
 | --print-config | /     | Prints the evaluated configuration (WARNING: includes potentially sensitive data such as tokens and API keys) for debugging purposes and then attempts to start the app. |
 | --skip-sync    | /     | Skips syncronization of all platforms on startup. Reduces startup time massively but can also lead to inconsistencies between the API and the database.                  |
+| --deploy-global-commands | /      | Deploys slash commands globally. By default, checks whether NODE_ENV is `production`.
 
 Remember that you may need to pass an or multiple additional `--` before command line arguments depending on how you start the app.
 

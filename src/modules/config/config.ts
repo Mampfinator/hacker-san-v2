@@ -15,6 +15,7 @@ export interface DiscordConfig {
     ownerId?: string;
     doLogin?: boolean;
     dmOwnerOnError: boolean;
+    deployGlobalCommands: boolean;
 }
 
 export interface YouTubeConfig extends PlatformConfig {
@@ -60,6 +61,7 @@ export default () => {
         doLogin: !claConfig.noLogin,
         dmOwnerOnError:
             claConfig.dmOwnerOnError ?? process.env.NODE_ENV === "production",
+        deployGlobalCommands: claConfig.deployGlobalCommands ?? process.env.NODE_ENV === "production",
     };
 
     const PORT = claConfig.port ?? tomlOptions.app.port ?? DEFAULT_PORT;

@@ -195,6 +195,8 @@ export class QuickSetupCommand implements ISlashCommand {
             "notification-options": new Set(),
         });
 
+        await interaction.deferReply();
+
         const {
             channelId,
             platform,
@@ -204,7 +206,7 @@ export class QuickSetupCommand implements ISlashCommand {
         } = this.getOptions(interaction);
 
         if (!notificationChannel && !streamChannel && !tagsChannel)
-            return interaction.reply({
+            return interaction.editReply({
                 embeds: [
                     new MessageEmbed({
                         description:
@@ -315,7 +317,7 @@ export class QuickSetupCommand implements ISlashCommand {
             ),
         );
 
-        const reply = (await interaction.reply({
+        const reply = (await interaction.editReply({
             embeds: [
                 new MessageEmbed()
                     .setTitle("Quick Setup")
@@ -325,7 +327,6 @@ export class QuickSetupCommand implements ISlashCommand {
                     .setColor("BLUE"),
             ],
             components,
-            fetchReply: true,
         })) as Message;
 
         const componentCollector = reply.createMessageComponentCollector();
@@ -399,7 +400,7 @@ export class QuickSetupCommand implements ISlashCommand {
 
         if (selectedOptions.has("live-and-uploads")) {
             const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
+                DiscordUtil.getChannelIds(notificationChannel as GuildBasedChannel);
 
             actions.push({
                 id: nanoid(),
@@ -538,6 +539,21 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         if (selectedOptions.has("auto-korotagger")) {
+            const {discordChannelId, discordThreadId} = DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
+            
+            actions.push({
+                id: nanoid(),
+                discordChannelId,
+                discordThreadId,
+                channelId,
+                platform,
+                type: "korotagger",
+                onEvent: "live",
+                guildId: interaction.guildId,
+                data: {
+                    message: "!stream {link}",
+                },
+            });
         }
 
         const savedActions = (await this.actionsRepo.save(actions)).map(

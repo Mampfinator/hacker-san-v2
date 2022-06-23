@@ -9,6 +9,7 @@ export const COMMANDLINE_OPTION_DEFINITIONS: commandLineArgs.OptionDefinition[] 
         { name: "always-dm", type: Boolean },
         { name: "print-config", type: Boolean },
         { name: "skip-sync", type: Boolean },
+        { name: "deploy-global-commands", type: Boolean }
     ];
 
 export interface CommandLineOptions {
@@ -18,6 +19,8 @@ export interface CommandLineOptions {
     port?: number;
     dmOwnerOnError?: boolean;
     skipSync?: boolean;
+    printConfig?: boolean;
+    deployGlobalCommands?: boolean;
 }
 
 export function parseCommandLineArgs(): CommandLineOptions {
@@ -28,6 +31,7 @@ export function parseCommandLineArgs(): CommandLineOptions {
         "always-dm": dmOwnerOnError,
         "skip-sync": skipSync,
         port,
+        "deploy-global-commands": deployGlobalCommands,
     } = commandLineArgs(COMMANDLINE_OPTION_DEFINITIONS);
 
     return {
@@ -37,5 +41,6 @@ export function parseCommandLineArgs(): CommandLineOptions {
         port,
         dmOwnerOnError,
         skipSync,
+        deployGlobalCommands,
     };
 }
