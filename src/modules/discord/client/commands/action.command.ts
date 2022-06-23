@@ -78,9 +78,10 @@ function addShared(
                 .setDescription("Remove an action.")
                 .addStringOption(id =>
                     id
-                        .setName("action-id")
-                        .setDescription("The ID of the action to be deleted.")
-                        .setRequired(true),
+                        .setName("action")
+                        .setDescription("The ID of the action to remove.")
+                        .setRequired(true)
+                        .setAutocomplete(true),
                 ),
         )
         .addSubcommand(lock =>
@@ -164,20 +165,20 @@ function addShared(
 export class ActionCommand implements ISlashCommand {
     private readonly logger = new Logger(ActionCommand.name);
 
+    private readonly actionMethods: {[key: string]: (interaction: CommandInteraction) => any | Promise<any>} = {};
+
     constructor(
         @InjectRepository(Action)
         private readonly actionRepo: Repository<Action>,
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
-    ) {}
-
-    private readonly actionMethods = {
-        lock: this.handleLock,
-        rename: this.handleRename,
-        echo: this.handleEcho,
-        notify: this.handleNotify,
-        remove: this.handleRemove,
-    };
+    ) {
+        this.actionMethods.lock = (interaction: CommandInteraction) => this.handleLock(interaction);
+        this.actionMethods.rename = (interaction: CommandInteraction) => this.handleRename(interaction);
+        this.actionMethods.echo = (interaction: CommandInteraction) => this.handleEcho(interaction);
+        this.actionMethods.notify = (interaction: CommandInteraction) => this.handleNotify(interaction);
+        this.actionMethods.remove = (interaction: CommandInteraction) => this.handleRemove(interaction);
+    }
 
     async execute(interaction: CommandInteraction) {
         if (!interaction.memberPermissions.any(["MANAGE_GUILD"], true))
@@ -309,8 +310,8 @@ export class ActionCommand implements ISlashCommand {
     }
 
     async handleRemove(interaction: CommandInteraction) {
-        const id = interaction.options.getString("action-id");
-        const action = await this.actionRepo.find({
+        const id = interaction.options.getString("action", true).trim();
+        const action = await this.actionRepo.findOne({
             where: { id, guildId: interaction.guildId },
         });
         if (!action)
@@ -323,19 +324,33 @@ export class ActionCommand implements ISlashCommand {
                 ],
             });
 
-        await this.actionRepo.remove(action);
+        const result = await this.actionRepo.remove(action);
+
         interaction.reply({
             embeds: [
                 new MessageEmbed()
                     .setTitle("Removed Action")
-                    .setDescription(`Removed action with ID ${id}.`),
+                    .setDescription(`Removed action with ID ${result.id}.`)
+                    .addFields(result.toEmbedField()),
             ],
         });
     }
 
+    @Autocomplete("action")
+    private async getActionsWithMatchingIds(interaction: AutocompleteInteraction): Promise<AutocompleteReturn> {
+        const value = interaction.options.getFocused() as string;
+        
+        const actions = await this.actionRepo.find({where: {guildId: interaction.guildId}});
+
+        const actionToLabel = (action: Action) => `${action.id} - ${action.type} (${action.channelId}, ${action.platform})`;
+
+        return actions.filter(action => {
+            return action.id.toLowerCase().includes(value.toLowerCase()) || value.includes(action.type) || action.channelId.toLowerCase().includes(value.toLowerCase()) || action.platform.toLowerCase().includes(value.toLowerCase());
+        }).map(action => ({name: actionToLabel(action), value: action.id}));
+    }
+
     @Autocomplete("channel")
     private async getChannel(
-        current: string,
         interaction: AutocompleteInteraction,
     ): Promise<AutocompleteReturn> {
         return DiscordUtil.handleChannelAutocomplete(

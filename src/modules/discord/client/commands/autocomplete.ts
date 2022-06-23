@@ -30,7 +30,7 @@ export const handleAutocomplete = async (
         | Map<string, string>
         | undefined;
 
-    const { name, value } = options.getFocused(true);
+    const { name } = options.getFocused(true);
     if (!autocompletes)
         throw new Error(`Could not find autocompletes for ${name}.`);
 
@@ -39,10 +39,8 @@ export const handleAutocomplete = async (
         throw new Error(
             `Error handling autocomplete: Could not find key for option ${name} in instance.`,
         );
-    const response: AutocompleteReturn = await instance[key]?.(
-        value,
-        interaction,
-    );
+
+    const response: AutocompleteReturn = await Reflect.apply(instance[key], instance, [interaction]);
     if (!response)
         throw new Error(
             `Error handling autocomplete ${name}: Got no response object.`,
