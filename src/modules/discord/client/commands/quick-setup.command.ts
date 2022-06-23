@@ -562,7 +562,6 @@ export class QuickSetupCommand implements ISlashCommand {
 
     @Autocomplete("channel")
     private async getChannel(
-        current: string,
         interaction: AutocompleteInteraction,
     ): Promise<AutocompleteReturn> {
         return DiscordUtil.handleChannelAutocomplete(
