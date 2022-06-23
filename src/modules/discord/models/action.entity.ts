@@ -34,7 +34,7 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
 export class Action {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
-            name: `${this.id} - ${firstUpperCase(this.type)}`,
+            name: `${this.id} | On: ${firstUpperCase(this.onEvent)} - ${firstUpperCase(this.type)}`,
             value: `${this.platform} (${this.channelId})\n**Channel**: <#${
                 this.discordThreadId ?? this.discordChannelId
             }> \n ${this.data ? descriptify(this.data) : ""}`,
