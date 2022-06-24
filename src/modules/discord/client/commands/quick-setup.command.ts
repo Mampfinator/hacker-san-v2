@@ -15,6 +15,7 @@ import {
     MessageSelectOptionData,
     SelectMenuInteraction,
     GuildBasedChannel,
+    GuildTextBasedChannel,
 } from "discord.js";
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
@@ -90,9 +91,14 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
                         .setName("name")
                         .setDescription("This channel's base name.")
                         .setRequired(true),
-                ),
-        ),
-})
+                )
+                .addChannelOption(forChannel =>
+                    forChannel
+                    .setName("for-channel")
+                    .setDescription("The channel to rename.")
+                )
+            ),
+    })
 export class QuickSetupCommand implements ISlashCommand {
     private readonly logger = new Logger(QuickSetupCommand.name);
 
@@ -146,6 +152,8 @@ export class QuickSetupCommand implements ISlashCommand {
         const { options, channel } = interaction;
 
         const { channelId, platform } = this.getOptions(interaction);
+        const discordChannel = interaction.options.getChannel("for-channel", false) as GuildTextBasedChannel;
+
         const name = interaction.options.getString("name");
 
         const {
@@ -164,7 +172,7 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         const { discordChannelId, discordThreadId } =
-            DiscordUtil.getChannelIds(channel);
+            DiscordUtil.getChannelIds(discordChannel ?? channel);
 
         const savedActions = await this.actionsRepo.save([
             this.actionsRepo.create({
