@@ -158,7 +158,7 @@ export class DiscordClientService extends Client {
         if (message.author.id == this.user.id) return;
 
         const postIdRegex =
-            /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community?lb=)Ug[A-z0-9_\-]+/g;
+            /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community\?lb=)Ug[A-z0-9_\-]+/g;
 
         const { content } = message;
         const ids = postIdRegex.exec(content);
