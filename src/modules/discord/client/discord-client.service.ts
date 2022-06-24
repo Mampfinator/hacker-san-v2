@@ -153,6 +153,7 @@ export class DiscordClientService extends Client {
         handleAutocomplete(interaction, command);
     }
 
+    // FIXME: multipage doesn't work. The regexp only finds the first post.
     @On("messageCreate")
     async detectCommunityPostLink(message: Message) {
         if (message.author.id == this.user.id) return;
@@ -160,9 +161,13 @@ export class DiscordClientService extends Client {
         const postIdRegex =
             /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community\?lb=)Ug[A-z0-9_\-]+/g;
 
+        
+
         const { content } = message;
-        const ids = postIdRegex.exec(content);
+        const ids = [...content.matchAll(postIdRegex)].flat();
         if (!ids || ids.length == 0) return;
+
+        this.logger.debug(`Found community post IDs: ${ids}.`);
 
         const embeds: MessageEmbed[] = [];
         for (const id of ids) {
@@ -182,7 +187,7 @@ export class DiscordClientService extends Client {
                 allowedMentions: { repliedUser: false },
             });
         } else {
-            const reply = new MultipageMessage(message.channel as any);
+            const reply = new MultipageMessage({channel: message.channel as any});
 
             for (const embed of embeds) {
                 reply.addPage({embeds: [embed]});
@@ -203,10 +208,8 @@ export class DiscordClientService extends Client {
             channels += response.channels.length;
         }
 
-        /*this.user.setActivity({
-            type: "WATCHING",
-            name: `${channels} channels in ${this.guilds.cache.size} servers.`
-        });*/
+        await this.guilds.fetch();
+
         const guilds = this.guilds.cache.size;
 
         this.user.setPresence({
@@ -224,7 +227,7 @@ export class DiscordClientService extends Client {
                     type: "WATCHING",
                 },
             ],
-            status: "dnd",
+            status: "online",
         });
     }
 }
