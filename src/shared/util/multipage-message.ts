@@ -1,13 +1,16 @@
 import {
+    CacheType,
     CommandInteraction,
     InteractionCollector,
     Message,
     MessageActionRow,
     MessageButton,
+    MessageComponentCollectorOptions,
     MessageComponentInteraction,
     MessageEditOptions,
     MessageEmbed,
     MessageOptions,
+    ReplyMessageOptions,
     TextBasedChannel,
 } from "discord.js";
 
@@ -18,29 +21,38 @@ export class MultipageMessage {
     private readonly pages: MessageOptions[] = [];
     private index = 0;
     private message?: Message;
-    private collector?: InteractionCollector<MessageComponentInteraction>; // probably fine to just remove?
+    //private collector?: InteractionCollector<MessageComponentInteraction>; // probably fine to just remove?
 
     private readonly channel?: TextBasedChannel;
     private readonly interaction?: CommandInteraction<any>;
 
+    private readonly componentCollectorOptions: MessageComponentCollectorOptions<MessageComponentInteraction>;
+
     constructor(options: {
         channel?: TextBasedChannel;
         interaction?: CommandInteraction<any>;
+        collectorOptions?: MessageComponentCollectorOptions<MessageComponentInteraction>;
     }) {
         this.channel = options.channel;
         this.interaction = options.interaction;
+        if (!this.channel && !this.interaction) throw new Error("No channel or interaction provided");
+        
+        this.componentCollectorOptions = options.collectorOptions ?? {};
     }
 
     public addPage(message: MessageOptions): number {
         return this.pages.push(message);
     }
 
-    public async send() {
+    public async send(options?: {asReply?: boolean; message?: Message, replyOptions?: ReplyMessageOptions }) {
         // scuff, but works
         const page = this.setupMessage(this.pages[this.index]) as any;
 
         let message: Message;
         switch (true) {
+            case options.asReply:
+                message = await options.message.reply({...page, ...options.replyOptions});
+                break;
             case this.channel !== undefined:
                 message = await this.channel.send(page);
                 break;
@@ -54,8 +66,8 @@ export class MultipageMessage {
                 });
         }
 
-        const collector = (this.collector =
-            message.createMessageComponentCollector());
+        const collector =
+            message.createMessageComponentCollector(this.componentCollectorOptions);
         collector.on("collect", async interaction => {
             await this.handleCollect(interaction.customId as ComponentId);
             interaction.reply({

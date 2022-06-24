@@ -25,6 +25,7 @@ import { SUPPORTED_PLATFORMS } from "src/constants";
 import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
 import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 import { Util } from "src/util";
+import { MultipageMessage } from "src/shared/util/multipage-message";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -154,6 +155,8 @@ export class DiscordClientService extends Client {
 
     @On("messageCreate")
     async detectCommunityPostLink(message: Message) {
+        if (message.author.id == this.user.id) return;
+
         const postIdRegex =
             /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community?lb=)Ug[A-z0-9_\-]+/g;
 
@@ -173,15 +176,19 @@ export class DiscordClientService extends Client {
             embeds.push(embed);
         }
 
-        if (embeds.length > 0) {
+        if (embeds.length == 1) {
             await message.reply({
                 embeds,
                 allowedMentions: { repliedUser: false },
             });
         } else {
-            this.logger.error(
-                `Found IDs but did not manage to generate embeds.`,
-            );
+            const reply = new MultipageMessage(message.channel as any);
+
+            for (const embed of embeds) {
+                reply.addPage({embeds: [embed]});
+            }
+
+            await reply.send({asReply: true, message, replyOptions: {allowedMentions: { repliedUser: false }}});
         }
     }
 
