@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import { YouTubeConfig } from "src/modules/config/config";
-import { YOUTUBE_EVENTSUB_HUB_URL } from "./constants";
+import { YOUTUBE_EVENTSUB_HUB_URL, YOUTUBE_EVENTSUB_TOPIC_BASE } from "./constants";
 
 @Injectable()
 export class YouTubeEventSubService {
@@ -28,7 +28,7 @@ export class YouTubeEventSubService {
         mode: "subscribe" | "unsubscribe",
         channelId: string,
     ) {
-        const topic = `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`;
+        const topic = `${YOUTUBE_EVENTSUB_TOPIC_BASE}?channel_id=${channelId}`;
         const callbackUrl = `${this.configService.getOrThrow(
             "URL",
         )}/youtube/eventsub`;

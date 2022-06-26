@@ -1,7 +1,7 @@
 import { MessageEmbed } from "discord.js";
 import { ICommand } from "@nestjs/cqrs";
 
-import { Platform } from "../models/action.entity";
+import { Platform } from "src/constants";
 
 export interface TriggerActionsCommandOptions {
     platform: Platform;

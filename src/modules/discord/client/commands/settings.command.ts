@@ -35,17 +35,7 @@ import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-chan
                             "The Discord channel for which to retrieve actions.",
                         ),
                 )
-                .addStringOption(platform =>
-                    platform
-                        .setName("platform")
-                        .setDescription(
-                            "The platform for which to retrieve actions.",
-                        )
-                        .setChoices(
-                            { name: "YouTube", value: "youtube" },
-                            { name: "Twitter", value: "twitter" },
-                        ),
-                )
+                .addStringOption(DiscordUtil.makePlatformOption)
                 .addStringOption(channel =>
                     channel
                         .setName("channel")

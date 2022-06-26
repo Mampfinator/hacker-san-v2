@@ -1,12 +1,13 @@
 import "./polyfill";
 
 import { ConfigService } from "@nestjs/config";
-import { NestFactory } from "@nestjs/core";
+import { HttpAdapterHost, NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { Logger } from "@nestjs/common";
+import { HttpException, Logger } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { DiscordClientService } from "./modules/discord/client/discord-client.service";
 import { GlobalExceptionFilter } from "./global-exception.filter";
+import { DiscordAPIError } from "discord.js";
 
 let exceptionFilter: GlobalExceptionFilter;
 
@@ -16,7 +17,17 @@ let exceptionFilter: GlobalExceptionFilter;
     const config = app.get(ConfigService);
     const discordClientService = app.get(DiscordClientService);
 
-    exceptionFilter = new GlobalExceptionFilter(discordClientService, config);
+    const {httpAdapter} = app.get(HttpAdapterHost);
+
+    exceptionFilter = new GlobalExceptionFilter(
+        httpAdapter, 
+        discordClientService, 
+        config
+    ).ignore(
+        exception => exception instanceof HttpException,
+        exception => exception instanceof DiscordAPIError
+    );
+
     app.useGlobalFilters(exceptionFilter);
 
     const logger = new Logger("Bootstrap");
@@ -32,13 +43,12 @@ let exceptionFilter: GlobalExceptionFilter;
     appService.triggerListen();
 })();
 
+
 // Yes, I'm going to assume resuming the application is fine.
 // No, I don't really care if this is "best practice" or not. :)
 process.on("uncaughtException", error => {
-    console.log(`Got uncaught exception: ${error.toString?.() ?? error}`);
     exceptionFilter.catch(error, null);
 });
 process.on("unhandledRejection", reason => {
-    console.log(`Got unhandled rejection: ${reason}`);
     exceptionFilter.catch(reason, null);
 });

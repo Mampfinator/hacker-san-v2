@@ -21,7 +21,6 @@ export class MultipageMessage {
     private readonly pages: MessageOptions[] = [];
     private index = 0;
     private message?: Message;
-    //private collector?: InteractionCollector<MessageComponentInteraction>; // probably fine to just remove?
 
     private readonly channel?: TextBasedChannel;
     private readonly interaction?: CommandInteraction<any>;

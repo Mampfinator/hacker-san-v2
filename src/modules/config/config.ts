@@ -72,7 +72,8 @@ export default () => {
     const URL = `http${tomlOptions.app.https ?? true ? "s" : ""}://${
         tomlOptions.app.domain
     }${tomlOptions.app.includePortInUrl ? `:${PORT}` : ""}`;
-    return {
+
+    const finalConfig = {
         YOUTUBE,
         TWITTER,
         DISCORD,
@@ -80,5 +81,9 @@ export default () => {
         DATABASE_URL,
         URL,
         SKIP_SYNC: claConfig.skipSync ?? false,
-    };
+    }
+
+    if (claConfig.printConfig) console.log(finalConfig);
+
+    return finalConfig;
 };

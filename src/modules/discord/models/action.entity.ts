@@ -1,20 +1,17 @@
 import { EmbedField } from "discord.js";
+import { Util } from "src/util";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { getActions } from "../actions/action";
 export type Platform = "youtube" | "twitter";
 export type Event = "live" | "upload" | "offline" | "upcoming";
 
 const actionEnum: string[] = getActions().map(action => action.prototype.type);
-const firstUpperCase = (value: string): string => {
-    const [first, ...rest] = Array.from(value);
-    return `${first.toUpperCase()}${rest.join("")}`;
-};
 
 const descriptify = (input: Record<string, string>, joiner = "\n"): string => {
     let output = "";
 
     for (const [key, value] of Object.entries(input)) {
-        output += `**${firstUpperCase(key)}**: ${value ?? "`None`"}${joiner}`;
+        output += `**${Util.firstUpperCase(key)}**: ${value ?? "`None`"}${joiner}`;
     }
 
     return output;
@@ -34,7 +31,7 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
 export class Action {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
-            name: `${this.id} | On: ${firstUpperCase(this.onEvent)} - ${firstUpperCase(this.type)}`,
+            name: `${this.id} | On: ${Util.firstUpperCase(this.onEvent)} - ${Util.firstUpperCase(this.type)}`,
             value: `${this.platform} (${this.channelId})\n**Channel**: <#${
                 this.discordThreadId ?? this.discordChannelId
             }> \n ${this.data ? descriptify(this.data) : ""}`,

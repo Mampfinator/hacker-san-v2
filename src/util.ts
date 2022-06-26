@@ -22,4 +22,9 @@ export namespace Util {
     ) {
         return amount == 1 ? singular : plural;
     }
+
+    export function firstUpperCase(value: string): string {
+        const [first, ...rest] = Array.from(value);
+        return `${first.toUpperCase()}${rest.join("")}`;
+    };
 }

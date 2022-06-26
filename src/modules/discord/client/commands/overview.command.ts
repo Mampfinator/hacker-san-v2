@@ -7,7 +7,7 @@ import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.hand
 import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
 import { MultipageMessage } from "src/shared/util/multipage-message";
 import { Repository } from "typeorm";
-import { Platform } from "../../models/action.entity";
+import { Platform } from "src/constants";
 import { GuildSettings } from "../../models/settings.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 

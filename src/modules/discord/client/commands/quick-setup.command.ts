@@ -20,7 +20,8 @@ import {
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
 import { Repository } from "typeorm";
-import { Action, Platform } from "../../models/action.entity";
+import { Action } from "../../models/action.entity";
+import { Platform } from "src/constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";

@@ -14,10 +14,12 @@ import {
 } from "discord.js";
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { Repository } from "typeorm";
-import { Action, Platform } from "../../models/action.entity";
+import { Action } from "../../models/action.entity";
+import { PALTFORM_NAME_LOOKUP, Platform } from "src/constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
+import { Util } from "src/util";
 
 function addShared(
     builder: SlashCommandSubcommandBuilder,
@@ -26,15 +28,15 @@ function addShared(
     ) => SlashCommandSubcommandBuilder,
 ): SlashCommandSubcommandBuilder {
     return before(builder)
-        .addStringOption(platform =>
-            platform
+        .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true)
+            /*platform
                 .setName("platform")
                 .setDescription("The platform to listen for.")
                 .setChoices(
                     { name: "YouTube", value: "youtube" },
                     { name: "Twitter", value: "twitter" },
                 )
-                .setRequired(true),
+                .setRequired(true),*/
         )
         .addStringOption(event =>
             event
@@ -356,7 +358,7 @@ export class ActionCommand implements ISlashCommand {
         });
 
         const actionToLabel = (action: Action) =>
-            `${action.id} - ${action.type} (${action.channelId}, ${action.platform})`;
+            `${action.id} - ${Util.firstUpperCase(action.type)} (${action.channelId}, ${PALTFORM_NAME_LOOKUP[action.platform]})`;
 
         return actions
             .filter(action => {

@@ -12,8 +12,7 @@ import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
 import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
-import { DISCORD_EVENT_NAMES } from "./discord-client-constants";
-import { handleEvent, On } from "./on-event";
+import { getEvents, handleEvent, On } from "./on-event";
 import { InjectCommands } from "./commands/slash-commands.provider";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { FetchPostCommand } from "src/modules/youtube/community-posts/commands/fetch-post.command";
@@ -51,13 +50,19 @@ export class DiscordClientService extends Client {
     }
 
     public async login(token?: string): Promise<string> {
-        for (const event of DISCORD_EVENT_NAMES)
+        const events = [...getEvents(this).keys()];
+        this.logger.debug(`Registering event handler for @On marked events: ${events.join(", ")}`);
+
+        for (const event of events) {
             this.on(event, (...args) => this.handleEvent(event, ...args));
+        }
+
         this.logger.debug(
             `Found ${this.commands.size} commands: ${[
                 ...this.commands.keys(),
-            ]}.`,
+            ].join(", ")}.`,
         );
+
         const ret = await super.login(token);
         await this.refreshPresence();
         return ret;

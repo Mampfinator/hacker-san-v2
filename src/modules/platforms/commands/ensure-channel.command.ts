@@ -1,5 +1,5 @@
 import { ICommand } from "@nestjs/cqrs";
-import { Platform } from "src/modules/discord/models/action.entity";
+import { Platform } from "src/constants";
 import { IEnsureChannelCommand } from "./ensure-channel.handler";
 
 export class EnsureChannelCommand implements ICommand, IEnsureChannelCommand {

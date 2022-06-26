@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ActionType, IActionType } from "../action";
 
-@Injectable()
+//@Injectable()
 @ActionType("lock")
 export class LockAction implements IActionType {
     private readonly emojis = {

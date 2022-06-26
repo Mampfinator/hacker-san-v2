@@ -1,5 +1,5 @@
 import { IQuery } from "@nestjs/cqrs";
-import { Platform } from "src/modules/discord/models/action.entity";
+import { Platform } from "src/constants";
 
 export class ChannelsQuery implements IQuery {
     constructor(public readonly platform: Platform) {}

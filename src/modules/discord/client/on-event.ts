@@ -1,5 +1,5 @@
 const eventStorageKey = Symbol("EVENTS");
-const getEvents = (target: object) => {
+export const getEvents = (target: object) => {
     if (!Reflect.hasMetadata(eventStorageKey, target)) {
         Reflect.defineMetadata(eventStorageKey, new Map(), target);
     }

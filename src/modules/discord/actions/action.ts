@@ -1,3 +1,4 @@
+import { Inject, Injectable } from "@nestjs/common";
 import { Client, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
 import { TriggerActionsCommand } from "../commands/trigger-actions.command";
 import { Action } from "../models/action.entity";
@@ -30,6 +31,7 @@ export const ActionType = (type: string) => {
             configurable: false,
             get: () => type,
         });
+        Injectable()(target); // is there maybe a better way to do this?
 
         actions.push(target);
     };

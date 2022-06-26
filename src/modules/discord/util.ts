@@ -6,7 +6,8 @@ import {
     TextChannel,
     ThreadChannel,
 } from "discord.js";
-import { Action, Platform } from "./models/action.entity";
+import { Action } from "./models/action.entity";
+import { PALTFORM_NAME_LOOKUP, Platform, SUPPORTED_PLATFORMS } from "src/constants";
 import {
     AttachmentType,
     ChannelInfo,
@@ -131,13 +132,13 @@ export namespace DiscordUtil {
         builder: SlashCommandStringOption,
         description?: string,
     ) {
+
+        const choices = SUPPORTED_PLATFORMS.map(platform => ({ name: PALTFORM_NAME_LOOKUP[platform], value: platform }));
+
         return builder
             .setName("platform")
             .setDescription(description ?? "The platform.")
-            .setChoices(
-                { name: "YouTube", value: "youtube" },
-                { name: "Twitter", value: "twitter" },
-            );
+            .setChoices(...choices);
     }
 
     export async function handleChannelAutocomplete(

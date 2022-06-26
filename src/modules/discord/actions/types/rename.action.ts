@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ActionType, IActionType } from "../action";
 
-@Injectable()
+//@Injectable()
 @ActionType("rename")
 export class RenameAction implements IActionType {
     async execute({ data, channel }) {
