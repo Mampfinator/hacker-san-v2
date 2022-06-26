@@ -8,6 +8,7 @@ import { CommandBus } from "@nestjs/cqrs";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
 import { tryFetchPosts } from "../util";
 import { DiscordUtil } from "src/modules/discord/util";
+import { CacheChannelInfoCommand } from "../commands/cache-channel-info.command";
 
 @Injectable()
 export class YouTubeCommunityPostsService {
@@ -34,11 +35,33 @@ export class YouTubeCommunityPostsService {
 
         if (!channel) return;
 
-        const { posts, channel: channelInfo } = await tryFetchPosts(
+        let channelInfo: {id: string, name: string, avatarUrl: string};
+
+        let { posts, channel: fullChannelInfo } = await tryFetchPosts(
             channel.channelId,
             3,
             500,
         );
+
+        if (!fullChannelInfo) {
+            this.logger.debug(`Failed getting channel info from ${channel.channelId}.`);
+            const cachedChannel = await this.channelRepo.findOne({where: {channelId: channel.channelId}});
+
+            channelInfo = {
+                id: cachedChannel.channelId,
+                name: cachedChannel.channelName,
+                avatarUrl: cachedChannel.avatarUrl,
+            };
+        } else {
+            channelInfo = {
+                id: fullChannelInfo.id,
+                name: fullChannelInfo.name,
+                avatarUrl: fullChannelInfo.avatarUrl,
+            };
+
+            await this.commandBus.execute(new CacheChannelInfoCommand(fullChannelInfo));
+        }
+
         if (typeof posts === "undefined")
             return this.logger.warn(
                 `Failed getting community posts for ${channel.channelId}`,

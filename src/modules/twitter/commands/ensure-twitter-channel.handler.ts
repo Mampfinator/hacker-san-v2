@@ -60,6 +60,8 @@ export class EnsureTwitterChannelHandler
                     name: username,
                 });
 
+                // TODO: sync space status
+
                 return { success: true, channelId: id, name: username };
             }
 

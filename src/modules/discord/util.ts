@@ -32,7 +32,7 @@ export namespace DiscordUtil {
 
     export function postToEmbed(
         post: CommunityPost,
-        channelInfo: ChannelInfo,
+        channelInfo: Partial<ChannelInfo>,
     ): MessageEmbed {
         const { content, attachmentType, id: postId } = post;
 

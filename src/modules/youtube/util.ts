@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+    ChannelInfo,
     extractChannelInfo,
     extractCommunityPosts,
 } from "yt-scraping-utilities";
@@ -29,8 +30,13 @@ export const tryFetchPosts = async (
     }
 
     if (data) {
-        const channel = extractChannelInfo(data);
-        const posts = extractCommunityPosts(data);
+        const posts = extractCommunityPosts(data); // if these aren't present, we definitely throw.
+        
+        let channel: ChannelInfo;
+
+        try {
+            channel = extractChannelInfo(data);
+        } catch {}
 
         return { channel, posts };
     }

@@ -71,10 +71,4 @@ export class AppModule implements NestModule {
             .apply(JsonBodyMiddleware)
             .forRoutes("*");
     }
-
-    public onModuleInit() {
-        setTimeout(() => {
-            throw new HttpException("Test", 404);
-        }, 10000);
-    }
 }

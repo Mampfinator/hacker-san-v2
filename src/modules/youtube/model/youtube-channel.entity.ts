@@ -7,4 +7,7 @@ export class YouTubeChannel {
 
     @Column({ nullable: true })
     channelName?: string;
+
+    @Column({ nullable: true })
+    avatarUrl?: string;
 }
