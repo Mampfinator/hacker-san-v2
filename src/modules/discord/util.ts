@@ -1,13 +1,14 @@
 import {
     AutocompleteInteraction,
     Channel,
+    DiscordAPIError,
     MessageEmbed,
     NonThreadGuildBasedChannel,
     TextChannel,
     ThreadChannel,
 } from "discord.js";
 import { Action } from "./models/action.entity";
-import { PALTFORM_NAME_LOOKUP, Platform, SUPPORTED_PLATFORMS } from "src/constants";
+import { PLATFORM_NAME_LOOKUP, Platform, SUPPORTED_PLATFORMS, EVENT_NAME_LOOKUP } from "src/constants";
 import {
     AttachmentType,
     ChannelInfo,
@@ -21,6 +22,12 @@ import { SlashCommandStringOption } from "@discordjs/builders";
 import { QueryBus } from "@nestjs/cqrs";
 import { ChannelsQuery } from "../platforms/queries/channels.query";
 import { ChannelsQueryResult } from "../platforms/queries/channels.handler";
+import { getActions } from "./actions/action";
+import { Util } from "src/util";
+import { Logger } from "@nestjs/common";
+import { DiscordRESTService } from "./discord-rest.service";
+import { Routes } from "discord-api-types/v10";
+import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
 
 export namespace DiscordUtil {
     export function postsToEmbed(data?: ytInitialData): MessageEmbed[] {
@@ -103,12 +110,35 @@ export namespace DiscordUtil {
         action: Action,
         client: DiscordClientService,
     ): Promise<NonThreadGuildBasedChannel | ThreadChannel> {
+        /*const guild = await client.guilds.fetch({guild: action.guildId, cache: false});
+        if (!guild) return;
+
+        const { discordChannelId: channelId }= action;
+        console.log(`Attempting to fetch channel with ID ${channelId}.`);
+        const channel = await guild.channels.fetch(channelId, {cache: false});
+        if (!channel) return;*/
+
         const channel = await client.channels.fetch(action.discordChannelId);
-        return action.discordThreadId
+        
+        const final = action.discordThreadId
             ? await (channel as TextChannel).threads.fetch(
                   action.discordThreadId,
               )
             : (channel as NonThreadGuildBasedChannel);
+
+        console.log(`Found channel ${final.name} (${channel.isThread() ? "thread" : "non-thread"}, ${final.id})`);
+        return final;
+    }
+
+
+    export async function fetchChannelOrThreadUncached(
+        action: Action,
+        rest: DiscordRESTService,
+    ) {
+        const channel = await rest.get(Routes.channel(action.discordChannelId)) as NonThreadGuildBasedChannel;
+        if (!action.discordThreadId) return channel;
+        const threads = await rest.get(Routes.threads(action.discordChannelId)) as ThreadChannel[];
+        return threads.find(thread => thread.id === action.discordThreadId);
     }
 
     export function getChannelIds(channel: Channel): {
@@ -133,11 +163,40 @@ export namespace DiscordUtil {
         description?: string,
     ) {
 
-        const choices = SUPPORTED_PLATFORMS.map(platform => ({ name: PALTFORM_NAME_LOOKUP[platform], value: platform }));
+        const choices = SUPPORTED_PLATFORMS.map(platform => ({ name: PLATFORM_NAME_LOOKUP[platform], value: platform }));
 
         return builder
             .setName("platform")
             .setDescription(description ?? "The platform.")
+            .setChoices(...choices);
+    }
+
+    export function makeEventOption(
+        builder: SlashCommandStringOption,
+        description?: string,
+    ) {
+            
+            const choices = Object.keys(EVENT_NAME_LOOKUP).map(event => ({ name: EVENT_NAME_LOOKUP[event], value: event }));
+    
+            return builder
+                .setName("event")
+                .setDescription(description ?? "The event.")
+                .setChoices(...choices);
+    }
+
+    export function makeActionTypeOption(
+        builder: SlashCommandStringOption,
+        description?: string,
+    ) {
+        const choices = getActions().map(action => {
+            const {type} = action.prototype;
+
+            return {value: type, name: Util.firstUpperCase(type)};
+        });
+
+        return builder
+            .setName("type")
+            .setDescription(description ?? "The action type.")
             .setChoices(...choices);
     }
 
@@ -166,4 +225,15 @@ export namespace DiscordUtil {
             .map(channel => ({ name: channel.name, value: channel.id }))
             .slice(0, 25); // limit to 25 results because Discord has a limit of 25 autocomplete suggestions.
     }
+}
+
+export function discordAPIError(error: any) {
+    if (error.prototype && (error instanceof DiscordAPIError || error instanceof DiscordAPIRESTError)) return true;
+}
+
+const ignoreLogger = new Logger("IgnoreLogger");
+
+export async function ignoreDiscordAPIErrors(error: any) {
+    await Util.ignore(error, discordAPIError);
+    ignoreLogger.warn(error);
 }

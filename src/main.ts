@@ -8,6 +8,7 @@ import { AppService } from "./app.service";
 import { DiscordClientService } from "./modules/discord/client/discord-client.service";
 import { GlobalExceptionFilter } from "./global-exception.filter";
 import { DiscordAPIError } from "discord.js";
+import { DiscordAPIError as DiscordAPIRESTError} from "@discordjs/rest";
 
 let exceptionFilter: GlobalExceptionFilter;
 
@@ -25,7 +26,8 @@ let exceptionFilter: GlobalExceptionFilter;
         config
     ).ignore(
         exception => exception instanceof HttpException,
-        exception => exception instanceof DiscordAPIError
+        exception => exception instanceof DiscordAPIError,
+        exception => exception instanceof DiscordAPIRESTError,
     );
 
     app.useGlobalFilters(exceptionFilter);

@@ -1,7 +1,5 @@
-import { Injectable } from "@nestjs/common";
 import { ActionType, IActionType } from "../action";
 
-//@Injectable()
 @ActionType("lock")
 export class LockAction implements IActionType {
     private readonly emojis = {
@@ -20,6 +18,7 @@ export class LockAction implements IActionType {
         await channel.permissionOverwrites.create(channel.guildId, {
             SEND_MESSAGES: permission,
         });
+        
         if (mode === "unlock" && message)
             await channel.send(this.makeMessage(mode, message));
     }

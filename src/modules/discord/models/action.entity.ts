@@ -1,4 +1,5 @@
 import { EmbedField } from "discord.js";
+import { PLATFORM_NAME_LOOKUP } from "src/constants";
 import { Util } from "src/util";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { getActions } from "../actions/action";
@@ -32,7 +33,7 @@ export class Action {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
             name: `${this.id} | On: ${Util.firstUpperCase(this.onEvent)} - ${Util.firstUpperCase(this.type)}`,
-            value: `${this.platform} (${this.channelId})\n**Channel**: <#${
+            value: `${PLATFORM_NAME_LOOKUP[this.platform]} (${this.channelId})\n**Channel**: <#${
                 this.discordThreadId ?? this.discordChannelId
             }> \n ${this.data ? descriptify(this.data) : ""}`,
             inline: inline ?? false,

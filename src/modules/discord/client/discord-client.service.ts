@@ -15,7 +15,7 @@ import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
 import { InjectCommands } from "./commands/slash-commands.provider";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { FetchPostCommand } from "src/modules/youtube/community-posts/commands/fetch-post.command";
+import { FetchPostsCommand } from "src/modules/youtube/community-posts/commands/fetch-post.command";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
@@ -111,6 +111,7 @@ export class DiscordClientService extends Client {
 
         for (const command of this.commands.values()) {
             const { commandData, forGuild } = getCommandMetadata(command);
+
             await this.application.commands.create(
                 commandData,
                 deployGlobalCommands
@@ -123,6 +124,9 @@ export class DiscordClientService extends Client {
             );
             this.logger.debug(`Created command for ${commandData.name}`);
         }
+
+
+        this.logger.log(`Signed in as ${this.user.tag} (${this.user.id}).`);
     }
 
     @On("interactionCreate")
@@ -158,7 +162,6 @@ export class DiscordClientService extends Client {
         handleAutocomplete(interaction, command);
     }
 
-    // FIXME: multipage doesn't work. The regexp only finds the first post.
     @On("messageCreate")
     async detectCommunityPostLink(message: Message) {
         if (message.author.id == this.user.id) return;
@@ -177,9 +180,9 @@ export class DiscordClientService extends Client {
         const embeds: MessageEmbed[] = [];
         for (const id of ids) {
             const { posts, channel } = await this.commandBus.execute<
-                FetchPostCommand,
+                FetchPostsCommand,
                 { posts: CommunityPost[]; channel: ChannelInfo }
-            >(new FetchPostCommand(id, { includeChannelInfo: true }));
+            >(new FetchPostsCommand({ postId: id, includeChannelInfo: true }));
             const embed = DiscordUtil.postToEmbed(posts[0], channel);
 
             this.logger.debug(`Generated embed for ${id}.`);

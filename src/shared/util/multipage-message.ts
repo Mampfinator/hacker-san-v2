@@ -49,9 +49,8 @@ export class MultipageMessage {
 
         let message: Message;
         switch (true) {
-            case options.asReply:
+            case options?.asReply:
                 message = await options.message.reply({...page, ...(options.replyOptions ?? {})});
-                console.log(message);
                 break;
             case this.channel !== undefined:
                 message = await this.channel.send(page);

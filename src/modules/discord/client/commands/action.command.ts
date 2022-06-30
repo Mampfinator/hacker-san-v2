@@ -15,7 +15,7 @@ import {
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { Repository } from "typeorm";
 import { Action } from "../../models/action.entity";
-import { PALTFORM_NAME_LOOKUP, Platform } from "src/constants";
+import { PLATFORM_NAME_LOOKUP, Platform } from "src/constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
@@ -28,16 +28,7 @@ function addShared(
     ) => SlashCommandSubcommandBuilder,
 ): SlashCommandSubcommandBuilder {
     return before(builder)
-        .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true)
-            /*platform
-                .setName("platform")
-                .setDescription("The platform to listen for.")
-                .setChoices(
-                    { name: "YouTube", value: "youtube" },
-                    { name: "Twitter", value: "twitter" },
-                )
-                .setRequired(true),*/
-        )
+        .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true))
         .addStringOption(event =>
             event
                 .setName("event")
@@ -190,6 +181,12 @@ export class ActionCommand implements ISlashCommand {
     }
 
     async execute(interaction: CommandInteraction) {
+        // Because Discord.js and/or Discord doesn't want to respect dm_permission: false, we have to check this here.
+        if (!interaction.guildId) {
+            interaction.reply("This command can only be used in a server.");
+            return;
+        }
+
         if (!interaction.memberPermissions.any(["MANAGE_GUILD"], true))
             return interaction.reply({
                 content: "You don't have the necessary permissions to do that.",
@@ -351,6 +348,7 @@ export class ActionCommand implements ISlashCommand {
     private async getActionsWithMatchingIds(
         interaction: AutocompleteInteraction,
     ): Promise<AutocompleteReturn> {
+        if (!interaction.guildId) interaction.respond([]);
         const value = interaction.options.getFocused() as string;
 
         const actions = await this.actionRepo.find({
@@ -358,7 +356,7 @@ export class ActionCommand implements ISlashCommand {
         });
 
         const actionToLabel = (action: Action) =>
-            `${action.id} - ${Util.firstUpperCase(action.type)} (${action.channelId}, ${PALTFORM_NAME_LOOKUP[action.platform]})`;
+            `${action.id} - ${Util.firstUpperCase(action.type)} (${action.channelId}, ${PLATFORM_NAME_LOOKUP[action.platform]})`;
 
         return actions
             .filter(action => {

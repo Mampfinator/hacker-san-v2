@@ -1,3 +1,8 @@
+const DEFAULT_TTL = 30000;
+const DEFAULT_SWEEP_INTERVAL = 60000;
+
+
+
 export interface CacheCollectionOptions {
     /**
      * How long to preserve cache entries for.
@@ -21,12 +26,13 @@ interface CacheEntry<T> {
     insertedAt: number;
 }
 
-type MapWithoutGet = new <K, V>(entries?: ReadonlyArray<readonly [K, V]>) => {
+// very hacky, but it works.
+type MapBase = new <K, V>(entries?: ReadonlyArray<readonly [K, V]>) => {
     [P in Exclude<keyof Map<K, V>, "get" | "set">]: Map<K, V>[P];
 };
 
-const MapWithoutGet: MapWithoutGet = Map;
-export class CacheCollection<TKey, TValue> extends MapWithoutGet<
+const MapBase: MapBase = Map;
+export class CacheCollection<TKey, TValue> extends MapBase<
     TKey,
     CacheEntry<TValue>
 > {
@@ -35,7 +41,7 @@ export class CacheCollection<TKey, TValue> extends MapWithoutGet<
     constructor(options?: CacheCollectionOptions) {
         super();
 
-        this.ttl = options?.ttl ?? 30000;
+        this.ttl = options?.ttl ?? DEFAULT_TTL;
 
         if (options?.autoSweep) {
             setInterval(() => this.sweep(), options?.sweepFrequency ?? 60000);

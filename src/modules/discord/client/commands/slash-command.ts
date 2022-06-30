@@ -1,7 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
+import { Class } from "src/constants";
 
-const commands: CommandClass[] = [];
+const commands: Class<ISlashCommand>[] = [];
 export const getCommands = () => [...commands];
 
 export interface SlashCommandOptions {
@@ -32,15 +33,11 @@ export interface SlashCommand extends ISlashCommand {
     [IS_RESTRICTED_KEY]: (guildId: string) => string | undefined;
 }
 
-interface CommandClass extends Function {
-    new (...args: any[]): ISlashCommand;
-}
-
 /**
  * Mark this class as a Slash Command. Needs to be imported somewhere to be accessible by `getCommands()` and consequently `@InjectCommands()`.
  */
 export const SlashCommand = (options: SlashCommandOptions) => {
-    return (target: CommandClass) => {
+    return (target: Class<ISlashCommand>) => {
         if (!options.commandData)
             throw new TypeError("Command data needs to be supplied.");
         if (!(typeof target.prototype.execute === "function"))

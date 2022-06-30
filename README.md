@@ -2,9 +2,17 @@
 The long-awaited and completely overdue improved notification bot for [PRISMCord](https://discord.gg/prismworld) - now with slash commands and 7% less jank.
 
 ## Features
+
+### Live Features
 - Live/Schedule/Upload/Offline notifications for YouTube & Twitter (with more planned!), along with community posts for YouTube
 - Customizable Action system 
 - An over-designed but at the very least working slash command loader.
+
+### Planned Features
+- Temporary Actions: schedule actions to happen one time and one time only; ideal for off-channel collabs.
+- More Platforms: support for more platforms (like Twitch   & Twitcasting)
+- Potentially a more user-friendly way of managing Actions. A frontend, mayhaps; or just a builder.
+- Mod-message relay (with per-guild defined ignore settings!) to a specified stream chat (~~totally not stolen from Luna bot~~)
 
 ## Self-hosting & Configuration
 Create your configuration in the project root: a `.env` file for API keys, tokens and the database URL, and a `config.toml` for the rest. 

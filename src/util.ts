@@ -27,4 +27,15 @@ export namespace Util {
         const [first, ...rest] = Array.from(value);
         return `${first.toUpperCase()}${rest.join("")}`;
     };
+
+
+    /**
+     * @param error The exception that was thrown.
+     * @param handlers The handlers. If any handler does not return true, the error will be rethrown.
+     */
+    export async function ignore(error, ...handlers: ((exception: any) => boolean | Promise<boolean>)[]) {
+        for (const handler of handlers) {
+            if (!(await handler(error))) throw error;
+        }
+    }
 }

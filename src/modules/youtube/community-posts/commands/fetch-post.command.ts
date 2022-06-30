@@ -3,17 +3,21 @@ import { ICommand } from "@nestjs/cqrs";
 export interface FetchPostCommandOptions {
     includeChannelInfo?: boolean;
     force?: boolean;
+    postId?: string;
+    channelId?: string;
 }
 
-export class FetchPostCommand implements ICommand {
+export class FetchPostsCommand implements ICommand {
     public readonly includeChannelInfo?: boolean;
     public readonly force?: boolean;
+    public readonly postId?: string;
+    public readonly channelId?: string;
 
     constructor(
-        public readonly postId: string,
         options: FetchPostCommandOptions = {},
     ) {
-        this.includeChannelInfo = options.includeChannelInfo;
-        this.force = options.force;
+        if (options.channelId && options.postId) throw new Error("Cannot specify both channelId and postId.");
+
+        Object.assign(this, options);
     }
 }

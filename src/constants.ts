@@ -1,6 +1,11 @@
+// only way to do this I could think of
+export interface Class<T> extends Function { 
+    new (...args: any[]): T;  
+}
+
 export type Platform = "youtube" | "twitter";
 export const SUPPORTED_PLATFORMS: Platform[] = ["youtube", "twitter"];
-export const PALTFORM_NAME_LOOKUP: {[Property in Platform]: string} = {
+export const PLATFORM_NAME_LOOKUP: {[Property in Platform]: string} = {
     youtube: "YouTube",
     twitter: "Twitter",
 };
@@ -14,4 +19,3 @@ export const EVENT_NAME_LOOKUP: {[Property in Event]: string} = {
     upcoming: "Upcoming",
     post: "Post",
 };
-

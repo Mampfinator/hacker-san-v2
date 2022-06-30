@@ -4,10 +4,18 @@ import { DiscordClientService } from "../client/discord-client.service";
 import { TriggerActionsCommand } from "./trigger-actions.command";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Action } from "../models/action.entity";
-import { Repository } from "typeorm";
+import { Repository, TreeRepository } from "typeorm";
 import { IActionType } from "../actions/action";
 import { InjectActions } from "../actions/actions-helper";
-import { DiscordUtil } from "../util";
+import { DiscordUtil, ignoreDiscordAPIErrors } from "../util";
+import { DiscordRESTService } from "../discord-rest.service";
+import { Channel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+
+class ChannelFetchHungError extends Error {
+    constructor() {
+        super("Channel fetch hung.");
+    }
+}
 
 @CommandHandler(TriggerActionsCommand)
 export class TriggerActionsHandler
@@ -17,6 +25,7 @@ export class TriggerActionsHandler
 
     constructor(
         private readonly client: DiscordClientService,
+        private readonly rest: DiscordRESTService,
         @InjectRepository(Action)
         private readonly actionsRepo: Repository<Action>,
         @InjectActions()
@@ -24,11 +33,9 @@ export class TriggerActionsHandler
     ) {}
 
     async execute(command: TriggerActionsCommand) {
-        this.logger.debug(
-            `Got TriggerActionsCommand for ${command.options.channelId} (${command.options.platform}, ${command.options.event})`,
-        );
-
         const { platform, event, channelId } = command.options;
+
+        
 
         const actions = await this.actionsRepo.find({
             where: {
@@ -38,9 +45,11 @@ export class TriggerActionsHandler
             },
         });
 
-        this.logger.debug(`Found ${actions.length} actions.`);
+        this.logger.debug(`Found ${actions.length} actions for ${channelId} (${platform}, ${event}).`);
 
         for (const action of actions) {
+            this.logger.debug(`Executing action ${action.id} (${action.type}).`);
+
             const actionType = this.actions.get(action.type);
             if (!actionType) {
                 this.logger.error(
@@ -49,16 +58,40 @@ export class TriggerActionsHandler
                 continue;
             }
 
-            const channel = await DiscordUtil.fetchChannelOrThread(
-                action,
-                this.client,
-            );
+            // fetching channels apparently sometimes has a chance to never return (or throw) when the channel doesn't exist.
+            const channel = await new Promise<ThreadChannel | NonThreadGuildBasedChannel>(async (res, rej) => {
+                let resolved = false;
+                setTimeout(() => {
+                    if (!resolved) rej(new ChannelFetchHungError());
+                }, 1000);
+                
+                const channel = await DiscordUtil.fetchChannelOrThread(action, this.client);
+                resolved = true;
+                res(channel);
+            }).catch(error => {
+                if (error instanceof ChannelFetchHungError) {
+                    return this.logger.warn(`Channel fetch hung for action ${action.id} (${action.type}).`);
+                }
 
-            await actionType.execute({
-                channel,
-                command,
-                data: action.data,
+                throw error;
             });
+
+            if (!channel) continue;
+
+            this.logger.debug(`Executing action in ${channel.id}.`);
+            
+            try {
+                await actionType.execute({
+                    channel,
+                    command,
+                    data: action.data,
+                });
+            } catch (error) {
+                this.logger.warn(error);
+                ignoreDiscordAPIErrors(error);
+            }
         }
+
+        this.logger.debug("Finished.");
     }
 }

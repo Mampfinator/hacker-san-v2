@@ -84,10 +84,6 @@ export class YouTubeCommunityPostsService {
                 id: post.id,
             });
 
-            this.logger.debug(
-                `Sending community TriggerActionsCommand for community post ${post.id}.`,
-            );
-
             const embed = DiscordUtil.postToEmbed(post, channelInfo);
 
             const event = new TriggerActionsCommand({

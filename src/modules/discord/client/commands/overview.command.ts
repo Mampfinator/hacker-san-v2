@@ -14,7 +14,8 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
 @SlashCommand({
     commandData: new SlashCommandBuilder()
         .setName("overview")
-        .setDescription("Get an overview of what's happening!"),
+        .setDescription("Get an overview of what's happening!")
+        .setDMPermission(false),
 })
 export class OverviewCommand implements ISlashCommand {
     constructor(
@@ -24,6 +25,11 @@ export class OverviewCommand implements ISlashCommand {
     ) {}
 
     async execute(interaction: CommandInteraction<CacheType>) {
+        if (!interaction.guildId) {
+            interaction.reply("This command can only be used in a server.");
+            return;
+        }
+        
         const channelsPromises: Promise<
             ChannelsQueryResult & { platform: Platform }
         >[] = [];

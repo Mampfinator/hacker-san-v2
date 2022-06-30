@@ -32,6 +32,7 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
         .setDescription(
             "Quick setup for default configuration. Creates multiple actions.",
         )
+        .setDMPermission(false)
         .addSubcommand(general =>
             general
                 .setName("general")
@@ -140,6 +141,11 @@ export class QuickSetupCommand implements ISlashCommand {
     }
 
     async execute(interaction: CommandInteraction<CacheType>) {
+        if (!interaction.guildId) {
+            interaction.reply("This command can only be used in a server.");
+            return;
+        }
+        
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === "general") {
@@ -218,7 +224,7 @@ export class QuickSetupCommand implements ISlashCommand {
         });
     }
 
-    async handleGeneral(interaction: CommandInteraction<CacheType>) {
+    async handleGeneral(interaction: CommandInteraction<CacheType>): Promise<any> {
         this.optionMap.set(interaction.id, {
             "convenience-options": new Set(),
             "notification-options": new Set(),

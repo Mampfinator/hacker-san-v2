@@ -11,6 +11,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { slashcommandFactory } from "./client/commands/slash-commands.provider";
 import { getActions } from "./actions/action";
 import { actionTypeFactory } from "./actions/actions-helper";
+import { DiscordRESTService } from "./discord-rest.service";
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { actionTypeFactory } from "./actions/actions-helper";
     ],
     providers: [
         DiscordService,
+        DiscordRESTService,
         DiscordClientService,
         slashcommandFactory,
         ...getCommands(),

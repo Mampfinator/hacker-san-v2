@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CommunityPost as CommunityPostEntity } from "../model/community-post.entity";
-import { FetchPostCommand } from "./fetch-post.command";
+import { FetchPostsCommand } from "./fetch-post.command";
 import {
     ChannelInfo,
     CommunityPost,
@@ -12,9 +12,8 @@ import {
 import axios from "axios";
 import { CacheCollection } from "src/shared/util/cache-collection";
 
-@CommandHandler(FetchPostCommand)
-export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
-    private readonly cache = new CacheCollection<string, string>();
+@CommandHandler(FetchPostsCommand)
+export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
 
     constructor(
         @InjectRepository(CommunityPostEntity)
@@ -22,16 +21,20 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
     ) {}
 
     async execute({
-        postId: id,
+        postId,
+        channelId,
         includeChannelInfo,
         force,
-    }: FetchPostCommand): Promise<
+    }: FetchPostsCommand): Promise<
         CommunityPost[] | { posts: CommunityPost[]; channel: ChannelInfo }
     > {
         let data: string;
 
-        if (!force && this.cache.has(id)) data = this.cache.get(id);
-        else data = (await axios.get(`https://youtube.com/post/${id}`)).data;
+        if (postId) {
+            data = await this.fetchPostPage(postId);
+        } else if (channelId) {
+            data = await this.fetchCommunityPage(channelId);
+        }
 
         const posts = extractCommunityPosts(data);
         const channel = includeChannelInfo
@@ -39,5 +42,15 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostCommand> {
             : undefined;
 
         return includeChannelInfo ? { posts, channel } : posts;
+    }
+
+    async fetchCommunityPage(channelId: string): Promise<string> {
+        const {data} = await axios.get(`https://youtube.com/channel/${channelId}/community`);
+        return data;
+    }
+
+    async fetchPostPage(postId: string): Promise<string> {
+        const {data} = await axios.get(`https://youtube.com/post/${postId}`);
+        return data;
     }
 }

@@ -1,5 +1,4 @@
 import {
-    HttpException,
     MiddlewareConsumer,
     Module,
     NestModule,
@@ -24,6 +23,9 @@ import { PlatformModule } from "./modules/platforms/platform.module";
 import { YouTubeModule } from "./modules/youtube/youtube.module";
 import { TwitterModule } from "./modules/twitter/twitter.module";
 import { CqrsModule } from "@nestjs/cqrs";
+
+// General todo: frontend for managing actions because trying to do that with slash commands will only get you so far.
+// Proper modals when Discord.
 
 @Module({
     imports: [

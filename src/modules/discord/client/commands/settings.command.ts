@@ -28,14 +28,9 @@ import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-chan
             actions
                 .setName("actions")
                 .setDescription("View configured actions for this guild.")
-                .addChannelOption(forChannel =>
-                    forChannel
-                        .setName("for-channel")
-                        .setDescription(
-                            "The Discord channel for which to retrieve actions.",
-                        ),
-                )
-                .addStringOption(DiscordUtil.makePlatformOption)
+                .addStringOption(platform => DiscordUtil.makePlatformOption(platform, "The platform for which to retrieve actions."))
+                .addStringOption(type => DiscordUtil.makeActionTypeOption(type, "The type of action to retrieve."))
+                .addStringOption(event => DiscordUtil.makeEventOption(event, "The event to retrieve actions for."))
                 .addStringOption(channel =>
                     channel
                         .setName("channel")
@@ -43,7 +38,14 @@ import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-chan
                             "The platform channel to retrieve actions for. Requires platform to be specified.",
                         )
                         .setAutocomplete(true),
-                ),
+                )
+                .addChannelOption(forChannel =>
+                    forChannel
+                        .setName("for-channel")
+                        .setDescription(
+                            "The Discord channel for which to retrieve actions.",
+                        ),
+                )
         )
         .addSubcommandGroup(channels =>
             channels
@@ -104,6 +106,13 @@ export class SettingsCommand implements ISlashCommand {
     ) {}
 
     async execute(interaction: CommandInteraction) {
+        if (!interaction.guildId) {
+            interaction.reply("This command can only be used in a server.");
+            return;
+        }
+        
+        
+        
         if (!interaction.memberPermissions.has("MANAGE_GUILD", true))
             return interaction.reply({
                 embeds: [
@@ -145,7 +154,10 @@ export class SettingsCommand implements ISlashCommand {
                 "for-channel",
                 false,
             ) as GuildBasedChannel,
-            platform = options.getString("platform", false) as Platform;
+            platform = options.getString("platform", false) as Platform,
+            type = options.getString("type", false),
+            event = options.getString("event", false);
+
 
         let channels = {};
         if (discordChannel) {
@@ -164,6 +176,8 @@ export class SettingsCommand implements ISlashCommand {
                 guildId,
                 channelId,
                 platform,
+                type,
+                onEvent: event,
                 ...channels,
             },
         });

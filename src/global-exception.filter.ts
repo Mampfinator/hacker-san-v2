@@ -77,7 +77,7 @@ export class GlobalExceptionFilter extends BaseExceptionFilter implements Except
                 } else {
                     for (let traceIndex = 0; traceIndex < traces.length; traceIndex++) {
                         embed.addField(
-                            `Stacktrace ${traceIndex + 1}`,
+                            `Stacktrace ${traceIndex + 1}/${traces.length}`,
                             codeBlock(traces[traceIndex]),
                         );
                     }

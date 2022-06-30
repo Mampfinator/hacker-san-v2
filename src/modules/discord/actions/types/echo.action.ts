@@ -1,8 +1,7 @@
-import { Injectable } from "@nestjs/common";
 import { ActionType, IActionType } from "../action";
 import { ActionUtil } from "../util";
 
-//@Injectable()
+
 @ActionType("echo")
 export class EchoAction implements IActionType {
     async execute({ data, channel, command }) {
