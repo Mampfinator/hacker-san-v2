@@ -7,9 +7,11 @@ import { DiscordConfig } from "./modules/config/config";
 import { DiscordClientService } from "./modules/discord/client/discord-client.service";
 import { codeBlock } from "@discordjs/builders";
 
-
 @Catch()
-export class GlobalExceptionFilter extends BaseExceptionFilter implements ExceptionFilter {
+export class GlobalExceptionFilter
+    extends BaseExceptionFilter
+    implements ExceptionFilter
+{
     private readonly logger = new Logger(GlobalExceptionFilter.name);
     private readonly sendDm: boolean;
     private readonly ownerId?: string;
@@ -33,14 +35,13 @@ export class GlobalExceptionFilter extends BaseExceptionFilter implements Except
         return this;
     }
 
-
     async catch(exception: any, host?: ArgumentsHost) {
         if (host) super.catch(exception, host);
         const ignore = this.ignoreChecks.some(check => check(exception));
         if (ignore) return;
 
         const errorText =
-        exception?.toString?.() ?? exception ?? "Unknown error.";
+            exception?.toString?.() ?? exception ?? "Unknown error.";
         this.logger.error(errorText);
 
         const sendDm = this.sendDm && !ignore;
@@ -63,7 +64,7 @@ export class GlobalExceptionFilter extends BaseExceptionFilter implements Except
                 for (const line of newLines) {
                     if (!traces[i]) traces[i] = "";
                     const trace = traces[i];
-                    
+
                     if (trace.length + line.length < 1017) {
                         traces[i] = trace + line + "\n";
                     } else {
@@ -75,7 +76,11 @@ export class GlobalExceptionFilter extends BaseExceptionFilter implements Except
                 if (traces.length == 1) {
                     embed.addField("Stacktrace", codeBlock(traces[0]));
                 } else {
-                    for (let traceIndex = 0; traceIndex < traces.length; traceIndex++) {
+                    for (
+                        let traceIndex = 0;
+                        traceIndex < traces.length;
+                        traceIndex++
+                    ) {
                         embed.addField(
                             `Stacktrace ${traceIndex + 1}/${traces.length}`,
                             codeBlock(traces[traceIndex]),

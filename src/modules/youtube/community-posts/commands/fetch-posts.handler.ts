@@ -14,7 +14,6 @@ import { CacheCollection } from "src/shared/util/cache-collection";
 
 @CommandHandler(FetchPostsCommand)
 export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
-
     constructor(
         @InjectRepository(CommunityPostEntity)
         private readonly postRepo: Repository<CommunityPostEntity>,
@@ -45,12 +44,14 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
     }
 
     async fetchCommunityPage(channelId: string): Promise<string> {
-        const {data} = await axios.get(`https://youtube.com/channel/${channelId}/community`);
+        const { data } = await axios.get(
+            `https://youtube.com/channel/${channelId}/community`,
+        );
         return data;
     }
 
     async fetchPostPage(postId: string): Promise<string> {
-        const {data} = await axios.get(`https://youtube.com/post/${postId}`);
+        const { data } = await axios.get(`https://youtube.com/post/${postId}`);
         return data;
     }
 }

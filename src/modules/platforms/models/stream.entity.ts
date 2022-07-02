@@ -7,7 +7,6 @@ export enum StreamStatus {
     Upcoming = "upcoming",
 }
 
-
 @Entity({ name: "stream" })
 export class StreamEntity {
     @PrimaryGeneratedColumn()

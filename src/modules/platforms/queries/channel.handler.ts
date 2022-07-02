@@ -7,24 +7,25 @@ import { ChannelQuery } from "./channel.query";
 @QueryHandler(ChannelQuery)
 export class ChannelQueryHandler implements IQueryHandler<ChannelQuery> {
     constructor(
-        @InjectRepository(ChannelEntity) private readonly channelRepository: Repository<ChannelEntity>
+        @InjectRepository(ChannelEntity)
+        private readonly channelRepository: Repository<ChannelEntity>,
     ) {}
-    
-    
-    async execute({options}: ChannelQuery): Promise<ChannelEntity | ChannelEntity[]> {
-        const {platform, platformId, query} = options;
-        let {one} = options;
+
+    async execute({
+        options,
+    }: ChannelQuery): Promise<ChannelEntity | ChannelEntity[]> {
+        const { platform, platformId, query } = options;
+        let { one } = options;
 
         let channelQuery: Record<string, any>;
-
 
         if (platform && platformId) {
             channelQuery = {
                 where: {
                     platform,
                     platformId,
-                }
-            }
+                },
+            };
 
             one = true;
         } else {

@@ -28,7 +28,9 @@ function addShared(
     ) => SlashCommandSubcommandBuilder,
 ): SlashCommandSubcommandBuilder {
     return before(builder)
-        .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true))
+        .addStringOption(platform =>
+            DiscordUtil.makePlatformOption(platform).setRequired(true),
+        )
         .addStringOption(event =>
             event
                 .setName("event")
@@ -356,7 +358,9 @@ export class ActionCommand implements ISlashCommand {
         });
 
         const actionToLabel = (action: Action) =>
-            `${action.id} - ${Util.firstUpperCase(action.type)} (${action.channelId}, ${PLATFORM_NAME_LOOKUP[action.platform]})`;
+            `${action.id} - ${Util.firstUpperCase(action.type)} (${
+                action.channelId
+            }, ${PLATFORM_NAME_LOOKUP[action.platform]})`;
 
         return actions
             .filter(action => {

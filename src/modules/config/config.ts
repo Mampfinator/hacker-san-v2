@@ -81,7 +81,7 @@ export default () => {
         DATABASE_URL,
         URL,
         SKIP_SYNC: claConfig.skipSync ?? false,
-    }
+    };
 
     if (claConfig.printConfig) console.log(finalConfig);
 

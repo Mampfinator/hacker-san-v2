@@ -1,8 +1,6 @@
 const DEFAULT_TTL = 30000;
 const DEFAULT_SWEEP_INTERVAL = 60000;
 
-
-
 export interface CacheCollectionOptions {
     /**
      * How long to preserve cache entries for.

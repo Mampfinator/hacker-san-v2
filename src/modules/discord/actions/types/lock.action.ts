@@ -18,7 +18,7 @@ export class LockAction implements IActionType {
         await channel.permissionOverwrites.create(channel.guildId, {
             SEND_MESSAGES: permission,
         });
-        
+
         if (mode === "unlock" && message)
             await channel.send(this.makeMessage(mode, message));
     }

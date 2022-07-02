@@ -51,7 +51,11 @@ export class DiscordClientService extends Client {
 
     public async login(token?: string): Promise<string> {
         const events = [...getEvents(this).keys()];
-        this.logger.debug(`Registering event handler for @On marked events: ${events.join(", ")}`);
+        this.logger.debug(
+            `Registering event handler for @On marked events: ${events.join(
+                ", ",
+            )}`,
+        );
 
         for (const event of events) {
             this.on(event, (...args) => this.handleEvent(event, ...args));
@@ -125,7 +129,6 @@ export class DiscordClientService extends Client {
             this.logger.debug(`Created command for ${commandData.name}`);
         }
 
-
         this.logger.log(`Signed in as ${this.user.tag} (${this.user.id}).`);
     }
 
@@ -169,8 +172,6 @@ export class DiscordClientService extends Client {
         const postIdRegex =
             /(?<=youtube.com\/post\/)Ug[A-z0-9_\-]+|(?<=youtube.com\/channel\/.+\/community\?lb=)Ug[A-z0-9_\-]+/g;
 
-        
-
         const { content } = message;
         const ids = [...content.matchAll(postIdRegex)].flat();
         if (!ids || ids.length == 0) return;
@@ -195,13 +196,19 @@ export class DiscordClientService extends Client {
                 allowedMentions: { repliedUser: false },
             });
         } else {
-            const reply = new MultipageMessage({channel: message.channel as any});
+            const reply = new MultipageMessage({
+                channel: message.channel as any,
+            });
 
             for (const embed of embeds) {
-                reply.addPage({embeds: [embed]});
+                reply.addPage({ embeds: [embed] });
             }
 
-            await reply.send({asReply: true, message, replyOptions: {allowedMentions: { repliedUser: false }}});
+            await reply.send({
+                asReply: true,
+                message,
+                replyOptions: { allowedMentions: { repliedUser: false } },
+            });
         }
     }
 

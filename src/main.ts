@@ -8,7 +8,7 @@ import { AppService } from "./app.service";
 import { DiscordClientService } from "./modules/discord/client/discord-client.service";
 import { GlobalExceptionFilter } from "./global-exception.filter";
 import { DiscordAPIError } from "discord.js";
-import { DiscordAPIError as DiscordAPIRESTError} from "@discordjs/rest";
+import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
 
 let exceptionFilter: GlobalExceptionFilter;
 
@@ -18,12 +18,12 @@ let exceptionFilter: GlobalExceptionFilter;
     const config = app.get(ConfigService);
     const discordClientService = app.get(DiscordClientService);
 
-    const {httpAdapter} = app.get(HttpAdapterHost);
+    const { httpAdapter } = app.get(HttpAdapterHost);
 
     exceptionFilter = new GlobalExceptionFilter(
-        httpAdapter, 
-        discordClientService, 
-        config
+        httpAdapter,
+        discordClientService,
+        config,
     ).ignore(
         exception => exception instanceof HttpException,
         exception => exception instanceof DiscordAPIError,
@@ -44,7 +44,6 @@ let exceptionFilter: GlobalExceptionFilter;
     const appService = app.get(AppService);
     appService.triggerListen();
 })();
-
 
 // Yes, I'm going to assume resuming the application is fine.
 // No, I don't really care if this is "best practice" or not. :)

@@ -12,7 +12,9 @@ const descriptify = (input: Record<string, string>, joiner = "\n"): string => {
     let output = "";
 
     for (const [key, value] of Object.entries(input)) {
-        output += `**${Util.firstUpperCase(key)}**: ${value ?? "`None`"}${joiner}`;
+        output += `**${Util.firstUpperCase(key)}**: ${
+            value ?? "`None`"
+        }${joiner}`;
     }
 
     return output;
@@ -32,8 +34,12 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
 export class Action {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
-            name: `${this.id} | On: ${Util.firstUpperCase(this.onEvent)} - ${Util.firstUpperCase(this.type)}`,
-            value: `${PLATFORM_NAME_LOOKUP[this.platform]} (${this.channelId})\n**Channel**: <#${
+            name: `${this.id} | On: ${Util.firstUpperCase(
+                this.onEvent,
+            )} - ${Util.firstUpperCase(this.type)}`,
+            value: `${PLATFORM_NAME_LOOKUP[this.platform]} (${
+                this.channelId
+            })\n**Channel**: <#${
                 this.discordThreadId ?? this.discordChannelId
             }> \n ${this.data ? descriptify(this.data) : ""}`,
             inline: inline ?? false,

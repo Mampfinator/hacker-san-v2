@@ -1,17 +1,29 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import { YouTubeConfig } from "src/modules/config/config";
-import { YOUTUBE_EVENTSUB_HUB_URL, YOUTUBE_EVENTSUB_TOPIC_BASE } from "./constants";
+import {
+    YOUTUBE_EVENTSUB_HUB_URL,
+    YOUTUBE_EVENTSUB_TOPIC_BASE,
+} from "./constants";
 
 @Injectable()
 export class YouTubeEventSubService {
     private readonly futureLeases = new Map<string, NodeJS.Timeout>();
+    private readonly logger = new Logger(YouTubeEventSubService.name);
 
     constructor(private readonly configService: ConfigService) {}
 
     public async subscribe(channelId: string) {
-        if (this.futureLeases.has(channelId)) return false;
+        this.logger.debug(
+            `Subscribing to push notifications for YouTube channel ${channelId}`,
+        );
+        if (this.futureLeases.has(channelId)) {
+            this.logger.debug(
+                `Skipping subscription for ${channelId}: lease renewal already scheduled.`,
+            );
+            return false;
+        }
         return await this._doSubscribe("subscribe", channelId);
     }
 
@@ -49,7 +61,16 @@ export class YouTubeEventSubService {
     }
 
     public scheduleLeaseRenewal(channelId: string, leaseSeconds: number) {
-        if (this.futureLeases.has(channelId)) return false;
+        this.logger.debug(
+            `Scheduling lease renewal for YouTube channel ${channelId}`,
+        );
+
+        if (this.futureLeases.has(channelId)) {
+            this.logger.debug(
+                `Skipping lease renewal for ${channelId}: lease renewal already scheduled.`,
+            );
+            return false;
+        }
 
         this.futureLeases.set(
             channelId,

@@ -35,7 +35,7 @@ export class YouTubeCommunityPostsService {
 
         if (!channel) return;
 
-        let channelInfo: {id: string, name: string, avatarUrl: string};
+        let channelInfo: { id: string; name: string; avatarUrl: string };
 
         let { posts, channel: fullChannelInfo } = await tryFetchPosts(
             channel.channelId,
@@ -44,8 +44,12 @@ export class YouTubeCommunityPostsService {
         );
 
         if (!fullChannelInfo) {
-            this.logger.debug(`Failed getting channel info from ${channel.channelId}.`);
-            const cachedChannel = await this.channelRepo.findOne({where: {channelId: channel.channelId}});
+            this.logger.debug(
+                `Failed getting channel info from ${channel.channelId}.`,
+            );
+            const cachedChannel = await this.channelRepo.findOne({
+                where: { channelId: channel.channelId },
+            });
 
             channelInfo = {
                 id: cachedChannel.channelId,
@@ -59,7 +63,9 @@ export class YouTubeCommunityPostsService {
                 avatarUrl: fullChannelInfo.avatarUrl,
             };
 
-            await this.commandBus.execute(new CacheChannelInfoCommand(fullChannelInfo));
+            await this.commandBus.execute(
+                new CacheChannelInfoCommand(fullChannelInfo),
+            );
         }
 
         if (typeof posts === "undefined")

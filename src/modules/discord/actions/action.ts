@@ -1,5 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Client, GuildTextBasedChannel, NonThreadGuildBasedChannel, ThreadChannel, VoiceChannel } from "discord.js";
+import {
+    Client,
+    GuildTextBasedChannel,
+    NonThreadGuildBasedChannel,
+    ThreadChannel,
+    VoiceChannel,
+} from "discord.js";
 import { TriggerActionsCommand } from "../commands/trigger-actions.command";
 import { Action } from "../models/action.entity";
 

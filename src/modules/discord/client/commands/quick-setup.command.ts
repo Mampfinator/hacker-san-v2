@@ -96,11 +96,11 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
                 )
                 .addChannelOption(forChannel =>
                     forChannel
-                    .setName("for-channel")
-                    .setDescription("The channel to rename.")
-                )
-            ),
-    })
+                        .setName("for-channel")
+                        .setDescription("The channel to rename."),
+                ),
+        ),
+})
 export class QuickSetupCommand implements ISlashCommand {
     private readonly logger = new Logger(QuickSetupCommand.name);
 
@@ -145,7 +145,7 @@ export class QuickSetupCommand implements ISlashCommand {
             interaction.reply("This command can only be used in a server.");
             return;
         }
-        
+
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === "general") {
@@ -159,7 +159,10 @@ export class QuickSetupCommand implements ISlashCommand {
         const { options, channel } = interaction;
 
         const { channelId, platform } = this.getOptions(interaction);
-        const discordChannel = interaction.options.getChannel("for-channel", false) as GuildTextBasedChannel;
+        const discordChannel = interaction.options.getChannel(
+            "for-channel",
+            false,
+        ) as GuildTextBasedChannel;
 
         const name = interaction.options.getString("name");
 
@@ -178,8 +181,9 @@ export class QuickSetupCommand implements ISlashCommand {
             });
         }
 
-        const { discordChannelId, discordThreadId } =
-            DiscordUtil.getChannelIds(discordChannel ?? channel);
+        const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(
+            discordChannel ?? channel,
+        );
 
         const savedActions = await this.actionsRepo.save([
             this.actionsRepo.create({
@@ -224,7 +228,9 @@ export class QuickSetupCommand implements ISlashCommand {
         });
     }
 
-    async handleGeneral(interaction: CommandInteraction<CacheType>): Promise<any> {
+    async handleGeneral(
+        interaction: CommandInteraction<CacheType>,
+    ): Promise<any> {
         this.optionMap.set(interaction.id, {
             "convenience-options": new Set(),
             "notification-options": new Set(),

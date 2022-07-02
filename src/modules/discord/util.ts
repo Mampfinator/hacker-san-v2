@@ -8,7 +8,12 @@ import {
     ThreadChannel,
 } from "discord.js";
 import { Action } from "./models/action.entity";
-import { PLATFORM_NAME_LOOKUP, Platform, SUPPORTED_PLATFORMS, EVENT_NAME_LOOKUP } from "src/constants";
+import {
+    PLATFORM_NAME_LOOKUP,
+    Platform,
+    SUPPORTED_PLATFORMS,
+    EVENT_NAME_LOOKUP,
+} from "src/constants";
 import {
     AttachmentType,
     ChannelInfo,
@@ -119,25 +124,32 @@ export namespace DiscordUtil {
         if (!channel) return;*/
 
         const channel = await client.channels.fetch(action.discordChannelId);
-        
+
         const final = action.discordThreadId
             ? await (channel as TextChannel).threads.fetch(
                   action.discordThreadId,
               )
             : (channel as NonThreadGuildBasedChannel);
 
-        console.log(`Found channel ${final.name} (${channel.isThread() ? "thread" : "non-thread"}, ${final.id})`);
+        console.log(
+            `Found channel ${final.name} (${
+                channel.isThread() ? "thread" : "non-thread"
+            }, ${final.id})`,
+        );
         return final;
     }
-
 
     export async function fetchChannelOrThreadUncached(
         action: Action,
         rest: DiscordRESTService,
     ) {
-        const channel = await rest.get(Routes.channel(action.discordChannelId)) as NonThreadGuildBasedChannel;
+        const channel = (await rest.get(
+            Routes.channel(action.discordChannelId),
+        )) as NonThreadGuildBasedChannel;
         if (!action.discordThreadId) return channel;
-        const threads = await rest.get(Routes.threads(action.discordChannelId)) as ThreadChannel[];
+        const threads = (await rest.get(
+            Routes.threads(action.discordChannelId),
+        )) as ThreadChannel[];
         return threads.find(thread => thread.id === action.discordThreadId);
     }
 
@@ -162,8 +174,10 @@ export namespace DiscordUtil {
         builder: SlashCommandStringOption,
         description?: string,
     ) {
-
-        const choices = SUPPORTED_PLATFORMS.map(platform => ({ name: PLATFORM_NAME_LOOKUP[platform], value: platform }));
+        const choices = SUPPORTED_PLATFORMS.map(platform => ({
+            name: PLATFORM_NAME_LOOKUP[platform],
+            value: platform,
+        }));
 
         return builder
             .setName("platform")
@@ -175,13 +189,15 @@ export namespace DiscordUtil {
         builder: SlashCommandStringOption,
         description?: string,
     ) {
-            
-            const choices = Object.keys(EVENT_NAME_LOOKUP).map(event => ({ name: EVENT_NAME_LOOKUP[event], value: event }));
-    
-            return builder
-                .setName("event")
-                .setDescription(description ?? "The event.")
-                .setChoices(...choices);
+        const choices = Object.keys(EVENT_NAME_LOOKUP).map(event => ({
+            name: EVENT_NAME_LOOKUP[event],
+            value: event,
+        }));
+
+        return builder
+            .setName("event")
+            .setDescription(description ?? "The event.")
+            .setChoices(...choices);
     }
 
     export function makeActionTypeOption(
@@ -189,9 +205,9 @@ export namespace DiscordUtil {
         description?: string,
     ) {
         const choices = getActions().map(action => {
-            const {type} = action.prototype;
+            const { type } = action.prototype;
 
-            return {value: type, name: Util.firstUpperCase(type)};
+            return { value: type, name: Util.firstUpperCase(type) };
         });
 
         return builder
@@ -228,7 +244,12 @@ export namespace DiscordUtil {
 }
 
 export function discordAPIError(error: any) {
-    if (error.prototype && (error instanceof DiscordAPIError || error instanceof DiscordAPIRESTError)) return true;
+    if (
+        error.prototype &&
+        (error instanceof DiscordAPIError ||
+            error instanceof DiscordAPIRESTError)
+    )
+        return true;
 }
 
 const ignoreLogger = new Logger("IgnoreLogger");

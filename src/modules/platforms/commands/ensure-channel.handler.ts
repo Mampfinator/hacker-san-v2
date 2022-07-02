@@ -5,15 +5,16 @@ import { EnsureTwitterChannelCommand } from "src/modules/twitter/commands/ensure
 import { EnsureYouTubeChannelCommand } from "src/modules/youtube/commands/ensure-youtube-channel.command";
 import { EnsureChannelCommand } from "./ensure-channel.command";
 
-
 export interface IEnsureChannelCommand {
     channelId: string;
 }
 
-const platformHandlers: {[Property in Platform]: Class<IEnsureChannelCommand>} = {
+const platformHandlers: {
+    [Property in Platform]: Class<IEnsureChannelCommand>;
+} = {
     youtube: EnsureYouTubeChannelCommand,
     twitter: EnsureTwitterChannelCommand,
-}
+};
 
 export interface EnsureChannelResult {
     success: boolean;
@@ -41,7 +42,6 @@ export class EnsureChannelHandler
             IEnsureChannelCommand,
             EnsureChannelResult
         >(newCommand);
-
 
         this.logger.debug(
             `Success: ${result.success} ${

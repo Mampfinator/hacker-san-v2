@@ -7,12 +7,15 @@ import { StreamQuery } from "./stream.query";
 @QueryHandler(StreamQuery)
 export class StreamQueryHandler implements IQueryHandler<StreamQuery> {
     constructor(
-        @InjectRepository(StreamEntity) private readonly streamRepository: Repository<StreamEntity>
+        @InjectRepository(StreamEntity)
+        private readonly streamRepository: Repository<StreamEntity>,
     ) {}
 
-    async execute({options}: StreamQuery): Promise<StreamEntity | StreamEntity[]> {
-        const {platform, platformId, query} = options;
-        let {one} = options;
+    async execute({
+        options,
+    }: StreamQuery): Promise<StreamEntity | StreamEntity[]> {
+        const { platform, platformId, query } = options;
+        let { one } = options;
 
         let streamQuery: Record<string, any>;
 
@@ -21,8 +24,8 @@ export class StreamQueryHandler implements IQueryHandler<StreamQuery> {
                 where: {
                     platform,
                     platformId,
-                }
-            }
+                },
+            };
 
             one = true;
         } else {

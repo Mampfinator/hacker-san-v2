@@ -35,8 +35,6 @@ export class TriggerActionsHandler
     async execute(command: TriggerActionsCommand) {
         const { platform, event, channelId } = command.options;
 
-        
-
         const actions = await this.actionsRepo.find({
             where: {
                 platform,
@@ -45,10 +43,14 @@ export class TriggerActionsHandler
             },
         });
 
-        this.logger.debug(`Found ${actions.length} actions for ${channelId} (${platform}, ${event}).`);
+        this.logger.debug(
+            `Found ${actions.length} actions for ${channelId} (${platform}, ${event}).`,
+        );
 
         for (const action of actions) {
-            this.logger.debug(`Executing action ${action.id} (${action.type}).`);
+            this.logger.debug(
+                `Executing action ${action.id} (${action.type}).`,
+            );
 
             const actionType = this.actions.get(action.type);
             if (!actionType) {
@@ -59,18 +61,25 @@ export class TriggerActionsHandler
             }
 
             // fetching channels apparently sometimes has a chance to never return (or throw) when the channel doesn't exist.
-            const channel = await new Promise<ThreadChannel | NonThreadGuildBasedChannel>(async (res, rej) => {
+            const channel = await new Promise<
+                ThreadChannel | NonThreadGuildBasedChannel
+            >(async (res, rej) => {
                 let resolved = false;
                 setTimeout(() => {
                     if (!resolved) rej(new ChannelFetchHungError());
                 }, 1000);
-                
-                const channel = await DiscordUtil.fetchChannelOrThread(action, this.client);
+
+                const channel = await DiscordUtil.fetchChannelOrThread(
+                    action,
+                    this.client,
+                );
                 resolved = true;
                 res(channel);
             }).catch(error => {
                 if (error instanceof ChannelFetchHungError) {
-                    return this.logger.warn(`Channel fetch hung for action ${action.id} (${action.type}).`);
+                    return this.logger.warn(
+                        `Channel fetch hung for action ${action.id} (${action.type}).`,
+                    );
                 }
 
                 throw error;
@@ -79,7 +88,7 @@ export class TriggerActionsHandler
             if (!channel) continue;
 
             this.logger.debug(`Executing action in ${channel.id}.`);
-            
+
             try {
                 await actionType.execute({
                     channel,

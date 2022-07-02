@@ -34,8 +34,9 @@ export class MultipageMessage {
     }) {
         this.channel = options.channel;
         this.interaction = options.interaction;
-        if (!this.channel && !this.interaction) throw new Error("No channel or interaction provided");
-        
+        if (!this.channel && !this.interaction)
+            throw new Error("No channel or interaction provided");
+
         this.componentCollectorOptions = options.collectorOptions ?? {};
     }
 
@@ -43,14 +44,21 @@ export class MultipageMessage {
         return this.pages.push(message);
     }
 
-    public async send(options?: {asReply?: boolean; message?: Message, replyOptions?: ReplyMessageOptions }) {
+    public async send(options?: {
+        asReply?: boolean;
+        message?: Message;
+        replyOptions?: ReplyMessageOptions;
+    }) {
         // scuff, but works
         const page = this.setupMessage(this.pages[this.index]) as any;
 
         let message: Message;
         switch (true) {
             case options?.asReply:
-                message = await options.message.reply({...page, ...(options.replyOptions ?? {})});
+                message = await options.message.reply({
+                    ...page,
+                    ...(options.replyOptions ?? {}),
+                });
                 break;
             case this.channel !== undefined:
                 message = await this.channel.send(page);
@@ -67,8 +75,9 @@ export class MultipageMessage {
 
         this.message = message;
 
-        const collector =
-            message.createMessageComponentCollector(this.componentCollectorOptions);
+        const collector = message.createMessageComponentCollector(
+            this.componentCollectorOptions,
+        );
         collector.on("collect", async interaction => {
             await this.handleCollect(interaction.customId as ComponentId);
             interaction.reply({

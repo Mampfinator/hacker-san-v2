@@ -31,7 +31,7 @@ export const tryFetchPosts = async (
 
     if (data) {
         const posts = extractCommunityPosts(data); // if these aren't present, we definitely throw.
-        
+
         let channel: ChannelInfo;
 
         try {

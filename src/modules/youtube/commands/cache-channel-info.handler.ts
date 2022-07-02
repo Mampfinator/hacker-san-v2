@@ -5,17 +5,16 @@ import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { CacheChannelInfoCommand } from "./cache-channel-info.command";
 
 @CommandHandler(CacheChannelInfoCommand)
-export class CacheChannelInfoHandler implements ICommandHandler<CacheChannelInfoCommand> {
+export class CacheChannelInfoHandler
+    implements ICommandHandler<CacheChannelInfoCommand>
+{
     constructor(
-        @InjectRepository(YouTubeChannel) private readonly channelRepo: Repository<YouTubeChannel>,
+        @InjectRepository(YouTubeChannel)
+        private readonly channelRepo: Repository<YouTubeChannel>,
     ) {}
-    
-    async execute({channelInfo}: CacheChannelInfoCommand): Promise<any> {
-        const {
-            id,
-            name,
-            avatarUrl,
-        } = channelInfo;
+
+    async execute({ channelInfo }: CacheChannelInfoCommand): Promise<any> {
+        const { id, name, avatarUrl } = channelInfo;
 
         if (!id) throw new TypeError(`channelInfo.id is required.`);
 
@@ -23,8 +22,8 @@ export class CacheChannelInfoHandler implements ICommandHandler<CacheChannelInfo
             this.channelRepo.create({
                 channelId: id,
                 channelName: name,
-                avatarUrl
-            })
+                avatarUrl,
+            }),
         );
     }
 }

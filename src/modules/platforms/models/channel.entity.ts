@@ -1,27 +1,27 @@
 import { Platform, SUPPORTED_PLATFORMS } from "src/constants";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: "channel"})
+@Entity({ name: "channel" })
 export class ChannelEntity {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column({type: "enum", enum: SUPPORTED_PLATFORMS})
+    @Column({ type: "enum", enum: SUPPORTED_PLATFORMS })
     platform: Platform;
 
     /**
      * ID of the channel on the platform, e.g. YouTube channel ID.
      */
     @Column()
-    platformId: string; 
+    platformId: string;
 
     @Column()
     name: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     userName?: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     avatarUrl?: string;
 
     /**

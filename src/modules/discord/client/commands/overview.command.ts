@@ -29,7 +29,7 @@ export class OverviewCommand implements ISlashCommand {
             interaction.reply("This command can only be used in a server.");
             return;
         }
-        
+
         const channelsPromises: Promise<
             ChannelsQueryResult & { platform: Platform }
         >[] = [];

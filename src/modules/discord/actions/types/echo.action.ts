@@ -1,7 +1,6 @@
 import { ActionType, IActionType } from "../action";
 import { ActionUtil } from "../util";
 
-
 @ActionType("echo")
 export class EchoAction implements IActionType {
     async execute({ data, channel, command }) {
