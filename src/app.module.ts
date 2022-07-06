@@ -27,6 +27,9 @@ import { CqrsModule } from "@nestjs/cqrs";
 // General todo: frontend for managing actions because trying to do that with slash commands will only get you so far.
 // Proper modals when Discord.
 
+// More todo:
+// - replace all platform-specific database models with the generic ones in src/modules/platforms/models/
+
 @Module({
     imports: [
         ConfigModule.forRoot({
