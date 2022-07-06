@@ -21,14 +21,14 @@ An Action, or in previous iterations, a Callback, is something to do when there'
 There are currently 4 types of actions:
 - **Echo**: sends a message to the specified channel. Doesn't really do a lot, but it can be used to set up KoroTagger with `!stream {link}` and `!tags {link}`.
 - **Lock**: Locks or unlocks the channel. If a message is supplied, will also send that message (prefixed with an unlocked/locked padlock).
-- **Notify**: Mostly functions like echo, but, as is the case with Twitter Spaces and YouTube community posts, if the website doesn't provide its own embeds, will it will also send a custom embed.
+- **Notify**: Mostly functions like echo, but, as is the case with Twitter Spaces and YouTube community posts, if the website doesn't provide its own embeds, it will also send a custom embed.
 - **Rename**: Renames the specified channel. Mainly useful to indicate if a channel is live or offline. See `/quick-setup rename` for the most common use case. 
 
 All actions can be triggered on any of the following events:
-- **Live**: When a stream goes live
-- **Offline**: When a stream goes offline
-- **Upload**: When a video is uploaded
-- **Post**: When a community post is made. May include other things in the future, such as Twitter posts.
+- **Live**: When a stream goes live.
+- **Offline**: When a stream goes offline.
+- **Upload**: When a video is uploaded (currently only YouTube).
+- **Post**: When a community post is made (currently only YouTube). May include other things in the future, such as Twitter posts.
 - **Upcoming**: When a stream is scheduled.
 
 ## Self-hosting & Configuration

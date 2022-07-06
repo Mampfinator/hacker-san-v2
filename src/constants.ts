@@ -12,7 +12,12 @@ export const PLATFORM_NAME_LOOKUP: { [Property in Platform]: string } = {
 
 // TODO: Split offline into seperate stream:offline and channel:offline events.
 // Also: migrate all actions to use the new event names (offline -> channel:offline).
-export type Event = "live" | "upload" | "offline" | "upcoming" | "post" /* | "channel:offline" | "stream:offline" */;
+export type Event =
+    | "live"
+    | "upload"
+    | "offline"
+    | "upcoming"
+    | "post" /* | "channel:offline" | "stream:offline" */;
 export const EVENT_NAME_LOOKUP: { [Property in Event]: string } = {
     live: "Live",
     upload: "Upload",
