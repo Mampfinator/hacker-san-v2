@@ -2,7 +2,7 @@ import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
 import { Repository } from "typeorm";
-import { SyncPostsCommand } from "../community-posts/commands/sync-posts-event";
+import { SyncPostsCommand } from "../community-posts/commands/sync-posts.command";
 import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { SyncVideosCommand } from "../videos/commands/sync-videos.command";
 import { YouTubeEventSubService } from "../videos/youtube-eventsub.service";

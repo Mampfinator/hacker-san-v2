@@ -3,7 +3,7 @@ export { YouTubeModule } from "./youtube.module";
 
 // commands
 export { EnsureYouTubeChannelCommand } from "./commands";
-export { FetchPostsCommand } from "./community-posts/commands/fetch-post.command";
+export { FetchPostsCommand } from "./community-posts/commands/fetch-posts.command";
 
 // queries
 export { YouTubeChannelsQuery } from "./queries/youtube-channels.query";

@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { SyncPostsCommand } from "./sync-posts-event";
+import { SyncPostsCommand } from "./sync-posts.command";
 import { tryFetchPosts } from "../../util";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommunityPost } from "../model/community-post.entity";

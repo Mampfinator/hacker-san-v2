@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CommunityPost as CommunityPostEntity } from "../model/community-post.entity";
-import { FetchPostsCommand } from "./fetch-post.command";
+import { FetchPostsCommand } from "./fetch-posts.command";
 import {
     ChannelInfo,
     CommunityPost,
@@ -10,7 +10,6 @@ import {
     extractCommunityPosts,
 } from "yt-scraping-utilities";
 import axios from "axios";
-import { CacheCollection } from "src/shared/util/cache-collection";
 
 @CommandHandler(FetchPostsCommand)
 export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {

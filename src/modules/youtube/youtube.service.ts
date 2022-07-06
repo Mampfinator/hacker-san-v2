@@ -7,7 +7,7 @@ import { SyncVideosCommand } from "./videos/commands/sync-videos.command";
 import { YouTubeEventSubService } from "./videos/youtube-eventsub.service";
 import { YouTubeVideosService } from "./videos/youtube-video.service";
 import { sleep } from "./util";
-import { SyncPostsCommand } from "./community-posts/commands/sync-posts-event";
+import { SyncPostsCommand } from "./community-posts/commands/sync-posts.command";
 import { COMMUNITY_POST_SLEEP_TIME, EVENTSUB_SLEEP_TIME } from "./constants";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { SchedulerRegistry } from "@nestjs/schedule";

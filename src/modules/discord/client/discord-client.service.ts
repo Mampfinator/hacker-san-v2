@@ -15,7 +15,7 @@ import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
 import { InjectCommands } from "./commands/slash-commands.provider";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { FetchPostsCommand } from "src/modules/youtube/community-posts/commands/fetch-post.command";
+import { FetchPostsCommand } from "src/modules/youtube/community-posts/commands/fetch-posts.command";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
