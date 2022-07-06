@@ -10,9 +10,26 @@ The long-awaited and completely overdue improved notification bot for [PRISMCord
 
 ### Planned Features
 - Temporary Actions: schedule actions to happen one time and one time only; ideal for off-channel collabs.
-- More Platforms: support for more platforms (like Twitch   & Twitcasting)
+- More Platforms: support for more platforms (like Twitch & Twitcasting)
 - Potentially a more user-friendly way of managing Actions. A frontend, mayhaps; or just a builder.
 - Mod-message relay (with per-guild defined ignore settings!) to a specified stream chat (~~totally not stolen from Luna bot~~)
+
+
+## What is an "Action"?
+An Action, or in previous iterations, a Callback, is something to do when there's activity on YouTube or Twitter or the likes, be it a community post, a live stream or an upload.
+
+There are currently 4 types of actions:
+- **Echo**: sends a message to the specified channel. Doesn't really do a lot, but it can be used to set up KoroTagger with `!stream {link}` and `!tags {link}`.
+- **Lock**: Locks or unlocks the channel. If a message is supplied, will also send that message (prefixed with an unlocked/locked padlock).
+- **Notify**: Mostly functions like echo, but, as is the case with Twitter Spaces and YouTube community posts, if the website doesn't provide its own embeds, will it will also send a custom embed.
+- **Rename**: Renames the specified channel. Mainly useful to indicate if a channel is live or offline. See `/quick-setup rename` for the most common use case. 
+
+All actions can be triggered on any of the following events:
+- **Live**: When a stream goes live
+- **Offline**: When a stream goes offline
+- **Upload**: When a video is uploaded
+- **Post**: When a community post is made. May include other things in the future, such as Twitter posts.
+- **Upcoming**: When a stream is scheduled.
 
 ## Self-hosting & Configuration
 Create your configuration in the project root: a `.env` file for API keys, tokens and the database URL, and a `config.toml` for the rest. 
