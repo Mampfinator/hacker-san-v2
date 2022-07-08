@@ -19,10 +19,8 @@ export class YouTubeEventSubService {
             `Subscribing to push notifications for YouTube channel ${channelId}`,
         );
         if (this.futureLeases.has(channelId)) {
-            this.logger.debug(
-                `Skipping subscription for ${channelId}: lease renewal already scheduled.`,
-            );
-            return false;
+            const oldLease = this.futureLeases.get(channelId);
+            clearTimeout(oldLease);
         }
         return await this._doSubscribe("subscribe", channelId);
     }
