@@ -131,11 +131,6 @@ export namespace DiscordUtil {
               )
             : (channel as NonThreadGuildBasedChannel);
 
-        console.log(
-            `Found channel ${final.name} (${
-                channel.isThread() ? "thread" : "non-thread"
-            }, ${final.id})`,
-        );
         return final;
     }
 
