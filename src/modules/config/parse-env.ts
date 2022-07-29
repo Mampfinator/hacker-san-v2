@@ -15,20 +15,26 @@ const checkRequired = (
     keys: (keyof EnvOptions)[],
 ) => {
     for (const key of keys) {
-        if (typeof input[key] == undefined) {
+        if (typeof input[key] == "undefined") {
             throw new Error(
-                `[ParseEnv]: Option ${key} is required but missing.`,
+                `[Environment]: Option ${key} is required but missing.`,
             );
         }
     }
 };
 
 export function parseEnv(): EnvOptions {
+    let envFile: EnvOptions | undefined;
+    try {
+        envFile = parse(
+            readFileSync(join(process.cwd(), ".env"))
+        ) as unknown as EnvOptions;
+    } catch {};
+
+
     const envConfig: EnvOptions = {
-        ...process.env,
-        ...(parse(
-            readFileSync(join(process.cwd(), ".env")),
-        ) as unknown as EnvOptions), // we don't care about env.TZ :)
+        ...process.env as unknown as EnvOptions,
+        ...(envFile ?? {})
     };
 
     checkRequired(envConfig, ["DISCORD_TOKEN", "DATABASE_URL"]);

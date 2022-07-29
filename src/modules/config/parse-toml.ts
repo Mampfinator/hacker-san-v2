@@ -20,9 +20,11 @@ export interface TOMLOptions {
 }
 
 export function parseTOML(): TOMLOptions {
-    const tomlOptions: TOMLOptions = parse(
-        readFileSync(join(process.cwd(), "config.toml")).toString(),
-    );
-    // TODO: validate options.
-    return tomlOptions;
+    try {
+        const tomlOptions: TOMLOptions = parse(
+            readFileSync(join(process.cwd(), "config.toml")).toString(),
+        );
+
+        return tomlOptions;
+    } catch (error) {}
 }

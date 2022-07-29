@@ -1,7 +1,7 @@
 import { DEFAULT_PORT, DISCORD_COMMAND_CLEANUP_DEFAULT } from "./defaults";
 import { parseCommandLineArgs } from "./parse-cla";
-import { parseEnv } from "./parse-env";
-import { parseTOML } from "./parse-toml";
+import { EnvOptions, parseEnv } from "./parse-env";
+import { parseTOML, TOMLOptions } from "./parse-toml";
 
 interface PlatformConfig {
     active: boolean;
@@ -28,7 +28,7 @@ export interface TwitterConfig extends PlatformConfig {
 }
 
 export default () => {
-    const tomlOptions = parseTOML();
+    const tomlOptions = parseTOML() ?? {} as TOMLOptions;
     const envConfig = parseEnv();
     const claConfig = parseCommandLineArgs();
 
@@ -53,11 +53,11 @@ export default () => {
     const DISCORD: DiscordConfig = {
         token: envConfig.DISCORD_TOKEN,
         cleanUpOnStart:
-            tomlOptions.discord.cleanupOldCommands ??
+            tomlOptions.discord?.cleanupOldCommands ??
             DISCORD_COMMAND_CLEANUP_DEFAULT,
-        testGuildId: tomlOptions.discord.testGuildId,
-        ownerId: tomlOptions.discord.ownerId,
-        ownerGuild: tomlOptions.discord.ownerGuild,
+        testGuildId: tomlOptions.discord?.testGuildId,
+        ownerId: tomlOptions.discord?.ownerId,
+        ownerGuild: tomlOptions.discord?.ownerGuild,
         doLogin: !claConfig.noLogin,
         dmOwnerOnError:
             claConfig.dmOwnerOnError ?? process.env.NODE_ENV === "production",
@@ -66,12 +66,15 @@ export default () => {
             process.env.NODE_ENV === "production",
     };
 
-    const PORT = claConfig.port ?? tomlOptions.app.port ?? DEFAULT_PORT;
+    const PORT = claConfig.port ?? tomlOptions.app?.port ?? DEFAULT_PORT;
     const { DATABASE_URL } = envConfig;
 
-    const URL = `http${tomlOptions.app.https ?? true ? "s" : ""}://${
-        tomlOptions.app.domain
-    }${tomlOptions.app.includePortInUrl ? `:${PORT}` : ""}`;
+    let URL: string;
+    if (tomlOptions.app?.domain) {
+        URL = `http${tomlOptions.app?.https ?? true ? "s" : ""}://${
+            tomlOptions.app.domain
+        }${tomlOptions.app.includePortInUrl ? `:${PORT}` : ""}`;
+    }
 
     const finalConfig = {
         YOUTUBE,
