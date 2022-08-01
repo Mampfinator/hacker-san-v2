@@ -27,14 +27,13 @@ export function parseEnv(): EnvOptions {
     let envFile: EnvOptions | undefined;
     try {
         envFile = parse(
-            readFileSync(join(process.cwd(), ".env"))
+            readFileSync(join(process.cwd(), ".env")),
         ) as unknown as EnvOptions;
-    } catch {};
-
+    } catch {}
 
     const envConfig: EnvOptions = {
-        ...process.env as unknown as EnvOptions,
-        ...(envFile ?? {})
+        ...(process.env as unknown as EnvOptions),
+        ...(envFile ?? {}),
     };
 
     checkRequired(envConfig, ["DISCORD_TOKEN", "DATABASE_URL"]);

@@ -28,7 +28,7 @@ export interface TwitterConfig extends PlatformConfig {
 }
 
 export default () => {
-    const tomlOptions = parseTOML() ?? {} as TOMLOptions;
+    const tomlOptions = parseTOML() ?? ({} as TOMLOptions);
     const envConfig = parseEnv();
     const claConfig = parseCommandLineArgs();
 
