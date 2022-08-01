@@ -9,9 +9,9 @@ import { GuildSettings } from "./models/settings.entity";
 import { Action } from "./models/action.entity";
 import { CqrsModule } from "@nestjs/cqrs";
 import { slashcommandFactory } from "./client/commands/slash-commands.provider";
-import { getActions } from "./actions/action";
 import { actionTypeFactory } from "./actions/actions-helper";
 import { DiscordRESTService } from "./discord-rest.service";
+import { ActionTypes } from "./actions/types";
 
 @Module({
     imports: [
@@ -25,7 +25,7 @@ import { DiscordRESTService } from "./discord-rest.service";
         DiscordClientService,
         slashcommandFactory,
         ...getCommands(),
-        ...getActions(),
+        ...ActionTypes,
         actionTypeFactory,
         ...DiscordCommandHandlers,
     ],

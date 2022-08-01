@@ -25,6 +25,7 @@ import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
 import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 import { Util } from "src/util";
 import { MultipageMessage } from "src/shared/util/multipage-message";
+import { getActions } from "../actions/action";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -65,6 +66,12 @@ export class DiscordClientService extends Client {
             `Found ${this.commands.size} commands: ${[
                 ...this.commands.keys(),
             ].join(", ")}.`,
+        );
+
+        this.logger.debug(
+            `Found ${getActions().length} action types: ${getActions()
+                .map(action => action.name)
+                .join(", ")}.`,
         );
 
         const ret = await super.login(token);
