@@ -1,6 +1,7 @@
 import axios from "axios";
 import {
     ChannelInfo,
+    CommunityPost,
     extractChannelInfo,
     extractCommunityPosts,
 } from "yt-scraping-utilities";
@@ -17,27 +18,20 @@ export const tryFetchPosts = async (
 
     const errors: Error[] = [];
 
-    let data: any;
+    let posts: CommunityPost[];
+    let channel: ChannelInfo;
     let currentTry = 0;
-    while (!data && currentTry < retries) {
+    while ((!posts || posts?.length == 0) && currentTry < retries) {
         currentTry++;
         try {
-            data = (await axios.get(url)).data;
+            const data = (await axios.get(url)).data;
+            posts = extractCommunityPosts(data);
+            channel = extractChannelInfo(data);
         } catch (error) {
             errors.push(error);
             await sleep(timeout);
         }
     }
 
-    if (data) {
-        const posts = extractCommunityPosts(data); // if these aren't present, we definitely throw.
-
-        let channel: ChannelInfo;
-
-        try {
-            channel = extractChannelInfo(data);
-        } catch {}
-
-        return { channel, posts };
-    }
+    return {posts, channel, errors};
 };

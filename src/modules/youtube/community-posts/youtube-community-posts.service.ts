@@ -37,7 +37,7 @@ export class YouTubeCommunityPostsService {
 
         let channelInfo: { id: string; name: string; avatarUrl: string };
 
-        let { posts, channel: fullChannelInfo } = await tryFetchPosts(
+        let { posts, channel: fullChannelInfo, errors } = await tryFetchPosts(
             channel.channelId,
             3,
             500,
@@ -68,10 +68,15 @@ export class YouTubeCommunityPostsService {
             );
         }
 
-        if (typeof posts === "undefined")
-            return this.logger.warn(
+        if (typeof posts === "undefined") {
+            this.logger.warn(
                 `Failed getting community posts for ${channel.channelId}`,
             );
+            for (const error of errors) {
+                this.logger.error(error);
+            }
+            return;
+        }
         if (posts.length == 0) return;
 
         const ids = posts.map(post => post.id);
