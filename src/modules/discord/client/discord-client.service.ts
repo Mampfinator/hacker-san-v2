@@ -218,7 +218,53 @@ export class DiscordClientService extends Client {
             });
         }
     }
+///Added OnReact to messages for otsu messages. August 2nd, 2022
+    @On("messageCreate")
+    const otsuRegEx = /^(?:otsu|oya)([^\s]+)|^saranara/
+    const reactions =
+    [
+        {otsunuggies:"839042514781732905"},
+        {otsufuri: "806110229397504000"},
+        {otsumeno: "826832284337307708"},
+        {otsurita: "840137087894421505"},
+        {otsuboin: "840137087806341150"},
+        {oyashiki: "854628627215810561"},
+        {otsuyura: "873632813910470717"},
+        {otsunia: "854667744775897108"},
+        {otsupina: "918365263206952980"},
+        {otsunaki: "994509287365812265"},
+        {saranara: "918796139627675688"},
+        {otsunon: "918796047243939882"},
+        {oyasumi: "926892367770959882"},
+        {otsuprism: "837419300927045713"}
+    ]
+    const MissingReact =
+    `Someone tried to otsu but there's no react for it.
+    User:      %s %s
+    Otsu:      %s
+    messageID: %s
+    message:   %s
+    `
 
+    client.on("messageCreate", message => {
+        const content = message.content.toLowerCase();
+        console.log('The message is seen');
+
+        var match = otsuRegEx.exec(content);
+        if (match) {
+            var emojiID = reactions[match[0]];
+            if (emojiID) {
+                message.react(emojiID).then(console.log);
+            } else {
+                console.log(MissingReact,
+                    message.author.id, message.author.username,
+                    match[0],
+                    message.id,
+                    message.content)
+      }
+  }
+});
+///Added OnReact to messages for otsu messages. August 2nd, 2022
     @Interval(60000)
     private async refreshPresence() {
         let channels = 0;
