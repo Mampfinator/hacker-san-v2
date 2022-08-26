@@ -2,12 +2,12 @@ import {
     BadRequestException,
     Controller,
     ForbiddenException,
-    Get,
-    Headers,
     HttpException,
     Logger,
     Post,
     Query,
+    Headers,
+    Get,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createHmac } from "crypto";

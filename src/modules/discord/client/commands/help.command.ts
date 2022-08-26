@@ -1,5 +1,8 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, CacheType } from "discord.js";
+import {
+    ChatInputCommandInteraction,
+    CacheType,
+    SlashCommandBuilder,
+} from "discord.js";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 
 @SlashCommand({
@@ -9,7 +12,7 @@ import { ISlashCommand, SlashCommand } from "./slash-command";
         .setDMPermission(true),
 })
 export class HelpCommand implements ISlashCommand {
-    async execute(interaction: CommandInteraction<CacheType>) {
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
         interaction.reply({ content: "Coming soon:tm:.", ephemeral: true });
     }
 }

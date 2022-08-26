@@ -1,6 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { YouTubeChannel } from "./model/youtube-channel.entity";
 import { SyncVideosCommand } from "./videos/commands/sync-videos.command";
@@ -10,13 +9,32 @@ import { sleep } from "./util";
 import { SyncPostsCommand } from "./community-posts/commands/sync-posts.command";
 import { COMMUNITY_POST_SLEEP_TIME, EVENTSUB_SLEEP_TIME } from "./constants";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
-import { SchedulerRegistry } from "@nestjs/schedule";
+import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { ConfigService } from "@nestjs/config";
+import axios from "axios";
+import { InjectRepository } from "@nestjs/typeorm";
+
+export interface FetchRawOptions {
+    maxRetries?: number;
+    /**
+     * "high" puts the request back at the bottom of the queue, "low" puts it on top. Defaults to low.
+     */
+    requeuePriority?: "high" | "low";
+}
+
+type RequestQueueItem = {
+    callback: () => Promise<string>;
+    resolve: (value: string) => any;
+    options?: FetchRawOptions;
+};
 
 @Injectable()
 export class YouTubeService {
     private readonly logger = new Logger(YouTubeService.name);
     private readonly skipSync: boolean;
+
+    private readonly requestQueue: RequestQueueItem[] = [];
+    private readonly retryCounter = new WeakMap<RequestQueueItem, number>();
 
     constructor(
         @InjectRepository(YouTubeChannel)
@@ -131,5 +149,50 @@ export class YouTubeService {
             }, 1500),
         );
         this.logger.debug("Scheduling YouTube community post check.");
+    }
+
+    /**
+     * Fetches raw pages from YouTube. Since YouTube's rate limits for crawling/scraping are extremely stingy, this needs to work like a request queue.
+     */
+    public async fetchRaw(
+        url: string,
+        options?: FetchRawOptions,
+    ): Promise<string> {
+        return new Promise<string>(resolve => {
+            const callback: () => Promise<string> = async () => {
+                const res = await axios.get(url);
+                return res.data;
+            };
+
+            this.requestQueue.push({ resolve, callback, options });
+        });
+    }
+
+    @Interval(1250)
+    private async workRequestQueue() {
+        if (this.requestQueue.length == 0) return;
+
+        const item = this.requestQueue.shift();
+        const value = await item.callback().catch(reason => {
+            const retryCount = this.retryCounter.get(item) ?? 0;
+            if (
+                item.options?.maxRetries &&
+                retryCount < item.options.maxRetries
+            ) {
+                // TODO: check for 404, 403 (since that's the error YouTube returns when you get blocked) and don't requeue/stop the queue.
+
+                // requeue the item.
+                this.requestQueue[
+                    (item.options.requeuePriority ?? "low") == "high"
+                        ? "unshift"
+                        : "push"
+                ](item);
+                this.retryCounter.set(item, retryCount + 1);
+            }
+        });
+
+        if (!value) return;
+
+        item.resolve(value);
     }
 }

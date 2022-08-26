@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { Class } from "src/constants";
 
 const commands: Class<ISlashCommand>[] = [];
@@ -15,7 +14,7 @@ export interface SlashCommandOptions {
 
 // interface classes can implement.
 export interface ISlashCommand {
-    execute(interaction: CommandInteraction): any;
+    execute(interaction: ChatInputCommandInteraction): any;
 }
 
 const COMMAND_DATA_KEY = Symbol("COMMAND_DATA");

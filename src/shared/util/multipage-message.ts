@@ -1,17 +1,15 @@
 import {
-    CacheType,
-    CommandInteraction,
-    InteractionCollector,
+    ChatInputCommandInteraction,
     Message,
-    MessageActionRow,
-    MessageButton,
+    ActionRowBuilder,
+    ButtonBuilder,
     MessageComponentCollectorOptions,
-    MessageComponentInteraction,
     MessageEditOptions,
-    MessageEmbed,
+    EmbedBuilder,
     MessageOptions,
     ReplyMessageOptions,
     TextBasedChannel,
+    ButtonStyle,
 } from "discord.js";
 
 type ComponentId = "first" | "back" | "next" | "last";
@@ -23,14 +21,14 @@ export class MultipageMessage {
     private message?: Message;
 
     private readonly channel?: TextBasedChannel;
-    private readonly interaction?: CommandInteraction<any>;
+    private readonly interaction?: ChatInputCommandInteraction<any>;
 
-    private readonly componentCollectorOptions: MessageComponentCollectorOptions<MessageComponentInteraction>;
+    private readonly componentCollectorOptions: MessageComponentCollectorOptions<any>;
 
     constructor(options: {
         channel?: TextBasedChannel;
-        interaction?: CommandInteraction<any>;
-        collectorOptions?: MessageComponentCollectorOptions<MessageComponentInteraction>;
+        interaction?: ChatInputCommandInteraction<any>;
+        collectorOptions?: MessageComponentCollectorOptions<any>;
     }) {
         this.channel = options.channel;
         this.interaction = options.interaction;
@@ -76,19 +74,20 @@ export class MultipageMessage {
         this.message = message;
 
         const collector = message.createMessageComponentCollector(
+            // @ts-ignore
             this.componentCollectorOptions,
         );
         collector.on("collect", async interaction => {
             await this.handleCollect(interaction.customId as ComponentId);
             interaction.reply({
                 embeds: [
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setDescription(
                             `Now viewing page ${this.index + 1}/${
                                 this.pages.length
                             }`,
                         )
-                        .setColor("GREEN"),
+                        .setColor("Green"),
                 ],
                 ephemeral: true,
             });
@@ -125,33 +124,36 @@ export class MultipageMessage {
     }
 
     private setupMessage(message: MessageOptions): MessageOptions {
-        const components = [...(message.components ?? [])];
+        // FIXME
+        // @ts-ignore
+        const components = [ActionRowBuilder.from(message.components ?? [])];
 
-        const row = new MessageActionRow<MessageButton>().addComponents(
-            new MessageButton()
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
                 .setCustomId("first")
                 .setEmoji("⬅️")
                 .setDisabled(this.index <= 0)
-                .setStyle("SECONDARY"),
-            new MessageButton()
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
                 .setCustomId("back")
                 .setEmoji("◀️")
                 .setDisabled(this.index <= 0)
-                .setStyle("SECONDARY"),
-            new MessageButton()
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
                 .setCustomId("next")
                 .setEmoji("▶️")
                 .setDisabled(this.index == this.pages.length - 1)
-                .setStyle("SECONDARY"),
-            new MessageButton()
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
                 .setCustomId("last")
                 .setEmoji("➡️")
                 .setDisabled(this.index == this.pages.length - 1)
-                .setStyle("SECONDARY"),
+                .setStyle(ButtonStyle.Secondary),
         );
 
         components.push(row);
 
+        // @ts-ignore
         return { ...message, components };
     }
 }

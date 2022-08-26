@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { ICommand } from "@nestjs/cqrs";
 
 import { Platform } from "src/constants";
@@ -8,7 +8,7 @@ export interface TriggerActionsCommandOptions {
     event: string;
     url: string; // A URL to the event. Needs to be present for every event type.
     channelId: string;
-    embed?: MessageEmbed;
+    embed?: EmbedBuilder;
 }
 
 export class TriggerActionsCommand implements ICommand {

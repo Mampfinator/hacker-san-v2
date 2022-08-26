@@ -1,6 +1,6 @@
 import { SUPPORTED_PLATFORMS } from "src/constants";
-import { Column, Entity, PrimaryColumn } from "typeorm";
 import { Platform } from "src/constants";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
 function pushUnique<T>(arr: T[], value: T) {
     if (arr.includes(value)) return false;

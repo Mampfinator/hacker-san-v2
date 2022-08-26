@@ -16,6 +16,10 @@ export class FetchPostsCommand implements ICommand {
     constructor(options: FetchPostCommandOptions = {}) {
         if (options.channelId && options.postId)
             throw new Error("Cannot specify both channelId and postId.");
+        if (!options.channelId && !options.postId)
+            throw new Error(
+                "Must specify either channelId or postId to fetch.",
+            );
 
         Object.assign(this, options);
     }

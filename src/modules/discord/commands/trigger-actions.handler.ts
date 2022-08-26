@@ -2,14 +2,14 @@ import { Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { DiscordClientService } from "../client/discord-client.service";
 import { TriggerActionsCommand } from "./trigger-actions.command";
-import { InjectRepository } from "@nestjs/typeorm";
 import { Action } from "../models/action.entity";
-import { Repository, TreeRepository } from "typeorm";
+import { Repository } from "typeorm";
 import { IActionType } from "../actions/action";
-import { InjectActions } from "../actions/actions-helper";
 import { DiscordUtil, ignoreDiscordAPIErrors } from "../util";
 import { DiscordRESTService } from "../discord-rest.service";
-import { Channel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+import { NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+import { InjectRepository } from "@nestjs/typeorm";
+import { InjectActions } from "../actions/actions-helper";
 
 class ChannelFetchHungError extends Error {
     constructor() {

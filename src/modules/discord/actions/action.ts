@@ -1,10 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
+    ChannelType,
     Client,
-    GuildTextBasedChannel,
     NonThreadGuildBasedChannel,
     ThreadChannel,
-    VoiceChannel,
 } from "discord.js";
 import { TriggerActionsCommand } from "../commands/trigger-actions.command";
 import { Action } from "../models/action.entity";
@@ -56,7 +55,7 @@ export async function handleAction<T extends Client>(
     ) as Promise<NonThreadGuildBasedChannel>);
 
     let thread: ThreadChannel;
-    if (channel.isText() && discordThreadId)
+    if (channel.type == ChannelType.GuildText && discordThreadId)
         thread = await (channel as any).threads?.fetch(discordThreadId);
 
     const actionType = actionTypes.get(action.type);

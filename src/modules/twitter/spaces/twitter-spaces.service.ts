@@ -1,8 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
 import { Event } from "src/modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
@@ -29,7 +28,7 @@ export class TwitterSpacesService {
         private readonly spacesRepo: Repository<TwitterSpace>,
     ) {}
 
-    @Interval(5000)
+    //@Interval(5000)
     public async syncTwitterSpaces() {
         const users = await this.usersRepo.find();
         if (users.length == 0) return;
@@ -131,33 +130,38 @@ export class TwitterSpacesService {
                 break;
         }
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setAuthor({
                 name: `${author.name} (@${author.username})`,
                 iconURL: author.profile_image_url,
             })
             .setTitle(`${userName} ${eventText}`)
-            .setColor("BLUE")
-            .addField("Title", `\`\`\`\n${space?.title ?? "No title"}\`\`\``)
-            .addField("Link", `[Join here](${url})`)
+            .setColor("Blue")
+            .addFields(
+                {
+                    name: "Title",
+                    value: `\`\`\`\n${space?.title ?? "No title"}\`\`\``,
+                },
+                { name: "Link", value: `[Join here](${url})` },
+            )
             .setThumbnail(author.profile_image_url);
 
         if (space?.started_at) {
             const startedAt = Math.floor(Date.parse(space.started_at) / 1000);
-            embed.addField(
-                "Started at",
-                `<t:${startedAt}:T> (<t:${startedAt}:R>)`,
-            );
+            embed.addFields({
+                name: "Started at",
+                value: `<t:${startedAt}:T> (<t:${startedAt}:R>)`,
+            });
         }
 
         if (space?.scheduled_start) {
             const scheduledFor = Math.floor(
                 Number(Date.parse(space.scheduled_start)) / 1000,
             );
-            embed.addField(
-                "Scheduled for",
-                `<t:${scheduledFor}:T> (<t:${scheduledFor}:R>)`,
-            );
+            embed.addFields({
+                name: "Scheduled for",
+                value: `<t:${scheduledFor}:T> (<t:${scheduledFor}:R>)`,
+            });
         }
 
         this.commandBus.execute(

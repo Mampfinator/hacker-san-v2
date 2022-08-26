@@ -1,11 +1,10 @@
-import { HttpException, HttpServer } from "@nestjs/common";
-import { ExceptionFilter, Catch, ArgumentsHost, Logger } from "@nestjs/common";
+import { Catch, HttpServer } from "@nestjs/common";
+import { ExceptionFilter, ArgumentsHost, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { BaseExceptionFilter } from "@nestjs/core";
-import { DiscordAPIError, MessageEmbed } from "discord.js";
+import { EmbedBuilder, codeBlock } from "discord.js";
 import { DiscordConfig } from "./modules/config/config";
 import { DiscordClientService } from "./modules/discord/client/discord-client.service";
-import { codeBlock } from "@discordjs/builders";
 
 @Catch()
 export class GlobalExceptionFilter
@@ -42,13 +41,16 @@ export class GlobalExceptionFilter
 
         const errorText =
             exception?.toString?.() ?? exception ?? "Unknown error.";
-        this.logger.error(errorText);
+        const stack = exception?.stack;
+
+        if (stack) this.logger.error(errorText, stack);
+        else this.logger.error(errorText);
 
         const sendDm = this.sendDm && !ignore;
 
         if (sendDm) {
-            const embed = new MessageEmbed()
-                .setColor("DARK_RED")
+            const embed = new EmbedBuilder()
+                .setColor("DarkRed")
                 .setTitle(
                     `Uncaught Exception: ${
                         (exception as Error).name ?? "Unknown error type."
@@ -59,7 +61,7 @@ export class GlobalExceptionFilter
                 const newLines = (exception as Error).stack.split("\n");
 
                 let i = 0;
-                let traces: string[] = [];
+                const traces: string[] = [];
 
                 for (const line of newLines) {
                     if (!traces[i]) traces[i] = "";
@@ -74,17 +76,22 @@ export class GlobalExceptionFilter
                 }
 
                 if (traces.length == 1) {
-                    embed.addField("Stacktrace", codeBlock(traces[0]));
+                    embed.addFields({
+                        name: "Stacktrace",
+                        value: codeBlock(traces[0]),
+                    });
                 } else {
                     for (
                         let traceIndex = 0;
                         traceIndex < traces.length;
                         traceIndex++
                     ) {
-                        embed.addField(
-                            `Stacktrace ${traceIndex + 1}/${traces.length}`,
-                            codeBlock(traces[traceIndex]),
-                        );
+                        embed.addFields({
+                            name: `Stacktrace ${traceIndex + 1}/${
+                                traces.length
+                            }`,
+                            value: codeBlock(traces[traceIndex]),
+                        });
                     }
                 }
             }

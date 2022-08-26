@@ -17,6 +17,10 @@ export interface TOMLOptions {
         ownerId?: string;
         ownerGuild?: string;
     };
+
+    youtube: {
+        channelScanInterval?: number;
+    };
 }
 
 export function parseTOML(): TOMLOptions {

@@ -55,7 +55,7 @@ export class YouTubeEventSubService {
                 "hub.secret": secret,
                 "hub.callback": callbackUrl,
             },
-        });
+        }).catch(() => console.log("Hi :)"));
     }
 
     public scheduleLeaseRenewal(channelId: string, leaseSeconds: number) {

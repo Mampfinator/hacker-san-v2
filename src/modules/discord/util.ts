@@ -2,10 +2,11 @@ import {
     AutocompleteInteraction,
     Channel,
     DiscordAPIError,
-    MessageEmbed,
+    EmbedBuilder,
     NonThreadGuildBasedChannel,
     TextChannel,
     ThreadChannel,
+    SlashCommandStringOption,
 } from "discord.js";
 import { Action } from "./models/action.entity";
 import {
@@ -23,7 +24,6 @@ import {
 } from "yt-scraping-utilities";
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./client/discord-client.service";
-import { SlashCommandStringOption } from "@discordjs/builders";
 import { QueryBus } from "@nestjs/cqrs";
 import { ChannelsQuery } from "../platforms/queries/channels.query";
 import { ChannelsQueryResult } from "../platforms/queries/channels.handler";
@@ -35,7 +35,7 @@ import { Routes } from "discord-api-types/v10";
 import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
 
 export namespace DiscordUtil {
-    export function postsToEmbed(data?: ytInitialData): MessageEmbed[] {
+    export function postsToEmbed(data?: ytInitialData): EmbedBuilder[] {
         const posts = extractCommunityPosts(data);
         const channelInfo = extractChannelInfo(data);
 
@@ -45,38 +45,37 @@ export namespace DiscordUtil {
     export function postToEmbed(
         post: CommunityPost,
         channelInfo: Partial<ChannelInfo>,
-    ): MessageEmbed {
+    ): EmbedBuilder {
         const { content, attachmentType, id: postId } = post;
 
         const { avatarUrl, name, id: channelId } = channelInfo;
 
-        const embed = new MessageEmbed().setAuthor({
+        const embed = new EmbedBuilder().setAuthor({
             name,
             iconURL: avatarUrl,
             url: `https://www.youtube.com/channel/${channelId}`,
         });
 
+        let embedContent: string;
+
         if (content)
-            embed
-                .setDescription(
-                    content
-                        .map(
-                            ({ text, url }) =>
-                                `${url ? "[" : ""}${text}${
-                                    url ? `](${url})` : ""
-                                }`,
-                        )
-                        .join(" "),
+            embedContent = content
+                .map(
+                    ({ text, url }) =>
+                        `${url ? "[" : ""}${text}${url ? `](${url})` : ""}`,
                 )
-                .setURL(`https://youtube.com/post/${postId}`)
-                .setColor("#ff0000")
-                .setFooter({
-                    text: `ID: ${postId} | ${
-                        attachmentType == AttachmentType.None
-                            ? "text"
-                            : attachmentType.toLowerCase()
-                    }-post`,
-                });
+                .join(" ");
+
+        embed
+            .setURL(`https://youtube.com/post/${postId}`)
+            .setColor("#ff0000")
+            .setFooter({
+                text: `ID: ${postId} | ${
+                    attachmentType == AttachmentType.None
+                        ? "text"
+                        : attachmentType.toLowerCase()
+                }-post`,
+            });
 
         switch (attachmentType) {
             case AttachmentType.None:
@@ -87,26 +86,27 @@ export namespace DiscordUtil {
                 break;
             case AttachmentType.Video:
                 const { video } = post;
-                embed.addField(
-                    "Video",
-                    `${video.title}\n[Click here](https://youtube.com/watch?v=${video.id})`,
-                );
+                embed.addFields({
+                    name: "Video",
+                    value: `${video.title}\n[Click here](https://youtube.com/watch?v=${video.id})`,
+                });
                 embed.setImage(video.thumbnail);
                 break;
             case AttachmentType.Playlist:
                 const { playlist } = post;
-                embed.description += `\n\nPlaylist: ${playlist.title} [link](https://youtube.com/playlist?list=${playlist.id})`;
+                embedContent += `\n\nPlaylist: ${playlist.title} [link](https://youtube.com/playlist?list=${playlist.id})`;
                 embed.setImage(playlist.thumbail);
             case AttachmentType.Poll:
                 const { choices } = post;
-                embed.description += "\n\u200b\n\u200b";
-                embed.addField(
-                    "Poll",
-                    choices
+                embedContent += "\n\u200b\n\u200b";
+                embed.addFields({
+                    name: "Poll",
+                    value: choices
                         .map(choice => `\u2022 \u200b ${choice.text}`)
                         .join("\n"),
-                );
+                });
         }
+        embed.setDescription(embedContent);
 
         return embed;
     }

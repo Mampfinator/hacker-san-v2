@@ -1,2 +1,3 @@
-export const DEFAULT_PORT = 3000;
+export const PORT_DEFAULT = 3000;
 export const DISCORD_COMMAND_CLEANUP_DEFAULT = true;
+export const YOUTUBE_CHANNEL_SCAN_INTERVAL_DEFAULT = 1500;

@@ -1,10 +1,9 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { InjectRepository } from "@nestjs/typeorm";
 import {
     AutocompleteInteraction,
-    CommandInteraction,
+    ChatInputCommandInteraction,
     GuildBasedChannel,
-    MessageEmbed,
+    EmbedBuilder,
+    SlashCommandBuilder,
 } from "discord.js";
 import { FindOperator, IsNull, Repository } from "typeorm";
 import { Action, Platform } from "../../models/action.entity";
@@ -17,6 +16,7 @@ import { GuildSettings } from "../../models/settings.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -120,17 +120,17 @@ export class SettingsCommand implements ISlashCommand {
         private readonly queryBus: QueryBus,
     ) {}
 
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         if (!interaction.guildId) {
             interaction.reply("This command can only be used in a server.");
             return;
         }
 
-        if (!interaction.memberPermissions.has("MANAGE_GUILD", true))
+        if (!interaction.memberPermissions.has("ManageGuild", true))
             return interaction.reply({
                 embeds: [
-                    new MessageEmbed()
-                        .setColor("RED")
+                    new EmbedBuilder()
+                        .setColor("Red")
                         .setDescription("You lack the permissions to do this!"),
                 ],
                 ephemeral: true,
@@ -156,11 +156,11 @@ export class SettingsCommand implements ISlashCommand {
         }
     }
 
-    async viewSettings(interaction: CommandInteraction) {}
+    async viewSettings(interaction: ChatInputCommandInteraction) {}
 
-    async editSettings(interaction: CommandInteraction) {}
+    async editSettings(interaction: ChatInputCommandInteraction) {}
 
-    async viewActions(interaction: CommandInteraction) {
+    async viewActions(interaction: ChatInputCommandInteraction) {
         const { options, guildId, guild } = interaction;
         const channelId = options.getString("channel", false),
             discordChannel = options.getChannel(
@@ -197,8 +197,8 @@ export class SettingsCommand implements ISlashCommand {
         if (!actions || actions.length == 0) {
             return interaction.reply({
                 embeds: [
-                    new MessageEmbed()
-                        .setColor("BLUE")
+                    new EmbedBuilder()
+                        .setColor("Blue")
                         .setDescription("No actions found!"),
                 ],
             });
@@ -222,13 +222,13 @@ export class SettingsCommand implements ISlashCommand {
 
             message.addPage({
                 embeds: [
-                    new MessageEmbed({ description })
+                    new EmbedBuilder({ description })
                         .setTitle(
                             `Actions for ${guild.name} (${i}/${pagefields.length})`,
                         )
                         .setThumbnail(guild.iconURL())
                         .setDescription(description)
-                        .setColor("BLUE")
+                        .setColor("Blue")
                         .addFields(fields),
                 ],
             });
@@ -237,7 +237,7 @@ export class SettingsCommand implements ISlashCommand {
         await message.send();
     }
 
-    async handlePrimaryChannel(interaction: CommandInteraction) {
+    async handlePrimaryChannel(interaction: ChatInputCommandInteraction) {
         const settings = await this.settingsRepo.findOne({
             where: { id: interaction.guildId },
         });
@@ -252,8 +252,8 @@ export class SettingsCommand implements ISlashCommand {
             if (!alreadyExists)
                 return await interaction.reply({
                     embeds: [
-                        new MessageEmbed()
-                            .setColor("RED")
+                        new EmbedBuilder()
+                            .setColor("Blue")
                             .setDescription(
                                 "Channel is already one of this server's primary channels!",
                             ),
@@ -268,8 +268,8 @@ export class SettingsCommand implements ISlashCommand {
             if (!success)
                 return await interaction.reply({
                     embeds: [
-                        new MessageEmbed()
-                            .setColor("RED")
+                        new EmbedBuilder()
+                            .setColor("Blue")
                             .setDescription("Invalid ID."),
                     ],
                     ephemeral: true,
@@ -278,8 +278,8 @@ export class SettingsCommand implements ISlashCommand {
             await this.settingsRepo.save(settings);
             return interaction.reply({
                 embeds: [
-                    new MessageEmbed()
-                        .setColor("GREEN")
+                    new EmbedBuilder()
+                        .setColor("Green")
                         .setDescription(
                             `Successfully added ${id} (${platform}) to this server's primary channels.`,
                         ),
@@ -290,8 +290,8 @@ export class SettingsCommand implements ISlashCommand {
             if (!removed)
                 return interaction.reply({
                     embeds: [
-                        new MessageEmbed()
-                            .setColor("RED")
+                        new EmbedBuilder()
+                            .setColor("Red")
                             .setDescription(
                                 "Channel is not a primary channel of this server.",
                             ),
@@ -301,8 +301,8 @@ export class SettingsCommand implements ISlashCommand {
 
             interaction.reply({
                 embeds: [
-                    new MessageEmbed()
-                        .setColor("GREEN")
+                    new EmbedBuilder()
+                        .setColor("Green")
                         .setDescription(
                             `Successfully removed ${id} (${platform} from this server's primary channels.)`,
                         ),

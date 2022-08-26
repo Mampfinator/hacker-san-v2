@@ -15,3 +15,6 @@ disableServices = [
 ownerId = "<Your Discord ID Here>" # If the bot encounters an error in production, you will be the first to know.
 cleanupOldCommands = true # whether or not to clean up old Discord slash commands on startup
 testGuildId = "<Guild ID>" # if set, will only deploy slash commands to this guild. Useful for debugging, not so useful otherwise.
+
+[youtube]
+channelScanInterval = 1500 # number of milliseconds to wait in between channel passes when scanning for new community posts & manual video fetches. Setting this number too low may result in YouTube's bot protection blocking you.

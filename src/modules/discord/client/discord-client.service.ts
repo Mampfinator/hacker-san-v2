@@ -1,31 +1,33 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { InjectRepository } from "@nestjs/typeorm";
 import {
     AutocompleteInteraction,
     Client,
-    CommandInteraction,
+    ChatInputCommandInteraction,
     Message,
-    MessageEmbed,
+    EmbedBuilder,
+    InteractionType,
+    ActivityType,
 } from "discord.js";
 import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
 import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
-import { InjectCommands } from "./commands/slash-commands.provider";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { FetchPostsCommand } from "src/modules/youtube/community-posts/commands/fetch-posts.command";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
-import { Interval } from "@nestjs/schedule";
 import { SUPPORTED_PLATFORMS } from "src/constants";
 import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
 import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 import { Util } from "src/util";
 import { MultipageMessage } from "src/shared/util/multipage-message";
 import { getActions } from "../actions/action";
+import { Interval } from "@nestjs/schedule";
+import { InjectRepository } from "@nestjs/typeorm";
+import { InjectCommands } from "./commands/slash-commands.provider";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -41,7 +43,7 @@ export class DiscordClientService extends Client {
         @InjectCommands() slashCommands: SlashCommand[],
     ) {
         super({
-            intents: ["GUILDS", "GUILD_MESSAGES"],
+            intents: ["Guilds", "GuildMessages"],
         });
 
         for (const command of slashCommands) {
@@ -140,8 +142,8 @@ export class DiscordClientService extends Client {
     }
 
     @On("interactionCreate")
-    async handleSlashCommand(interaction: CommandInteraction) {
-        if (!interaction.isApplicationCommand()) return;
+    async handleSlashCommand(interaction: ChatInputCommandInteraction) {
+        if (interaction.type != InteractionType.ApplicationCommand) return;
 
         const { commandName } = interaction;
         this.logger.debug(`Received slash command for ${commandName}.`);
@@ -185,7 +187,7 @@ export class DiscordClientService extends Client {
 
         this.logger.debug(`Found community post IDs: ${ids}.`);
 
-        const embeds: MessageEmbed[] = [];
+        const embeds: EmbedBuilder[] = [];
         for (const id of ids) {
             const { posts, channel } = await this.commandBus.execute<
                 FetchPostsCommand,
@@ -246,7 +248,7 @@ export class DiscordClientService extends Client {
                         "server",
                         "servers",
                     )}.`,
-                    type: "WATCHING",
+                    type: ActivityType.Watching,
                 },
             ],
             status: "online",

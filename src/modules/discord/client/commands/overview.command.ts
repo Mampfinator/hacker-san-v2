@@ -1,7 +1,9 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { QueryBus } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { CommandInteraction, CacheType } from "discord.js";
+import {
+    ChatInputCommandInteraction,
+    CacheType,
+    SlashCommandBuilder,
+} from "discord.js";
 import { SUPPORTED_PLATFORMS } from "src/constants";
 import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
@@ -10,6 +12,7 @@ import { Repository } from "typeorm";
 import { Platform } from "src/constants";
 import { GuildSettings } from "../../models/settings.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -24,7 +27,7 @@ export class OverviewCommand implements ISlashCommand {
         private readonly queryBus: QueryBus,
     ) {}
 
-    async execute(interaction: CommandInteraction<CacheType>) {
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
         if (!interaction.guildId) {
             interaction.reply("This command can only be used in a server.");
             return;

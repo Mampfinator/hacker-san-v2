@@ -1,16 +1,14 @@
-import {
-    SlashCommandBuilder,
-    SlashCommandSubcommandBuilder,
-} from "@discordjs/builders";
 import { Logger } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
 import {
     AutocompleteInteraction,
-    CommandInteraction,
-    MessageEmbed,
+    CommandInteractionOptionResolver,
+    EmbedBuilder,
     TextChannel,
     ThreadChannel,
+    SlashCommandSubcommandBuilder,
+    ChatInputCommandInteraction,
+    SlashCommandBuilder,
 } from "discord.js";
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { Repository } from "typeorm";
@@ -20,6 +18,7 @@ import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 import { Util } from "src/util";
+import { InjectRepository } from "@nestjs/typeorm";
 
 function addShared(
     builder: SlashCommandSubcommandBuilder,
@@ -161,7 +160,9 @@ export class ActionCommand implements ISlashCommand {
     private readonly logger = new Logger(ActionCommand.name);
 
     private readonly actionMethods: {
-        [key: string]: (interaction: CommandInteraction) => any | Promise<any>;
+        [key: string]: (
+            interaction: ChatInputCommandInteraction,
+        ) => any | Promise<any>;
     } = {};
 
     constructor(
@@ -170,37 +171,37 @@ export class ActionCommand implements ISlashCommand {
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
     ) {
-        this.actionMethods.lock = (interaction: CommandInteraction) =>
+        this.actionMethods.lock = (interaction: ChatInputCommandInteraction) =>
             this.handleLock(interaction);
-        this.actionMethods.rename = (interaction: CommandInteraction) =>
-            this.handleRename(interaction);
-        this.actionMethods.echo = (interaction: CommandInteraction) =>
+        this.actionMethods.rename = (
+            interaction: ChatInputCommandInteraction,
+        ) => this.handleRename(interaction);
+        this.actionMethods.echo = (interaction: ChatInputCommandInteraction) =>
             this.handleEcho(interaction);
-        this.actionMethods.notify = (interaction: CommandInteraction) =>
-            this.handleNotify(interaction);
-        this.actionMethods.remove = (interaction: CommandInteraction) =>
-            this.handleRemove(interaction);
+        this.actionMethods.notify = (
+            interaction: ChatInputCommandInteraction,
+        ) => this.handleNotify(interaction);
+        this.actionMethods.remove = (
+            interaction: ChatInputCommandInteraction,
+        ) => this.handleRemove(interaction);
     }
 
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         // Because Discord.js and/or Discord doesn't want to respect dm_permission: false, we have to check this here.
         if (!interaction.guildId) {
             interaction.reply("This command can only be used in a server.");
             return;
         }
 
-        if (!interaction.memberPermissions.any(["MANAGE_GUILD"], true))
+        if (!interaction.memberPermissions.any(["ManageGuild"], true))
             return interaction.reply({
                 content: "You don't have the necessary permissions to do that.",
                 ephemeral: true,
             });
 
-        const subcommand = interaction.options.getSubcommand() as
-            | "remove"
-            | "lock"
-            | "rename"
-            | "echo"
-            | "notify";
+        const subcommand = (
+            interaction.options as CommandInteractionOptionResolver<any>
+        ).getSubcommand() as "remove" | "lock" | "rename" | "echo" | "notify";
 
         const dataOption: { data: any } | void = await this.actionMethods[
             subcommand
@@ -217,11 +218,11 @@ export class ActionCommand implements ISlashCommand {
                 );
                 await interaction.reply({
                     embeds: [
-                        new MessageEmbed()
+                        new EmbedBuilder()
                             .setDescription(
                                 `Added new callback with ID ${action.id}`,
                             )
-                            .setColor("GREEN"),
+                            .setColor("Green"),
                     ],
                     ephemeral: true,
                 });
@@ -232,7 +233,7 @@ export class ActionCommand implements ISlashCommand {
     }
 
     async getBasicOptions(
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
     ): Promise<Partial<Action> | undefined> {
         const { options, channel: interactionChannel, guildId } = interaction;
 
@@ -262,8 +263,8 @@ export class ActionCommand implements ISlashCommand {
         if (!success) {
             await interaction.reply({
                 embeds: [
-                    new MessageEmbed()
-                        .setColor("RED")
+                    new EmbedBuilder()
+                        .setColor("Red")
                         .setDescription("Error: invalid channel ID"),
                 ],
                 ephemeral: true,
@@ -286,7 +287,7 @@ export class ActionCommand implements ISlashCommand {
         };
     }
 
-    handleLock({ options }: CommandInteraction): { data: any } {
+    handleLock({ options }: ChatInputCommandInteraction): { data: any } {
         return {
             data: {
                 mode: options.getString("mode"),
@@ -295,7 +296,7 @@ export class ActionCommand implements ISlashCommand {
         };
     }
 
-    handleRename({ options }: CommandInteraction): { data: any } {
+    handleRename({ options }: ChatInputCommandInteraction): { data: any } {
         return {
             data: {
                 name: options.getString("name"),
@@ -303,7 +304,7 @@ export class ActionCommand implements ISlashCommand {
         };
     }
 
-    handleEcho({ options }: CommandInteraction): { data: any } {
+    handleEcho({ options }: ChatInputCommandInteraction): { data: any } {
         return {
             data: {
                 message: options.getString("message"),
@@ -311,7 +312,7 @@ export class ActionCommand implements ISlashCommand {
         };
     }
 
-    handleNotify({ options }: CommandInteraction): { data: any } {
+    handleNotify({ options }: ChatInputCommandInteraction): { data: any } {
         return {
             data: {
                 message: options.getString("message"),
@@ -319,7 +320,7 @@ export class ActionCommand implements ISlashCommand {
         };
     }
 
-    async handleRemove(interaction: CommandInteraction) {
+    async handleRemove(interaction: ChatInputCommandInteraction) {
         const id = interaction.options.getString("action", true).trim();
         const action = await this.actionRepo.findOne({
             where: { id, guildId: interaction.guildId },
@@ -327,10 +328,10 @@ export class ActionCommand implements ISlashCommand {
         if (!action)
             return interaction.reply({
                 embeds: [
-                    new MessageEmbed()
+                    new EmbedBuilder()
                         .setTitle("Could not remove Action")
                         .setDescription(`Could not find action with ID ${id}.`)
-                        .setColor("RED"),
+                        .setColor("Red"),
                 ],
             });
 
@@ -338,7 +339,7 @@ export class ActionCommand implements ISlashCommand {
 
         interaction.reply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setTitle("Removed Action")
                     .setDescription(`Removed action with ID ${result.id}.`)
                     .addFields(result.toEmbedField()),

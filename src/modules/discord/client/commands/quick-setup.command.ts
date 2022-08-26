@@ -1,21 +1,21 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { Logger } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
 import {
-    CommandInteraction,
+    ChatInputCommandInteraction,
     CacheType,
     AutocompleteInteraction,
-    MessageEmbed,
-    MessageActionRow,
-    MessageButton,
-    MessageSelectMenu,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    SelectMenuBuilder,
     Message,
     MessageComponentInteraction,
-    MessageSelectOptionData,
     SelectMenuInteraction,
     GuildBasedChannel,
     GuildTextBasedChannel,
+    SelectMenuOptionBuilder,
+    ButtonStyle,
+    SlashCommandBuilder,
 } from "discord.js";
 import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
@@ -25,6 +25,7 @@ import { Platform } from "src/constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -120,7 +121,7 @@ export class QuickSetupCommand implements ISlashCommand {
         }
     >();
 
-    private getOptions(interaction: CommandInteraction) {
+    private getOptions(interaction: ChatInputCommandInteraction) {
         const { options } = interaction;
 
         const channelId = options.getString("channel"),
@@ -140,7 +141,7 @@ export class QuickSetupCommand implements ISlashCommand {
         };
     }
 
-    async execute(interaction: CommandInteraction<CacheType>) {
+    async execute(interaction: ChatInputCommandInteraction<CacheType>) {
         if (!interaction.guildId) {
             interaction.reply("This command can only be used in a server.");
             return;
@@ -155,7 +156,7 @@ export class QuickSetupCommand implements ISlashCommand {
         }
     }
 
-    async handleRename(interaction: CommandInteraction<CacheType>) {
+    async handleRename(interaction: ChatInputCommandInteraction<CacheType>) {
         const { options, channel } = interaction;
 
         const { channelId, platform } = this.getOptions(interaction);
@@ -215,12 +216,12 @@ export class QuickSetupCommand implements ISlashCommand {
         this.logger.debug(`Saved ${savedActions.length} actions.`);
         return interaction.reply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setTitle("Quick Setup")
                     .setDescription(
                         `Configured rename actions for ${channelName} (${guaranteedChannelId})`,
                     )
-                    .setColor("GREEN")
+                    .setColor("Green")
                     .addFields(
                         savedActions.map(action => action.toEmbedField()),
                     ),
@@ -229,7 +230,7 @@ export class QuickSetupCommand implements ISlashCommand {
     }
 
     async handleGeneral(
-        interaction: CommandInteraction<CacheType>,
+        interaction: ChatInputCommandInteraction<CacheType>,
     ): Promise<any> {
         this.optionMap.set(interaction.id, {
             "convenience-options": new Set(),
@@ -249,7 +250,7 @@ export class QuickSetupCommand implements ISlashCommand {
         if (!notificationChannel && !streamChannel && !tagsChannel)
             return interaction.editReply({
                 embeds: [
-                    new MessageEmbed({
+                    new EmbedBuilder({
                         description:
                             "No channels to configure actions for. What exactly do you want me to do here?",
                     }),
@@ -263,110 +264,117 @@ export class QuickSetupCommand implements ISlashCommand {
         if (!success)
             await interaction.reply({
                 embeds: [
-                    new MessageEmbed({ description: "Invalid id." }).setColor(
-                        "RED",
+                    new EmbedBuilder({ description: "Invalid id." }).setColor(
+                        "Red",
                     ),
                 ],
             });
 
-        const notificationOptions: MessageSelectOptionData[] = [];
-        const convenienceOptions: MessageSelectOptionData[] = [];
+        const notificationOptions: SelectMenuOptionBuilder[] = [];
+        const convenienceOptions: SelectMenuOptionBuilder[] = [];
 
         if (notificationChannel) {
             notificationOptions.push(
-                {
-                    label: "Live & Uploads",
-                    value: "live-and-uploads",
-                    description:
+                new SelectMenuOptionBuilder()
+                    .setLabel("Live & Uploads")
+                    .setValue("live-and-uploads")
+                    .setDescription(
                         "Send notifications when streams go live in the notification channel.",
-                },
-                {
+                    ),
+                new SelectMenuOptionBuilder({
                     label: "Offline (Notification channel)",
                     value: "offline:notif",
                     description:
                         "Send notifications when a stream goes offline in the notification channel.",
-                },
+                }),
             );
 
             if (platform === "youtube") {
-                notificationOptions.push({
-                    label: "Community Posts",
-                    value: "community-posts",
-                    description:
-                        "Send notifications when a community post is made in the notification channel.",
-                });
+                notificationOptions.push(
+                    new SelectMenuOptionBuilder({
+                        label: "Community Posts",
+                        value: "community-posts",
+                        description:
+                            "Send notifications when a community post is made in the notification channel.",
+                    }),
+                );
             }
         }
 
         if (streamChannel) {
-            notificationOptions.push({
-                label: "Offline (Stream chat)",
-                value: "offline:stream",
-                description:
-                    "Send notifications when a stream goes offline in the stream chat.",
-            });
+            notificationOptions.push(
+                new SelectMenuOptionBuilder({
+                    label: "Offline (Stream chat)",
+                    value: "offline:stream",
+                    description:
+                        "Send notifications when a stream goes offline in the stream chat.",
+                }),
+            );
 
             convenienceOptions.push(
-                {
+                new SelectMenuOptionBuilder({
                     label: "Automatic KoroTagger Setup",
                     value: "auto-korotagger",
                     description:
                         "Echo !stream {link} for KoroTagger in stream chat when a stream goes live.",
-                },
-                {
+                }),
+                new SelectMenuOptionBuilder({
                     label: "No automatic lock & unlock",
                     value: "no-lock",
                     description:
                         "Don't automatically lock and unlock the stream channel.",
-                },
+                }),
             );
         }
 
         if (tagsChannel) {
-            convenienceOptions.push({
-                label: "Send tags",
-                value: "tags",
-                description:
-                    "Use KoroTagger to print tags in the tags channel.",
-            });
+            convenienceOptions.push(
+                new SelectMenuOptionBuilder({
+                    label: "Send tags",
+                    value: "tags",
+                    description:
+                        "Use KoroTagger to print tags in the tags channel.",
+                }),
+            );
         }
 
-        const components: MessageActionRow[] = [];
+        const components: ActionRowBuilder[] = [];
 
         components.push(
-            new MessageActionRow().addComponents(
-                new MessageSelectMenu()
+            new ActionRowBuilder().addComponents(
+                new SelectMenuBuilder()
                     .setPlaceholder("Notification options")
                     .setMinValues(0)
                     .setMaxValues(notificationOptions.length)
                     .setCustomId("notification-options")
                     .setOptions(notificationOptions),
             ),
-            new MessageActionRow().addComponents(
-                new MessageSelectMenu()
+            new ActionRowBuilder().addComponents(
+                new SelectMenuBuilder()
                     .setPlaceholder("Convenience options")
                     .setMinValues(0)
                     .setMaxValues(convenienceOptions.length)
                     .setCustomId("convenience-options")
                     .setOptions(convenienceOptions),
             ),
-            new MessageActionRow().addComponents(
-                new MessageButton()
+            new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
                     .setCustomId("submit")
                     .setLabel("Submit")
-                    .setStyle("PRIMARY"),
+                    .setStyle(ButtonStyle.Primary),
             ),
         );
 
         const reply = (await interaction.editReply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setTitle("Quick Setup")
                     .setDescription(
                         `Configure actions for ${name} (${channelId}, ${platform})`,
                     )
-                    .setColor("BLUE"),
+                    .setColor("Blue"),
             ],
+            // @ts-ignore
             components,
         })) as Message;
 
@@ -397,7 +405,7 @@ export class QuickSetupCommand implements ISlashCommand {
     }
 
     private async handleSubmit(
-        interaction: CommandInteraction<CacheType>,
+        interaction: ChatInputCommandInteraction<CacheType>,
         componentInteraction: MessageComponentInteraction,
     ) {
         const {
@@ -413,9 +421,9 @@ export class QuickSetupCommand implements ISlashCommand {
         if (selectedOptions.size === 0) {
             await componentInteraction.reply({
                 embeds: [
-                    new MessageEmbed({
+                    new EmbedBuilder({
                         description: "You must select at least one option.",
-                    }).setColor("RED"),
+                    }).setColor("Red"),
                 ],
             });
             return;
@@ -611,8 +619,8 @@ export class QuickSetupCommand implements ISlashCommand {
 
         await componentInteraction.reply({
             embeds: [
-                new MessageEmbed({ description: "Actions saved." })
-                    .setColor("GREEN")
+                new EmbedBuilder({ description: "Actions saved." })
+                    .setColor("Green")
                     .addFields(
                         savedActions.map(action => action.toEmbedField()),
                     ),

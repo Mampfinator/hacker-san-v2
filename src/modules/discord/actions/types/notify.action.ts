@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { ActionType, IActionType } from "../action";
 import { ActionUtil } from "../util";
 
@@ -7,7 +7,7 @@ export class NotifyAction implements IActionType {
     async execute({ data, command, channel }) {
         const { message } = data as { message: string };
 
-        const notification: { content: string; embeds?: MessageEmbed[] } = {
+        const notification: { content: string; embeds?: EmbedBuilder[] } = {
             content: ActionUtil.interpolate(message, command),
         };
         if (command.options.embed)

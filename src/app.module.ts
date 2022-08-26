@@ -4,25 +4,25 @@ import {
     NestModule,
     RequestMethod,
 } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { RawBodyMiddleware } from "./shared/middleware/raw-body.middleware";
+import { JsonBodyMiddleware } from "./shared/middleware/json-body.middleware";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { ScheduleModule } from "@nestjs/schedule";
-import { AppService } from "./app.service";
-import config from "src/modules/config/config";
-import { DiscordModule } from "./modules/discord/discord.module";
+import config from "./modules/config/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { GuildSettings } from "./modules/discord/models/settings.entity";
 import { YouTubeChannel } from "./modules/youtube/model/youtube-channel.entity";
 import { CommunityPost } from "./modules/youtube/community-posts/model/community-post.entity";
-import { RawBodyMiddleware } from "./shared/middleware/raw-body.middleware";
-import { JsonBodyMiddleware } from "./shared/middleware/json-body.middleware";
 import { YouTubeVideo } from "./modules/youtube/model/youtube-video.entity";
-import { Action } from "./modules/discord/models/action.entity";
-import { TwitterSpace } from "./modules/twitter/models/twitter-space.entity";
+import { Action } from "rxjs/internal/scheduler/Action";
 import { TwitterUser } from "./modules/twitter/models/twitter-user.entity";
-import { PlatformModule } from "./modules/platforms/platform.module";
-import { YouTubeModule } from "./modules/youtube/youtube.module";
-import { TwitterModule } from "./modules/twitter/twitter.module";
+import { TwitterSpace } from "./modules/twitter/models/twitter-space.entity";
+import { ScheduleModule } from "@nestjs/schedule";
 import { CqrsModule } from "@nestjs/cqrs";
+import { DiscordModule } from "./modules/discord/discord.module";
+import { PlatformModule } from "./modules/platforms/platform.module";
+import { YouTubeModule } from "./modules/youtube";
+import { TwitterModule } from "./modules/twitter/twitter.module";
+import { AppService } from "./app.service";
 
 // General todo: frontend for managing actions because trying to do that with slash commands will only get you so far.
 // Proper modals when Discord.

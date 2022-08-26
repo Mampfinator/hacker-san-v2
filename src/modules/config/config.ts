@@ -1,6 +1,10 @@
-import { DEFAULT_PORT, DISCORD_COMMAND_CLEANUP_DEFAULT } from "./defaults";
+import {
+    DISCORD_COMMAND_CLEANUP_DEFAULT,
+    PORT_DEFAULT,
+    YOUTUBE_CHANNEL_SCAN_INTERVAL_DEFAULT,
+} from "./defaults";
 import { parseCommandLineArgs } from "./parse-cla";
-import { EnvOptions, parseEnv } from "./parse-env";
+import { parseEnv } from "./parse-env";
 import { parseTOML, TOMLOptions } from "./parse-toml";
 
 interface PlatformConfig {
@@ -21,6 +25,7 @@ export interface DiscordConfig {
 export interface YouTubeConfig extends PlatformConfig {
     apiKey?: string;
     secret?: string;
+    channelScanInterval: number;
 }
 
 export interface TwitterConfig extends PlatformConfig {
@@ -41,6 +46,9 @@ export default () => {
             !tomlOptions.app?.disableServices?.includes("youtube"),
         apiKey: envConfig.YOUTUBE_API_KEY,
         secret: envConfig.YOUTUBE_SECRET,
+        channelScanInterval:
+            tomlOptions.youtube?.channelScanInterval ??
+            YOUTUBE_CHANNEL_SCAN_INTERVAL_DEFAULT,
     };
 
     const TWITTER: TwitterConfig = {
@@ -66,7 +74,7 @@ export default () => {
             process.env.NODE_ENV === "production",
     };
 
-    const PORT = claConfig.port ?? tomlOptions.app?.port ?? DEFAULT_PORT;
+    const PORT = claConfig.port ?? tomlOptions.app?.port ?? PORT_DEFAULT;
     const { DATABASE_URL } = envConfig;
 
     let URL: string;

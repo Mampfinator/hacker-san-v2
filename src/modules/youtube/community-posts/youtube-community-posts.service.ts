@@ -1,21 +1,20 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 import { CommunityPost as CommunityPostEntitiy } from "./model/community-post.entity";
 import { Repository } from "typeorm";
 import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { In } from "typeorm";
 import { CommandBus } from "@nestjs/cqrs";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
-import { tryFetchPosts } from "../util";
 import { DiscordUtil } from "src/modules/discord/util";
 import { CacheChannelInfoCommand } from "../commands/cache-channel-info.command";
+import { FetchPostsCommand } from "./commands/fetch-posts.command";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class YouTubeCommunityPostsService {
     private readonly logger = new Logger(YouTubeCommunityPostsService.name);
 
     private pointer = 0;
-
     private started = false;
 
     constructor(
@@ -37,10 +36,15 @@ export class YouTubeCommunityPostsService {
 
         let channelInfo: { id: string; name: string; avatarUrl: string };
 
-        let { posts, channel: fullChannelInfo, errors } = await tryFetchPosts(
-            channel.channelId,
-            3,
-            500,
+        const {
+            posts,
+            channel: fullChannelInfo,
+            errors,
+        } = await this.commandBus.execute(
+            new FetchPostsCommand({
+                channelId: channel.channelId,
+                includeChannelInfo: true,
+            }),
         );
 
         if (!fullChannelInfo) {

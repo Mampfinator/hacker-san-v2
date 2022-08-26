@@ -1,15 +1,16 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { SyncPostsCommand } from "./sync-posts.command";
-import { tryFetchPosts } from "../../util";
-import { InjectRepository } from "@nestjs/typeorm";
 import { CommunityPost } from "../model/community-post.entity";
 import { Repository } from "typeorm";
+import { FetchPostsCommand } from "./fetch-posts.command";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @CommandHandler(SyncPostsCommand)
 export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand> {
     constructor(
         @InjectRepository(CommunityPost)
         private readonly postRepo: Repository<CommunityPost>,
+        private readonly commandBus: CommandBus,
     ) {}
 
     async execute({ channelId, posts }: SyncPostsCommand) {
@@ -19,7 +20,9 @@ export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand> {
             );
 
         if (channelId && !posts) {
-            posts = (await tryFetchPosts(channelId, 3, 500)).posts;
+            posts = await this.commandBus.execute(
+                new FetchPostsCommand({ channelId }),
+            );
         }
 
         for (const post of posts) {

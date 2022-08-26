@@ -1,12 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { CommandBus } from "@nestjs/cqrs";
-import { Interval } from "@nestjs/schedule";
+import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
+import axios from "axios";
+import { XMLParser } from "fast-xml-parser";
 import { youtube_v3 } from "googleapis";
+import { YouTubeConfig } from "src/modules/config/config";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
 import { In, Repository } from "typeorm";
+import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { YouTubeLiveStatus, YouTubeVideo } from "../model/youtube-video.entity";
 import { YouTubeApiService } from "../youtube-api.service";
+import { YOUTUBE_VIDEO_FEED_URL } from "./constants";
 
 interface SimplifiedYouTubeVideo {
     id: string;
@@ -28,13 +34,30 @@ type YouTubeStatusChange = "live" | "upcoming" | "upload" | "offline";
 @Injectable()
 export class YouTubeVideosService {
     private readonly logger = new Logger(YouTubeVideosService.name);
+    private readonly rssParser = new XMLParser();
+    /**
+     * Used to store the list of channels that are still to be scanned.
+     * If the list is empty, rebuild it from the database.
+     */
+    private channelList: string[] = [];
 
     constructor(
         private readonly apiClient: YouTubeApiService,
         private readonly commandBus: CommandBus,
         @InjectRepository(YouTubeVideo)
         private readonly videoRepo: Repository<YouTubeVideo>,
-    ) {}
+        @InjectRepository(YouTubeChannel)
+        private readonly channelRepo: Repository<YouTubeChannel>,
+        schedulerRegistry: SchedulerRegistry,
+        config: ConfigService,
+    ) {
+        const { channelScanInterval } = config.get<YouTubeConfig>("YOUTUBE");
+        const interval = setInterval(
+            () => this.rescanVideos(),
+            channelScanInterval,
+        );
+        schedulerRegistry.addInterval("CHECK_CHANNEL_VIDEOS", interval);
+    }
 
     /**
      * Processes potentially new videos.
@@ -221,5 +244,79 @@ export class YouTubeVideosService {
                 url: `https://www.youtube.com/watch?v=${video.id}`,
             }),
         );
+    }
+
+    private async rescanVideos() {
+        if (this.channelList.length == 0) {
+            this.channelList = (await this.channelRepo.find({})).map(
+                channel => channel.channelId,
+            );
+        }
+
+        const channelId = this.channelList.shift();
+        if (!channelId) return;
+        const url = `${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`;
+
+        const xml = await axios
+            .get(url)
+            .then(res => this.rssParser.parse(res.data));
+        const videoIds: string[] = xml.feed.entry
+            .map(entry => entry["yt:videoId"])
+            .filter(id => id);
+
+        const {
+            data: { items: apiVideos },
+        } = await this.apiClient.videos.list({
+            id: [...new Set(videoIds)].slice(0, 50),
+            part: ["snippet", "liveStreamingDetails"],
+            maxResults: 50,
+        });
+
+        const databaseVideos = new Map(
+            (
+                await this.videoRepo.find({
+                    where: {
+                        channelId,
+                    },
+                })
+            ).map(video => [video.id, video]),
+        );
+
+        for (const apiVideo of apiVideos) {
+            const { id } = apiVideo;
+            const video = this.simplifyVideo(apiVideo);
+            const { liveStatus: newStatus } = video;
+
+            const dbVideo = databaseVideos.get(id);
+            const oldStatus = dbVideo?.status ?? YouTubeLiveStatus.Offline;
+
+            if (newStatus == "Unknown") {
+                this.logger.warn(
+                    `Unknown video status for video ${id} on ${channelId}. Skipping.`,
+                );
+                continue;
+            }
+
+            const change = this.getStatusChange(oldStatus, newStatus);
+            await this.videoRepo.save({
+                id,
+                channelId,
+                status: newStatus,
+            });
+
+            if (change) {
+                this.generateNotif(video, change);
+            }
+        }
+    }
+
+    private getStatusChange(
+        oldStatus: YouTubeLiveStatus | null,
+        newStatus: YouTubeLiveStatus,
+    ): YouTubeStatusChange | null {
+        if (oldStatus == newStatus) return null;
+        if (!oldStatus && newStatus == YouTubeLiveStatus.Offline)
+            return "upload";
+        else return newStatus as YouTubeStatusChange;
     }
 }
