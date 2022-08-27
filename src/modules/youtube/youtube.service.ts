@@ -11,7 +11,7 @@ import { COMMUNITY_POST_SLEEP_TIME, EVENTSUB_SLEEP_TIME } from "./constants";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { ConfigService } from "@nestjs/config";
-import axios from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from "axios";
 import { InjectRepository } from "@nestjs/typeorm";
 
 export interface FetchRawOptions {
@@ -20,11 +20,19 @@ export interface FetchRawOptions {
      * "high" puts the request back at the bottom of the queue, "low" puts it on top. Defaults to low.
      */
     requeuePriority?: "high" | "low";
+    /**
+     * Options to pass to Axios for the request.
+     */
+    requestOptions?: AxiosRequestConfig<any>;
+    /**
+     * Use your own Axios instance for the request instead. RequestOptions still get passed to it.
+     */
+    useInstance?: AxiosInstance;
 }
 
 type RequestQueueItem = {
-    callback: () => Promise<string>;
-    resolve: (value: string) => any;
+    callback: () => Promise<string | AxiosResponse>;
+    resolve: (value: string | AxiosResponse) => any;
     options?: FetchRawOptions;
 };
 
@@ -154,14 +162,17 @@ export class YouTubeService {
     /**
      * Fetches raw pages from YouTube. Since YouTube's rate limits for crawling/scraping are extremely stingy, this needs to work like a request queue.
      */
-    public async fetchRaw(
+    public async fetchRaw<T extends boolean>(
         url: string,
         options?: FetchRawOptions,
-    ): Promise<string> {
-        return new Promise<string>(resolve => {
-            const callback: () => Promise<string> = async () => {
-                const res = await axios.get(url);
-                return res.data;
+        returnResponse?: T,
+    ): Promise<T extends true ? AxiosResponse : string | Record<string, any>> {
+        return new Promise<any>(resolve => {
+            const callback: () => Promise<string | AxiosResponse> = async () => {
+                const client: AxiosInstance = options?.useInstance ?? axios;
+                const res = await client(url, {method: "GET", ...(options?.requestOptions ?? {})});
+                if (returnResponse) return res;
+                else return res.data;
             };
 
             this.requestQueue.push({ resolve, callback, options });

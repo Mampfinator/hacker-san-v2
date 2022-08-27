@@ -38,7 +38,8 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
                 maxRetries: 3,
                 requeuePriority: "high",
             },
-        );
+            false
+        ) as string;
 
         const posts = extractCommunityPosts(data);
         const channel = includeChannelInfo

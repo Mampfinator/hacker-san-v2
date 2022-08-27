@@ -51,12 +51,14 @@ export class YouTubeVideosService {
         schedulerRegistry: SchedulerRegistry,
         config: ConfigService,
     ) {
+        /*
         const { channelScanInterval } = config.get<YouTubeConfig>("YOUTUBE");
         const interval = setInterval(
             () => this.rescanVideos(),
             channelScanInterval,
         );
         schedulerRegistry.addInterval("CHECK_CHANNEL_VIDEOS", interval);
+        */
     }
 
     /**
@@ -127,7 +129,7 @@ export class YouTubeVideosService {
     }
 
     // TODO: put on dynamic interval.
-    @Interval(12500)
+    //@Interval(12500)
     public async checkVideoStatusChange() {
         const dbVideos = await this.videoRepo.find({
             where: {
