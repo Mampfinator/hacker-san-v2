@@ -42,7 +42,7 @@ export class CacheCollection<TKey, TValue> extends MapBase<
         this.ttl = options?.ttl ?? DEFAULT_TTL;
 
         if (options?.autoSweep) {
-            setInterval(() => this.sweep(), options?.sweepFrequency ?? 60000);
+            setInterval(() => this.sweep(), options?.sweepFrequency ?? DEFAULT_SWEEP_INTERVAL);
         }
     }
 
