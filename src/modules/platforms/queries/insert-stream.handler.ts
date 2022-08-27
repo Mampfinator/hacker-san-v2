@@ -11,11 +11,13 @@ export class InsertStreamHandler implements IQueryHandler<InsertStreamQuery> {
 
     constructor(
         @InjectRepository(StreamEntity)
-        private readonly streamRepo: Repository<StreamEntity>
+        private readonly streamRepo: Repository<StreamEntity>,
     ) {}
-    
+
     async execute(query: InsertStreamQuery): Promise<boolean> {
-        const result = await this.streamRepo.insert(query.stream).catch(error => this.logger.error(error, error.stack));
+        const result = await this.streamRepo
+            .insert(query.stream)
+            .catch(error => this.logger.error(error, error.stack));
         return typeof result !== "undefined";
     }
 }

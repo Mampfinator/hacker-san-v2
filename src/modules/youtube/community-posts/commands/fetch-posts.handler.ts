@@ -30,7 +30,7 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
     }: FetchPostsCommand): Promise<
         CommunityPost[] | { posts: CommunityPost[]; channel: ChannelInfo }
     > {
-        const data = await this.youtubeService.fetchRaw(
+        const data = (await this.youtubeService.fetchRaw(
             postId
                 ? this.makePostLink(postId)
                 : this.makeCommunityLink(channelId),
@@ -38,8 +38,8 @@ export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
                 maxRetries: 3,
                 requeuePriority: "high",
             },
-            false
-        ) as string;
+            false,
+        )) as string;
 
         const posts = extractCommunityPosts(data);
         const channel = includeChannelInfo

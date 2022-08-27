@@ -11,7 +11,12 @@ import { COMMUNITY_POST_SLEEP_TIME, EVENTSUB_SLEEP_TIME } from "./constants";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { ConfigService } from "@nestjs/config";
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from "axios";
+import axios, {
+    AxiosInstance,
+    AxiosRequestConfig,
+    AxiosResponse,
+    Method,
+} from "axios";
 import { InjectRepository } from "@nestjs/typeorm";
 
 export interface FetchRawOptions {
@@ -168,9 +173,14 @@ export class YouTubeService {
         returnResponse?: T,
     ): Promise<T extends true ? AxiosResponse : string | Record<string, any>> {
         return new Promise<any>(resolve => {
-            const callback: () => Promise<string | AxiosResponse> = async () => {
+            const callback: () => Promise<
+                string | AxiosResponse
+            > = async () => {
                 const client: AxiosInstance = options?.useInstance ?? axios;
-                const res = await client(url, {method: "GET", ...(options?.requestOptions ?? {})});
+                const res = await client(url, {
+                    method: "GET",
+                    ...(options?.requestOptions ?? {}),
+                });
                 if (returnResponse) return res;
                 else return res.data;
             };
