@@ -1,7 +1,9 @@
 import { ChannelQueryHandler } from "./channel.handler";
-import { StreamQueryHandler } from "./stream.handler";
+import { FindStreamQueryHandler } from "./find-stream.handler";
+import { InsertStreamHandler } from "./insert-stream.handler";
 
 export { ChannelQuery, ChannelQueryOptions } from "./channel.query";
-export { StreamQuery, StreamQueryOptions } from "./stream.query";
+export { FindStreamQuery, StreamQueryOptions } from "./find-stream.query";
+export { InsertStreamQuery, InsertQueryItem } from "./insert-stream.query"
 
-export const QueryHandlers = [ChannelQueryHandler, StreamQueryHandler];
+export const QueryHandlers = [ChannelQueryHandler, FindStreamQueryHandler, InsertStreamHandler];

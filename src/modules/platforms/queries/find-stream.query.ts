@@ -13,7 +13,7 @@ export interface StreamQueryOptions<T extends boolean> {
         : FindManyOptions<StreamEntity>;
 }
 
-export class StreamQuery implements IQuery {
+export class FindStreamQuery implements IQuery {
     constructor(public readonly options: StreamQueryOptions<boolean>) {
         if (options.platform && !options.platformId) {
             throw new Error(
@@ -36,7 +36,7 @@ export class StreamQuery implements IQuery {
 
     // used for YouTube, specifically.
     public static allNonOfflineQuery(platform: Platform, platformId?: string) {
-        return new StreamQuery({
+        return new FindStreamQuery({
             query: {
                 where: {
                     platform,
