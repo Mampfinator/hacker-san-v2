@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
+import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmbedBuilder } from "discord.js";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
@@ -28,7 +29,7 @@ export class TwitterSpacesService {
         private readonly spacesRepo: Repository<TwitterSpace>,
     ) {}
 
-    //@Interval(5000)
+    @Interval(5000)
     public async syncTwitterSpaces() {
         const users = await this.usersRepo.find();
         if (users.length == 0) return;

@@ -72,8 +72,6 @@ export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand>, OnMo
     }
 
     async execute({ channelId, posts }: SyncPostsCommand) {
-        // TODO: fetch *all* posts from a channel ("borrow" code from https://github.com/bot-jonas/youtube-community-tab/blob/master/src/youtube_community_tab/community_tab.py)
-
         if (!channelId && typeof posts !== "object")
             throw new TypeError(
                 "Either channelId or posts needs to be defined.",
