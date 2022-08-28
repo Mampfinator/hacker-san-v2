@@ -58,10 +58,11 @@ export class SyncPostsHandler
                     success = true;
                     this.logger.debug(`Success!`);
                 })
-                .catch(() => {
+                .catch((error: Error) => {
                     success = false;
-                    this.logger.debug(
+                    this.logger.error(
                         `Failed getting new cookies from YouTube.`,
+                        error.stack
                     );
                 });
         }
