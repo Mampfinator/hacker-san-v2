@@ -47,27 +47,27 @@ export class SyncPostsHandler
         const page = await browser.newPage();
         await page.goto(`https://youtube.com/`);
 
+
+        let cookieJar: CookieJar;
         let success = false;
+        let failed = 0;
         while (!success) {
             await sleep(250);
-            await page
-                .click(
-                    ".eom-buttons.style-scope.ytd-consent-bump-v2-lightbox>div>ytd-button-renderer",
-                )
-                .then(() => {
-                    success = true;
-                    this.logger.debug(`Success!`);
-                })
-                .catch((error: Error) => {
-                    success = false;
-                    this.logger.error(
-                        `Failed getting new cookies from YouTube.`,
-                        error.stack
-                    );
-                });
+            try {
+                cookieJar = new CookieJar(await getStoreByPage(page));
+                await page.click(".eom-buttons.style-scope.ytd-consent-bump-v2-lightbox>div>ytd-button-renderer").then(() => success = true);
+            } catch (error) {
+                failed++;
+                if (failed <= 5) {
+                    this.logger.warn(`Potentially failed getting cookies from YouTube: ${(error as Error).message}.`);
+                } else {
+                    this.logger.error(`Failing to get cookies from YouTube: `, (error as Error).stack);
+                }
+
+                if ((await cookieJar.getCookies("https://youtube.com")).some(cookie => cookie.key.toLowerCase().includes("consent") && cookie.value.toLowerCase().includes("pending"))) success = true;
+            }
         }
 
-        const cookieJar = new CookieJar(await getStoreByPage(page));
         const cookies = await cookieJar.getCookies("https://youtube.com");
         this.cookies = new CookieJar();
         for (const cookie of cookies) {
