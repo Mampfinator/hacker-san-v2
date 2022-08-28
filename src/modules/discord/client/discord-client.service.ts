@@ -43,7 +43,7 @@ export class DiscordClientService extends Client {
         @InjectCommands() slashCommands: SlashCommand[],
     ) {
         super({
-            intents: ["Guilds", "GuildMessages"],
+            intents: ["Guilds", "GuildMessages", "MessageContent"],
         });
 
         for (const command of slashCommands) {
