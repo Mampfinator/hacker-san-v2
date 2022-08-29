@@ -8,6 +8,7 @@ import { XMLParser } from "fast-xml-parser";
 import { youtube_v3 } from "googleapis";
 import { YouTubeConfig } from "src/modules/config/config";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
+import { Util } from "src/util";
 import { In, Repository } from "typeorm";
 import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { YouTubeLiveStatus, YouTubeVideo } from "../model/youtube-video.entity";
@@ -40,6 +41,7 @@ export class YouTubeVideosService {
      * If the list is empty, rebuild it from the database.
      */
     private channelList: string[] = [];
+    private newVideoIds: string[] = [];
 
     constructor(
         private readonly apiClient: YouTubeApiService,
@@ -264,50 +266,33 @@ export class YouTubeVideosService {
             .map(entry => entry["yt:videoId"])
             .filter(id => id);
 
-        const {
-            data: { items: apiVideos },
-        } = await this.apiClient.videos.list({
-            id: [...new Set(videoIds)].slice(0, 50),
-            part: ["snippet", "liveStreamingDetails"],
-            maxResults: 50,
-        });
-
-        const databaseVideos = new Map(
-            (
-                await this.videoRepo.find({
-                    where: {
-                        channelId,
-                    },
-                })
-            ).map(video => [video.id, video]),
+        const databaseVideos = await this.videoRepo.find(
+            {
+                where: {
+                    channelId,
+                    id: In(videoIds)
+                },
+            }
         );
 
-        for (const apiVideo of apiVideos) {
-            const { id } = apiVideo;
-            const video = this.simplifyVideo(apiVideo);
-            const { liveStatus: newStatus } = video;
+        const difference = Util.symmetricSetDifference(new Set(videoIds), new Set(databaseVideos.map(v => v.id)));
+        
+        for (const videoId of difference) {
+            const {
+                unavailable,
+                video,
+                inserted
+            } = await this.process(videoId);
 
-            const dbVideo = databaseVideos.get(id);
-            const oldStatus = dbVideo?.status ?? YouTubeLiveStatus.Offline;
-
-            if (newStatus == "Unknown") {
-                this.logger.warn(
-                    `Unknown video status for video ${id} on ${channelId}. Skipping.`,
-                );
+            if (unavailable) {
+                this.generateNotif({ ...(video ?? {}), id: videoId, channelId }, "offline");
                 continue;
             }
 
-            const change = this.getStatusChange(oldStatus, newStatus);
-            await this.videoRepo.save({
-                id,
-                channelId,
-                status: newStatus,
-            });
-
-            if (change) {
-                this.generateNotif(video, change);
-            }
+            const newStatus = this.simplifyVideo(video).liveStatus as YouTubeLiveStatus;
+            this.generateNotif(video, this.getStatusChange(databaseVideos.find(video => video.id == videoId).status, newStatus));
         }
+
     }
 
     private getStatusChange(

@@ -40,4 +40,24 @@ export namespace Util {
             if (!(await handler(error))) throw error;
         }
     }
+
+    export function setDifference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+        const difference = new Set(setA);
+
+        for (const element of setB) {
+            difference.delete(element);
+        }
+
+        return difference;
+    }
+
+    export function symmetricSetDifference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+        const difference = new Set(setA);
+
+        for (const element of setB) {
+            difference[difference.has(element) ? "delete" : "add"](element);
+        }
+
+        return difference;
+    }
 }
