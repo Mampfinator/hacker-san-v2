@@ -220,7 +220,7 @@ export namespace DiscordUtil {
             | undefined;
         if (!platform) return [];
 
-        const input = (options.getFocused() as string).trim();
+        const input = (options.getFocused() as string).trim().toLowerCase();
 
         const { channels } = await queryBus.execute<
             ChannelsQuery,
@@ -231,7 +231,7 @@ export namespace DiscordUtil {
         return channels
             .filter(
                 channel =>
-                    channel.name.includes(input) || channel.id.includes(input),
+                    channel.name.toLowerCase().includes(input) || channel.id.toLowerCase().includes(input),
             )
             .map(channel => ({ name: channel.name, value: channel.id }))
             .slice(0, 25); // limit to 25 results because Discord has a limit of 25 autocomplete suggestions.
