@@ -1,4 +1,5 @@
-import { ActionType, IActionType } from "../action";
+import { ChannelType } from "discord.js";
+import { ActionPayload, ActionType, IActionType } from "../action";
 
 @ActionType("lock")
 export class LockAction implements IActionType {
@@ -7,7 +8,9 @@ export class LockAction implements IActionType {
         unlock: "🔓",
     };
 
-    async execute({ channel, data }) {
+    async execute({ channel, data }: ActionPayload) {
+        if (channel.type !== ChannelType.GuildText) return; 
+        
         const { mode, message } = data as {
             mode: "lock" | "unlock";
             message?: string;
@@ -16,7 +19,7 @@ export class LockAction implements IActionType {
         if (mode === "lock" && message)
             await channel.send(this.makeMessage(mode, message));
         await channel.permissionOverwrites.create(channel.guildId, {
-            SEND_MESSAGES: permission,
+            SendMessages: permission,
         });
 
         if (mode === "unlock" && message)
