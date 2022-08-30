@@ -13,7 +13,7 @@ import { GuildSettings } from "./modules/discord/models/settings.entity";
 import { YouTubeChannel } from "./modules/youtube/model/youtube-channel.entity";
 import { CommunityPost } from "./modules/youtube/community-posts/model/community-post.entity";
 import { YouTubeVideo } from "./modules/youtube/model/youtube-video.entity";
-import { Action } from "rxjs/internal/scheduler/Action";
+import { Action } from "./modules/discord/models/action.entity";
 import { TwitterUser } from "./modules/twitter/models/twitter-user.entity";
 import { TwitterSpace } from "./modules/twitter/models/twitter-space.entity";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -76,4 +76,6 @@ export class AppModule implements NestModule {
             .apply(JsonBodyMiddleware)
             .forRoutes("*");
     }
+
+    
 }
