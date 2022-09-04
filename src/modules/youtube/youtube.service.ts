@@ -162,7 +162,7 @@ export class YouTubeService implements OnModuleInit {
     public getAxiosInstance(config?: AxiosRequestConfig): AxiosInstance {
         const headers = config?.headers ?? {};
         Object.assign(headers, {
-            cookies: this.cookies.getCookieStringSync("https://youtube.com") 
+            cookies: this.cookies.getCookieStringSync("https://youtube.com"),
         });
 
         const options: AxiosRequestConfig = {
@@ -245,11 +245,19 @@ export class YouTubeService implements OnModuleInit {
                 .join("\n")}`,
         );
 
-        this.client = this.getAxiosInstance({method: "GET"});
+        this.client = this.getAxiosInstance({ method: "GET" });
     }
 
     public async init() {
-        const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({one: false, query: {where: {platform: "youtube"}}}));
+        const channels = await this.queryBus.execute<
+            ChannelQuery,
+            ChannelEntity[]
+        >(
+            new ChannelQuery({
+                one: false,
+                query: { where: { platform: "youtube" } },
+            }),
+        );
 
         //const channels = await this.channels.find();
         const channelLoggers = channels.map(
@@ -291,10 +299,15 @@ export class YouTubeService implements OnModuleInit {
                             logger.debug("Synced community posts.");
                         }),
                 );
-            
+
                 logger.debug("Doing full channel crawl.");
-                const videos = await this.commandBus.execute<FullChannelCrawlCommand, VideoRenderer[]>(new FullChannelCrawlCommand(channelId));
-                logger.debug(`Found ${videos.length} videos for full channel crawl.`);
+                const videos = await this.commandBus.execute<
+                    FullChannelCrawlCommand,
+                    VideoRenderer[]
+                >(new FullChannelCrawlCommand(channelId));
+                logger.debug(
+                    `Found ${videos.length} videos for full channel crawl.`,
+                );
 
                 /*logger.debug("Syncing videos.");
                 await this.commandBus.execute(new SyncVideosCommand(channelId));
@@ -360,21 +373,23 @@ export class YouTubeService implements OnModuleInit {
      */
     public async fetchRaw<T extends boolean>(
         options: FetchRawOptions,
-        returnResponse: T
-    ): Promise<T extends true ? AxiosResponse : string | Record<string, any>>
+        returnResponse: T,
+    ): Promise<T extends true ? AxiosResponse : string | Record<string, any>>;
     public async fetchRaw<T extends boolean>(
         url: string,
         options?: FetchRawOptions,
         returnResponse?: T,
-    ): Promise<T extends true ? AxiosResponse : string | Record<string, any>> 
+    ): Promise<T extends true ? AxiosResponse : string | Record<string, any>>;
     public async fetchRaw<T extends boolean>(
         optionsOrUrl: FetchRawOptions | string,
         optionsOrReturnResponse?: T | FetchRawOptions,
-        returnResponse?: T
-    )
-    {
+        returnResponse?: T,
+    ) {
         const url = typeof optionsOrUrl == "string" ? optionsOrUrl : "";
-        const options = typeof optionsOrUrl == "object" ? optionsOrUrl : optionsOrReturnResponse as FetchRawOptions;
+        const options =
+            typeof optionsOrUrl == "object"
+                ? optionsOrUrl
+                : (optionsOrReturnResponse as FetchRawOptions);
 
         return new Promise<any>(resolve => {
             const callback: () => Promise<
@@ -410,7 +425,9 @@ export class YouTubeService implements OnModuleInit {
             "X-Goog-EOM-Visitor-Id": visitorData,
             Origin: "https://youtube.com",
             Host: "www.youtube.com",
-            Cookies: await this.getCookies().then(jar => jar.getCookieString("https://youtube.com"))
+            Cookies: await this.getCookies().then(jar =>
+                jar.getCookieString("https://youtube.com"),
+            ),
         };
 
         const data: Record<string, any> = {
@@ -434,8 +451,8 @@ export class YouTubeService implements OnModuleInit {
                 requestOptions: {
                     headers,
                     method: "POST",
-                    data
-                }
+                    data,
+                },
             },
             false,
         );

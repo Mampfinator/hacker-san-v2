@@ -9,7 +9,7 @@ export class AppService {
 
     constructor(
         private readonly eventBus: EventBus,
-        private readonly eventEmitter: EventEmitter2
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     public async triggerListen() {

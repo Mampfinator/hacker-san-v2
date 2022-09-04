@@ -18,13 +18,14 @@ import { Logger } from "@nestjs/common";
 import { findValuesByKeys } from "yt-scraping-utilities/dist/util";
 
 @CommandHandler(FullChannelCrawlCommand)
-export class FullChannelCrawlHandler implements ICommandHandler<FullChannelCrawlCommand> {
+export class FullChannelCrawlHandler
+    implements ICommandHandler<FullChannelCrawlCommand>
+{
     private readonly logger = new Logger(FullChannelCrawlHandler.name);
-    
+
     constructor(private readonly youtubeService: YouTubeService) {}
 
     async execute({ channelId }: FullChannelCrawlCommand): Promise<any> {
-        
         this.logger.debug(`Got full channel crawl command for ${channelId}.`);
 
         // view = 0 for uploads
@@ -35,7 +36,6 @@ export class FullChannelCrawlHandler implements ICommandHandler<FullChannelCrawl
         )) as string;
 
         this.logger.debug(`Got channel video page for ${channelId}.`);
-
 
         const { ytInitialData } = parseRawData({
             ytInitialData: true,
@@ -50,14 +50,20 @@ export class FullChannelCrawlHandler implements ICommandHandler<FullChannelCrawl
 
         //const {content: initialVideoList} = findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].shelfRenderer;
 
-        const [initialContRenderer] = findValuesByKeys(findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer.contents[0], ["continuationItemRenderer"]) as ContinuationItemRenderer[];
+        const [initialContRenderer] = findValuesByKeys(
+            findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer
+                .contents[0],
+            ["continuationItemRenderer"],
+        ) as ContinuationItemRenderer[];
 
         let { token, clickTrackingParams } = this.extractInfo(
             //contRenderer.continuationItemRenderer,
-            initialContRenderer
+            initialContRenderer,
         );
 
-        this.logger.debug(`Continuation request params: \nvisitorData: ${visitorData}\ntoken: ${token}\nclickTrackingParams: ${clickTrackingParams}`);
+        this.logger.debug(
+            `Continuation request params: \nvisitorData: ${visitorData}\ntoken: ${token}\nclickTrackingParams: ${clickTrackingParams}`,
+        );
 
         while (token) {
             const {

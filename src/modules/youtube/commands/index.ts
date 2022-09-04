@@ -9,5 +9,5 @@ export { FullChannelCrawlCommand } from "./full-channel-crawl.command";
 export const YouTubeCommandHandlers = [
     EnsureYouTubeChannelHandler,
     CacheChannelInfoHandler,
-    FullChannelCrawlHandler
+    FullChannelCrawlHandler,
 ];

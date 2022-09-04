@@ -58,7 +58,9 @@ export class YouTubeVideosService {
         private readonly schedulerRegistry: SchedulerRegistry,
         config: ConfigService,
     ) {
-        this.channelScanInterval = config.get<number>("YOUTUBE.channelScanInterval");
+        this.channelScanInterval = config.get<number>(
+            "YOUTUBE.channelScanInterval",
+        );
     }
 
     @OnEvent("listeners.ready")
@@ -259,7 +261,15 @@ export class YouTubeVideosService {
 
     private async rescanVideos() {
         if (this.channelList.length == 0) {
-            const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({query: {where: {platform: "youtube"}}, one: false}));
+            const channels = await this.queryBus.execute<
+                ChannelQuery,
+                ChannelEntity[]
+            >(
+                new ChannelQuery({
+                    query: { where: { platform: "youtube" } },
+                    one: false,
+                }),
+            );
             this.channelList = channels.map(channel => channel.platformId);
         }
 
