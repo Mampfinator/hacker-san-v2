@@ -20,68 +20,18 @@ import {
     YOUTUBE_BROWSE_ENDPOINT,
     YOUTUBE_CLIENT_VERSION,
 } from "../../constants";
-import { Logger, OnModuleInit } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { createHash } from "crypto";
-import { launch } from "puppeteer";
-import { getStoreByPage } from "puppeteer-tough-cookie-store";
-import { sleep } from "../../util";
 
 @CommandHandler(SyncPostsCommand)
-export class SyncPostsHandler
-    implements ICommandHandler<SyncPostsCommand>, OnModuleInit
-{
+export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand> {
     private readonly logger = new Logger(SyncPostsHandler.name);
-    private cookies: CookieJar;
 
     constructor(
         @InjectRepository(CommunityPostEntity)
         private readonly postRepo: Repository<CommunityPostEntity>,
         private readonly youtubeService: YouTubeService,
     ) {}
-    async onModuleInit() {
-        // TODO: *maybe* move to YouTubeService, since I can then just route all requests through a client that has the appropriate consent cookies.
-        const browser = await launch({
-            headless: true,
-        });
-
-        const page = await browser.newPage();
-        await page.goto(`https://youtube.com/`);
-
-
-        let cookieJar: CookieJar;
-        let success = false;
-        let failed = 0;
-        while (!success) {
-            await sleep(250);
-            try {
-                cookieJar = new CookieJar(await getStoreByPage(page));
-                await page.click(".eom-buttons.style-scope.ytd-consent-bump-v2-lightbox>div>ytd-button-renderer").then(() => success = true);
-            } catch (error) {
-                failed++;
-                if (failed <= 5) {
-                    this.logger.warn(`Potentially failed getting cookies from YouTube: ${(error as Error).message}.`);
-                } else {
-                    this.logger.error(`Failing to get cookies from YouTube: `, (error as Error).stack);
-                }
-
-                if ((await cookieJar.getCookies("https://youtube.com")).some(cookie => cookie.key.toLowerCase().includes("consent") && cookie.value.toLowerCase().includes("pending"))) success = true;
-            }
-        }
-
-        const cookies = await cookieJar.getCookies("https://youtube.com");
-        this.cookies = new CookieJar();
-        for (const cookie of cookies) {
-            await this.cookies.setCookie(cookie, "https://youtube.com");
-        }
-
-        this.logger.debug(
-            `Got cookies from puppeteer: \n${cookies
-                .map(cookie => cookie.toString())
-                .join("\n")}`,
-        );
-
-        await browser.close();
-    }
 
     private getPostsAndToken(
         data: Record<string, any>,
@@ -109,9 +59,7 @@ export class SyncPostsHandler
 
         if (channelId && !posts) {
             this.logger.debug(`Fetching all posts for ${channelId}.`);
-            let clickTrackingParams: Record<string, any>;
-
-            const client = wrapper(axios.create({ jar: this.cookies }));
+            let clickTrackingParams: string;
 
             const communityUrl = `https://youtube.com/channel/${channelId}/community`;
             const headers: Record<string, string> = {
@@ -124,7 +72,7 @@ export class SyncPostsHandler
                 try {
                     const data = (await this.youtubeService.fetchRaw(
                         communityUrl,
-                        { useInstance: client, requestOptions: { headers } },
+                        { requestOptions: { headers } },
                         false,
                     )) as string;
                     ytInitialData = parseRawData({
@@ -150,35 +98,17 @@ export class SyncPostsHandler
             let [allPosts, continuationToken] =
                 this.getPostsAndToken(ytInitialData);
 
-            Object.assign(headers, {
+            /*Object.assign(headers, {
                 "X-Youtube-Client-Name": "1",
                 "X-Youtube-Client-Version": YOUTUBE_CLIENT_VERSION,
                 "X-Youtube-Bootstrap-Logged-In": false,
                 "X-Goog-EOM-Visitor-Id": visitorData,
                 Origin: "https://youtube.com",
                 Host: "www.youtube.com",
-                Cookies: (await this.cookies.getCookies("https://youtube.com"))
-                    .map(cookie => cookie.toString())
-                    .join("; "),
-            });
-
-            // TODO: test if this is even necessary?
-            const SAPISID = (await this.cookies.getCookies(communityUrl)).find(
-                cookie => cookie.key === "SASIPID",
-            );
-            if (SAPISID) {
-                const time = `${Math.round(new Date().getTime() / 1000)}`;
-                Object.assign(headers, {
-                    Authorization: `SAPISIDHASH ${time}_${createHash("sha1")
-                        .update(Buffer.from(time))
-                        .update(Buffer.from(SAPISID.value))
-                        .update(Buffer.from("https://www.youtube.com"))
-                        .digest("hex")}`,
-                });
-            }
+            });*/
 
             while (continuationToken) {
-                const body = {
+                /*const body = {
                     context: {
                         client: {
                             clientName: "WEB",
@@ -195,10 +125,20 @@ export class SyncPostsHandler
                     YOUTUBE_BROWSE_ENDPOINT,
                     {
                         requestOptions: { data: body, headers, method: "POST" },
-                        useInstance: client,
                     },
                     false,
-                )) as Record<string, any>;
+                )) as Record<string, any>;*/
+                // TODO: type properly
+                const data = await this.youtubeService.doContinuationRequest<
+                    any,
+                    "",
+                    true
+                >({
+                    visitorData,
+                    token: continuationToken,
+                    clickTrackingParams,
+                });
+
                 const [newPosts, newToken] = this.getPostsAndToken(data);
                 allPosts.push(...newPosts);
 

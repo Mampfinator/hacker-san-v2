@@ -6,7 +6,7 @@ import { ActionUtil } from "../util";
 export class NotifyAction implements IActionType {
     async execute({ data, command, channel }: ActionPayload) {
         if (channel.type !== ChannelType.GuildText) return;
-        
+
         const { message } = data as { message: string };
 
         const notification: { content: string; embeds?: EmbedBuilder[] } = {

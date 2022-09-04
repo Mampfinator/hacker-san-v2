@@ -33,6 +33,9 @@ import { Logger } from "@nestjs/common";
 import { DiscordRESTService } from "./discord-rest.service";
 import { Routes } from "discord-api-types/v10";
 import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
+import { ChannelQuery } from "../platforms/queries";
+import { ILike } from "typeorm";
+import { YouTubeChannel } from "../youtube/model/youtube-channel.entity";
 
 export namespace DiscordUtil {
     export function postsToEmbed(data?: ytInitialData): EmbedBuilder[] {
@@ -222,7 +225,7 @@ export namespace DiscordUtil {
 
         const input = (options.getFocused() as string).trim().toLowerCase();
 
-        const { channels } = await queryBus.execute<
+        /*const { channels } = await queryBus.execute<
             ChannelsQuery,
             ChannelsQueryResult
         >(new ChannelsQuery(platform));
@@ -235,6 +238,32 @@ export namespace DiscordUtil {
             )
             .map(channel => ({ name: channel.name, value: channel.id }))
             .slice(0, 25); // limit to 25 results because Discord has a limit of 25 autocomplete suggestions.
+        */
+
+        const channels = await queryBus.execute<ChannelQuery, YouTubeChannel[]>(
+            new ChannelQuery({
+                query: {
+                    where: [
+                        {
+                            name: ILike(input),
+                        },
+                        {
+                            userName: ILike(input),
+                        },
+                        {
+                            id: ILike(input),
+                        },
+                    ],
+                    take: 25,
+                },
+                one: false,
+            }),
+        );
+
+        return channels.map(channel => ({
+            name: channel.channelName,
+            value: channel.channelId,
+        }));
     }
 }
 

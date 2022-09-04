@@ -9,8 +9,8 @@ export class LockAction implements IActionType {
     };
 
     async execute({ channel, data }: ActionPayload) {
-        if (channel.type !== ChannelType.GuildText) return; 
-        
+        if (channel.type !== ChannelType.GuildText) return;
+
         const { mode, message } = data as {
             mode: "lock" | "unlock";
             message?: string;

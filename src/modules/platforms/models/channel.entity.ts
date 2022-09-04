@@ -1,4 +1,4 @@
-import { Platform, SUPPORTED_PLATFORMS } from "src/constants";
+import { Platform, SUPPORTED_PLATFORMS } from "../../../constants";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "channel" })

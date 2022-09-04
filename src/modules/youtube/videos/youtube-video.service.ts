@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { OnEvent } from "@nestjs/event-emitter";
 import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import axios from "axios";
@@ -8,9 +9,10 @@ import { XMLParser } from "fast-xml-parser";
 import { youtube_v3 } from "googleapis";
 import { YouTubeConfig } from "src/modules/config/config";
 import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
+import { ChannelEntity } from "src/modules/platforms/models/channel.entity";
+import { ChannelQuery } from "src/modules/platforms/queries";
 import { Util } from "src/util";
 import { In, Repository } from "typeorm";
-import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { YouTubeLiveStatus, YouTubeVideo } from "../model/youtube-video.entity";
 import { YouTubeApiService } from "../youtube-api.service";
 import { YOUTUBE_VIDEO_FEED_URL } from "./constants";
@@ -43,22 +45,29 @@ export class YouTubeVideosService {
     private channelList: string[] = [];
     private newVideoIds: string[] = [];
 
+    private readonly channelScanInterval: number;
+
     constructor(
         private readonly apiClient: YouTubeApiService,
         private readonly commandBus: CommandBus,
         @InjectRepository(YouTubeVideo)
         private readonly videoRepo: Repository<YouTubeVideo>,
-        @InjectRepository(YouTubeChannel)
-        private readonly channelRepo: Repository<YouTubeChannel>,
-        schedulerRegistry: SchedulerRegistry,
+        //@InjectRepository(YouTubeChannel)
+        //private readonly channelRepo: Repository<YouTubeChannel>,
+        private readonly queryBus: QueryBus,
+        private readonly schedulerRegistry: SchedulerRegistry,
         config: ConfigService,
     ) {
-        const { channelScanInterval } = config.get<YouTubeConfig>("YOUTUBE");
+        this.channelScanInterval = config.get<number>("YOUTUBE.channelScanInterval");
+    }
+
+    @OnEvent("listeners.ready")
+    private scheduleRescans() {
         const interval = setInterval(
             () => this.rescanVideos(),
-            channelScanInterval,
+            this.channelScanInterval,
         );
-        schedulerRegistry.addInterval("CHECK_CHANNEL_VIDEOS", interval);
+        this.schedulerRegistry.addInterval("CHECK_CHANNEL_VIDEOS", interval);
     }
 
     /**
@@ -250,9 +259,8 @@ export class YouTubeVideosService {
 
     private async rescanVideos() {
         if (this.channelList.length == 0) {
-            this.channelList = (await this.channelRepo.find({})).map(
-                channel => channel.channelId,
-            );
+            const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({query: {where: {platform: "youtube"}}, one: false}));
+            this.channelList = channels.map(channel => channel.platformId);
         }
 
         const channelId = this.channelList.shift();
@@ -266,33 +274,41 @@ export class YouTubeVideosService {
             .map(entry => entry["yt:videoId"])
             .filter(id => id);
 
-        const databaseVideos = await this.videoRepo.find(
-            {
-                where: {
-                    channelId,
-                    id: In(videoIds)
-                },
-            }
+        const databaseVideos = await this.videoRepo.find({
+            where: {
+                channelId,
+                id: In(videoIds),
+            },
+        });
+
+        const difference = Util.symmetricSetDifference(
+            new Set(videoIds),
+            new Set(databaseVideos.map(v => v.id)),
         );
 
-        const difference = Util.symmetricSetDifference(new Set(videoIds), new Set(databaseVideos.map(v => v.id)));
-        
         for (const videoId of difference) {
-            const {
-                unavailable,
-                video,
-                inserted
-            } = await this.process(videoId);
+            const { unavailable, video, inserted } = await this.process(
+                videoId,
+            );
 
             if (unavailable) {
-                this.generateNotif({ ...(video ?? {}), id: videoId, channelId }, "offline");
+                this.generateNotif(
+                    { ...(video ?? {}), id: videoId, channelId },
+                    "offline",
+                );
                 continue;
             }
 
-            const newStatus = this.simplifyVideo(video).liveStatus as YouTubeLiveStatus;
-            this.generateNotif(video, this.getStatusChange(databaseVideos.find(video => video.id == videoId).status, newStatus));
+            const newStatus = this.simplifyVideo(video)
+                .liveStatus as YouTubeLiveStatus;
+            this.generateNotif(
+                video,
+                this.getStatusChange(
+                    databaseVideos.find(video => video.id == videoId)?.status,
+                    newStatus,
+                ),
+            );
         }
-
     }
 
     private getStatusChange(

@@ -55,6 +55,6 @@ export class RequestBuilder {
             url: this.url,
             params: this.params,
             headers: this.headers,
-        }).catch(() => console.log("HI from RequestBuilder :)"));
+        });
     }
 }

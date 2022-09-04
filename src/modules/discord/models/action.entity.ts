@@ -1,8 +1,9 @@
 import { EmbedField } from "discord.js";
-import { PLATFORM_NAME_LOOKUP } from "src/constants";
-import { Util } from "src/util";
+import { PLATFORM_NAME_LOOKUP } from "../../../constants";
+import { Util } from "../../../util";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { getActions } from "../actions/action";
+
 export type Platform = "youtube" | "twitter";
 export type Event = "live" | "upload" | "offline" | "upcoming";
 

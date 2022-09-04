@@ -55,7 +55,9 @@ export class TriggerActionsHandler
             const actionType = this.actions.get(action.type);
             if (!actionType) {
                 this.logger.error(
-                    `Could not find @ActionType for ${action.type}: ${JSON.stringify(action)}`,
+                    `Could not find @ActionType for ${
+                        action.type
+                    }: ${JSON.stringify(action)}`,
                 );
                 continue;
             }

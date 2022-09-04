@@ -1,5 +1,4 @@
-import { SUPPORTED_PLATFORMS } from "src/constants";
-import { Platform } from "src/constants";
+import { SUPPORTED_PLATFORMS, Platform } from "../../../constants";
 import { Column, Entity, PrimaryColumn } from "typeorm";
 
 function pushUnique<T>(arr: T[], value: T) {

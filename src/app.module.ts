@@ -23,6 +23,10 @@ import { PlatformModule } from "./modules/platforms/platform.module";
 import { YouTubeModule } from "./modules/youtube";
 import { TwitterModule } from "./modules/twitter/twitter.module";
 import { AppService } from "./app.service";
+import { Entities } from "./entities";
+import { ChannelMigration1661942362285 } from "migrations/1661942362285-ChannelMigration";
+import { Migrations } from "./migrations";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
 // General todo: frontend for managing actions because trying to do that with slash commands will only get you so far.
 // Proper modals when Discord.
@@ -43,20 +47,15 @@ import { AppService } from "./app.service";
             useFactory: (configService: ConfigService) => ({
                 type: "postgres",
                 url: configService.get<string>("DATABASE_URL"),
-                synchronize: true,
-                entities: [
-                    GuildSettings,
-                    YouTubeChannel,
-                    CommunityPost,
-                    YouTubeVideo,
-                    Action,
-                    TwitterUser,
-                    TwitterSpace,
-                ],
+                synchronize: false,
+                entities: Entities,
+                migrations: Migrations,
+                migrationsRun: true,
             }),
             inject: [ConfigService],
         }),
         ScheduleModule.forRoot(),
+        EventEmitterModule.forRoot(),
         CqrsModule,
         DiscordModule,
         PlatformModule,
@@ -76,6 +75,4 @@ export class AppModule implements NestModule {
             .apply(JsonBodyMiddleware)
             .forRoutes("*");
     }
-
-    
 }
