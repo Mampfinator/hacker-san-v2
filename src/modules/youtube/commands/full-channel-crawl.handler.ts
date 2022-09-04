@@ -48,18 +48,14 @@ export class FullChannelCrawlHandler
             ytInitialData.responseContext.webResponseContextExtensionData
                 .ytConfigData;
 
-        //const {content: initialVideoList} = findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].shelfRenderer;
-
         const [initialContRenderer] = findValuesByKeys(
             findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer
                 .contents[0],
             ["continuationItemRenderer"],
         ) as ContinuationItemRenderer[];
 
-        let { token, clickTrackingParams } = this.extractInfo(
-            //contRenderer.continuationItemRenderer,
-            initialContRenderer,
-        );
+        let { token, clickTrackingParams } =
+            this.extractInfo(initialContRenderer);
 
         this.logger.debug(
             `Continuation request params: \nvisitorData: ${visitorData}\ntoken: ${token}\nclickTrackingParams: ${clickTrackingParams}`,
@@ -108,12 +104,15 @@ export class FullChannelCrawlHandler
         return videos;
     }
 
-    private extractInfo(continuationRenderer: ContinuationItemRenderer) {
-        const { clickTrackingParams } =
-            continuationRenderer.continuationEndpoint;
-        const { token } =
-            continuationRenderer.continuationEndpoint.continuationCommand;
-
-        return { clickTrackingParams, token };
+    private extractInfo(continuationRenderer: ContinuationItemRenderer): {
+        clickTrackingParams: string;
+        token: string;
+    } {
+        return {
+            clickTrackingParams:
+                continuationRenderer?.continuationEndpoint?.clickTrackingParams,
+            token: continuationRenderer?.continuationEndpoint
+                ?.continuationCommand?.token,
+        };
     }
 }
