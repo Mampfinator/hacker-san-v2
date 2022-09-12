@@ -8,12 +8,7 @@ import {
     EmbedBuilder,
     InteractionType,
     ActivityType,
-    PresenceStatusData
-<<<<<<< Updated upstream
-=======
-    Guild,
     PresenceStatusData,
->>>>>>> Stashed changes
 } from "discord.js";
 import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
@@ -248,24 +243,6 @@ export class DiscordClientService extends Client {
             });
         }
     }
-
-    @Interval(60000)
-<<<<<<< Updated upstream
-    private async refreshPresence() {
-        let channels = 0;
-        for (const platform of SUPPORTED_PLATFORMS) {
-            const response = await this.queryBus.execute<
-                ChannelsQuery,
-                ChannelsQueryResult
-            >(new ChannelsQuery(platform));
-            channels += response.channels.length;
-        }
-
-        await this.guilds.fetch();
-=======
-    private async refreshPresence(): Promise<void> {
-        let name: string;
->>>>>>> Stashed changes
 
     @Interval(60000)
     private async refreshPresence(): Promise<void> {
