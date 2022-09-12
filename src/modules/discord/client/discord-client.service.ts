@@ -8,6 +8,12 @@ import {
     EmbedBuilder,
     InteractionType,
     ActivityType,
+    PresenceStatusData
+<<<<<<< Updated upstream
+=======
+    Guild,
+    PresenceStatusData,
+>>>>>>> Stashed changes
 } from "discord.js";
 import { DiscordConfig } from "src/modules/config/config";
 import { Repository } from "typeorm";
@@ -19,7 +25,7 @@ import { FetchPostsCommand } from "src/modules/youtube/community-posts/commands/
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
-import { SUPPORTED_PLATFORMS } from "src/constants";
+import { Platform, SUPPORTED_PLATFORMS } from "src/constants";
 import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
 import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
 import { Util } from "src/util";
@@ -28,11 +34,16 @@ import { getActions } from "../actions/action";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectCommands } from "./commands/slash-commands.provider";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { ChannelQuery } from "src/modules/platforms/queries";
+import { ChannelEntity } from "src/modules/platforms/models/channel.entity";
 
 @Injectable()
 export class DiscordClientService extends Client {
     private readonly logger = new Logger(DiscordClientService.name);
     private readonly commands: Map<string, SlashCommand> = new Map();
+    private readonly statusReady: Map<Platform, boolean> = new Map();
+    private status: PresenceStatusData = "dnd";
 
     constructor(
         private readonly configService: ConfigService,
@@ -41,6 +52,7 @@ export class DiscordClientService extends Client {
         @InjectRepository(GuildSettings)
         private readonly settingsRepository: Repository<GuildSettings>,
         @InjectCommands() slashCommands: SlashCommand[],
+        private readonly eventEmitter: EventEmitter2
     ) {
         super({
             intents: ["Guilds", "GuildMessages", "MessageContent"],
@@ -49,6 +61,10 @@ export class DiscordClientService extends Client {
         for (const command of slashCommands) {
             const { commandData } = getCommandMetadata(command);
             this.commands.set(commandData.name, command);
+        }
+
+        for (const platform of SUPPORTED_PLATFORMS) {
+            this.statusReady.set(platform, !configService.getOrThrow<boolean>(`${platform.toUpperCase()}.active`));
         }
     }
 
@@ -86,6 +102,16 @@ export class DiscordClientService extends Client {
         if (!success) {
             this.logger.warn("handleEvent failed.");
             for (const error of errors) this.logger.error(error);
+        }
+    }
+
+    @OnEvent("*.ready")
+    async platformReady(platform: Platform) {
+        this.statusReady.set(platform, true);
+
+        if ([...this.statusReady.values()].reduce((prev, cur) => prev && (cur == undefined || cur))) {
+            this.status = "online";
+            this.refreshPresence();
         }
     }
 
@@ -139,6 +165,8 @@ export class DiscordClientService extends Client {
         }
 
         this.logger.log(`Signed in as ${this.user.tag} (${this.user.id}).`);
+        
+        this.eventEmitter.emit("discord.ready", "discord");
     }
 
     @On("interactionCreate")
@@ -222,6 +250,7 @@ export class DiscordClientService extends Client {
     }
 
     @Interval(60000)
+<<<<<<< Updated upstream
     private async refreshPresence() {
         let channels = 0;
         for (const platform of SUPPORTED_PLATFORMS) {
@@ -233,25 +262,42 @@ export class DiscordClientService extends Client {
         }
 
         await this.guilds.fetch();
+=======
+    private async refreshPresence(): Promise<void> {
+        let name: string;
+>>>>>>> Stashed changes
 
-        const guilds = this.guilds.cache.size;
+    @Interval(60000)
+    private async refreshPresence(): Promise<void> {
+        let name: string;
+
+        if (this.status === "dnd") {
+            name = "starting..."
+        } else {
+            const channels = (await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({query: {}}))).length;
+            
+            await this.guilds.fetch();
+            const guilds = this.guilds.cache.size;
+
+            name = `${channels} ${Util.pluralize(
+                channels,
+                "channel",
+                "channels",
+            )} in ${guilds} ${Util.pluralize(
+                guilds,
+                "server",
+                "servers",
+            )}.`;
+        }
 
         this.user.setPresence({
             activities: [
                 {
-                    name: `${channels} ${Util.pluralize(
-                        channels,
-                        "channel",
-                        "channels",
-                    )} in ${guilds} ${Util.pluralize(
-                        guilds,
-                        "server",
-                        "servers",
-                    )}.`,
+                    name,
                     type: ActivityType.Watching,
                 },
             ],
-            status: "online",
+            status: this.status,
         });
     }
 }

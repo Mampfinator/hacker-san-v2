@@ -27,6 +27,7 @@ import { FullChannelCrawlCommand } from "./commands/full-channel-crawl.command";
 import { VideoRenderer } from "yt-scraping-utilities";
 import { ChannelQuery } from "../platforms/queries";
 import { ChannelEntity } from "../platforms/models/channel.entity";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 
 export interface FetchRawOptions {
     maxRetries?: number;
@@ -155,6 +156,7 @@ export class YouTubeService implements OnModuleInit {
         private readonly videos: YouTubeVideosService,
         private readonly postService: YouTubeCommunityPostsService,
         config: ConfigService,
+        private readonly eventEmitter: EventEmitter2
     ) {
         this.skipSync = config.getOrThrow<boolean>("SKIP_SYNC");
     }
@@ -366,6 +368,8 @@ export class YouTubeService implements OnModuleInit {
             }, 1500),
         );
         this.logger.debug("Scheduling YouTube community post check.");
+
+        this.eventEmitter.emit("youtube.ready", "youtube");
     }
 
     /**

@@ -9,13 +9,6 @@ import { JsonBodyMiddleware } from "./shared/middleware/json-body.middleware";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import config from "./modules/config/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { GuildSettings } from "./modules/discord/models/settings.entity";
-import { YouTubeChannel } from "./modules/youtube/model/youtube-channel.entity";
-import { CommunityPost } from "./modules/youtube/community-posts/model/community-post.entity";
-import { YouTubeVideo } from "./modules/youtube/model/youtube-video.entity";
-import { Action } from "./modules/discord/models/action.entity";
-import { TwitterUser } from "./modules/twitter/models/twitter-user.entity";
-import { TwitterSpace } from "./modules/twitter/models/twitter-space.entity";
 import { ScheduleModule } from "@nestjs/schedule";
 import { CqrsModule } from "@nestjs/cqrs";
 import { DiscordModule } from "./modules/discord/discord.module";
@@ -24,7 +17,6 @@ import { YouTubeModule } from "./modules/youtube";
 import { TwitterModule } from "./modules/twitter/twitter.module";
 import { AppService } from "./app.service";
 import { Entities } from "./entities";
-import { ChannelMigration1661942362285 } from "migrations/1661942362285-ChannelMigration";
 import { Migrations } from "./migrations";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 
@@ -55,7 +47,9 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
             inject: [ConfigService],
         }),
         ScheduleModule.forRoot(),
-        EventEmitterModule.forRoot(),
+        EventEmitterModule.forRoot({
+            wildcard: true
+        }),
         CqrsModule,
         DiscordModule,
         PlatformModule,
