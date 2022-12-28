@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ActionOrchestrator } from "./actions/action.orchestrator";
 import { actionTypeFactory } from "./actions/actions-helper";
 import { ActionTypes } from "./actions/types";
 import { getCommands } from "./client/commands/slash-command";
@@ -23,6 +24,7 @@ import { GuildSettings } from "./models/settings.entity";
         DiscordService,
         DiscordRESTService,
         DiscordClientService,
+        ActionOrchestrator,
         slashcommandFactory,
         ...getCommands(),
         ...ActionTypes,
