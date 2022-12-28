@@ -97,6 +97,7 @@ export namespace DiscordUtil {
                 const { playlist } = post;
                 embedContent += `\n\nPlaylist: ${playlist.title} [link](https://youtube.com/playlist?list=${playlist.id})`;
                 embed.setImage(playlist.thumbail);
+                break;
             case AttachmentType.Poll:
                 const { choices } = post;
                 embedContent += "\n\u200b\n\u200b";
