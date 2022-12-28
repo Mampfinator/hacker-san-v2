@@ -4,10 +4,10 @@ import { ActionUtil } from "../util";
 
 @Action({type: "notify"})
 export class NotifyAction implements IActionType {
-    async execute({ data, command, channel }: ActionPayload) {
+    async execute({ action, command, channel }: ActionPayload) {
         if (channel.type !== ChannelType.GuildText) return;
 
-        const { message } = data as { message: string };
+        const { message } = action.data as { message: string };
 
         const notification: { content: string; embeds?: EmbedBuilder[] } = {
             content: ActionUtil.interpolate(message, command),

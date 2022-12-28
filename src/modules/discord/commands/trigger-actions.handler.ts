@@ -10,6 +10,7 @@ import { DiscordRESTService } from "../discord-rest.service";
 import { Channel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectActions } from "../actions/actions-helper";
+import { ActionOrchestrator } from "../actions/action.orchestrator";
 
 class ChannelFetchHungError extends Error {
     constructor() {
@@ -25,11 +26,9 @@ export class TriggerActionsHandler
 
     constructor(
         private readonly client: DiscordClientService,
-        private readonly rest: DiscordRESTService,
         @InjectRepository(ActionDescriptor)
         private readonly actionsRepo: Repository<ActionDescriptor>,
-        @InjectActions()
-        private readonly actions: Map<string, IActionType & { type: string }>,
+        private readonly actionOrchestrator: ActionOrchestrator,
     ) {}
 
     async execute(command: TriggerActionsCommand) {
@@ -48,21 +47,6 @@ export class TriggerActionsHandler
         );
 
         for (const action of actions) {
-            this.logger.debug(
-                `Executing action ${action.id} (${action.type}).`,
-            );
-
-            const actionType = this.actions.get(action.type);
-            if (!actionType) {
-                this.logger.error(
-                    `Could not find @ActionType for ${
-                        action.type
-                    }: ${JSON.stringify(action)}`,
-                );
-                continue;
-            }
-
-            // fetching channels apparently sometimes has a chance to never return (or throw) when the channel doesn't exist.
             const channel = await new Promise<
                 Channel
             >(async (res, rej) => {
@@ -92,11 +76,11 @@ export class TriggerActionsHandler
             this.logger.debug(`Executing action in ${channel.id}.`);
 
             try {
-                await actionType.execute({
-                    channel,
+                await this.actionOrchestrator.execute(
                     command,
-                    data: action.data,
-                });
+                    action,
+                    channel
+                );
             } catch (error) {
                 this.logger.warn(error);
                 ignoreDiscordAPIErrors(error);

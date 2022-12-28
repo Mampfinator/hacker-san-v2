@@ -4,8 +4,8 @@ import { ActionUtil } from "../util";
 
 @Action({type: "echo"})
 export class EchoAction implements IActionType {
-    async execute({ data, channel, command }: ActionPayload) {
-        const { message } = data as { message: string };
+    async execute({ action, channel, command }: ActionPayload) {
+        const { message } = action.data as { message: string };
 
         if (channel.type === ChannelType.GuildText) {
             await channel.send(ActionUtil.interpolate(message, command));

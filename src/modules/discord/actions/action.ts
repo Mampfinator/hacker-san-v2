@@ -6,7 +6,7 @@ import { ActionDescriptor } from "../models/action.entity";
 import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "./action.constants";
 
 export interface ActionPayload {
-    data: any;
+    action: ActionDescriptor;
     channel: Channel;
     command: TriggerActionsCommand;
 }
