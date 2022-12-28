@@ -24,6 +24,7 @@ import { VideoRenderer } from "yt-scraping-utilities";
 import { ChannelQuery } from "../platforms/queries";
 import { ChannelEntity } from "../platforms/models/channel.entity";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+import { YouTubeApiService } from "./youtube-api.service";
 
 export interface FetchRawOptions {
     maxRetries?: number;
@@ -153,6 +154,7 @@ export class YouTubeService implements OnModuleInit {
         private readonly postService: YouTubeCommunityPostsService,
         config: ConfigService,
         private readonly eventEmitter: EventEmitter2,
+        private readonly apiService: YouTubeApiService,
     ) {
         this.skipSync = config.getOrThrow<boolean>("SKIP_SYNC");
     }
@@ -246,7 +248,39 @@ export class YouTubeService implements OnModuleInit {
         this.client = this.getAxiosInstance({ method: "GET" });
     }
 
-    public async init() {
+    private async purgeInvalidChannels() {
+        this.logger.log("Verifying YouTube channel IDs.");
+
+        const channelIds = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
+            new ChannelQuery({
+                one: false,
+                query: {where: {platform: "youtube"}}
+            })
+        ).then(channels => channels.map(channel => channel.platformId));
+
+        let invalidIds: string[] = [];
+
+        for (let i = 0; i < channelIds.length; i += 50) {
+            const batch = channelIds.slice(i, 50);
+            const {data: {items: channels}} = await this.apiService.channels.list({
+                id: batch,
+                part: ["id"]
+            });
+
+            invalidIds.push(...batch.filter(id => 
+                !channels.find(c => c.id === id)
+            ));
+        }
+
+        if (invalidIds.length > 0) {
+            this.logger.log(`Found ${invalidIds.length} invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`);
+            // TODO: figure out which tables need purging
+        } else {
+            this.logger.log("No invalid channel IDs. No purging necessary.");
+        }
+    }
+
+    private async sync() {
         const channels = await this.queryBus.execute<
             ChannelQuery,
             ChannelEntity[]
@@ -355,6 +389,11 @@ export class YouTubeService implements OnModuleInit {
                 logger.warn(`Failed to set up: ${postResult.reason}`);
             }
         }
+    }
+
+    public async init() {
+        await this.purgeInvalidChannels().catch(error => this.logger.error(error));
+        await this.sync().catch(error => this.logger.error(error));
 
         // start checking for new posts as soon as all posts are synced.
         this.schedulerRegistry.addInterval(
