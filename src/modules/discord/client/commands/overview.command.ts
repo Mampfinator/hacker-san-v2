@@ -4,12 +4,11 @@ import {
     CacheType,
     SlashCommandBuilder,
 } from "discord.js";
-import { SUPPORTED_PLATFORMS } from "src/constants";
-import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
-import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
-import { MultipageMessage } from "src/shared/util/multipage-message";
+import { SUPPORTED_PLATFORMS, Platform } from "../../../../constants";
+import { ChannelsQueryResult } from "../../../platforms/queries/channels.handler";
+import { ChannelsQuery } from "../../../platforms/queries/channels.query";
+import { MultipageMessage } from "../../../../shared/util/multipage-message";
 import { Repository } from "typeorm";
-import { Platform } from "src/constants";
 import { GuildSettings } from "../../models/settings.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 import { InjectRepository } from "@nestjs/typeorm";

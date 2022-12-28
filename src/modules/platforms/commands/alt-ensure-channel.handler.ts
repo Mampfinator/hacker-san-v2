@@ -8,9 +8,9 @@ import {
     ICommandHandler,
 } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Class, Platform } from "src/constants";
-import { ValidateTwitterChannelCommand } from "src/modules/twitter/commands/validate-twitter-channel.command";
-import { ValidateYouTubeChannelCommand } from "src/modules/youtube/commands/validate-youtube-channel.command";
+import { Class, Platform } from "../../../constants";
+import { ValidateTwitterChannelCommand } from "../../../modules/twitter/commands/validate-twitter-channel.command";
+import { ValidateYouTubeChannelCommand } from "../../../modules/youtube/commands/validate-youtube-channel.command";
 import { Repository } from "typeorm";
 import { ChannelEntity } from "../models/channel.entity";
 import { EnsureChannelCommand } from "./ensure-channel.command";

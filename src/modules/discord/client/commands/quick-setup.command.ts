@@ -17,11 +17,11 @@ import {
     ButtonStyle,
     SlashCommandBuilder,
 } from "discord.js";
-import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
-import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
+import { EnsureChannelCommand } from "../../../../modules/platforms/commands/ensure-channel.command";
+import { EnsureChannelResult } from "../../../../modules/platforms/commands/ensure-channel.handler";
 import { Repository } from "typeorm";
-import { Action } from "../../models/action.entity";
-import { Platform } from "src/constants";
+import { ActionDescriptor } from "../../models/action.entity";
+import { Platform } from "../../../../constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
@@ -106,8 +106,8 @@ export class QuickSetupCommand implements ISlashCommand {
     private readonly logger = new Logger(QuickSetupCommand.name);
 
     constructor(
-        @InjectRepository(Action)
-        private readonly actionsRepo: Repository<Action>,
+        @InjectRepository(ActionDescriptor)
+        private readonly actionsRepo: Repository<ActionDescriptor>,
         private readonly queryBus: QueryBus,
         private readonly commandBus: CommandBus,
     ) {}
@@ -445,7 +445,7 @@ export class QuickSetupCommand implements ISlashCommand {
             pingRole,
         } = this.getOptions(interaction);
 
-        const actions: Partial<Action>[] = [];
+        const actions: Partial<ActionDescriptor>[] = [];
 
         if (selectedOptions.has("live-and-uploads")) {
             const { discordChannelId, discordThreadId } =

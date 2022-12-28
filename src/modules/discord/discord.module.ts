@@ -10,13 +10,13 @@ import { DiscordClientService } from "./client/discord-client.service";
 import { DiscordCommandHandlers } from "./commands";
 import { DiscordRESTService } from "./discord-rest.service";
 import { DiscordService } from "./discord.service";
-import { Action } from "./models/action.entity";
+import { ActionDescriptor } from "./models/action.entity";
 import { GuildSettings } from "./models/settings.entity";
 
 @Module({
     imports: [
         ConfigModule,
-        TypeOrmModule.forFeature([GuildSettings, Action]),
+        TypeOrmModule.forFeature([GuildSettings, ActionDescriptor]),
         CqrsModule,
     ],
     providers: [

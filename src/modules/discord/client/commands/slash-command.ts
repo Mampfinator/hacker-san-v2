@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
-import { Class } from "src/constants";
+import { Class } from "../../../../constants";
 
 const commands: Class<ISlashCommand>[] = [];
 export const getCommands = () => [...commands];

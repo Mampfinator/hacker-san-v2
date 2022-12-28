@@ -10,15 +10,15 @@ import {
     ChatInputCommandInteraction,
     SlashCommandBuilder,
 } from "discord.js";
-import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
 import { Repository } from "typeorm";
-import { Action } from "../../models/action.entity";
-import { PLATFORM_NAME_LOOKUP, Platform } from "src/constants";
+import { ActionDescriptor } from "../../models/action.entity";
+import { PLATFORM_NAME_LOOKUP, Platform } from "../../../../constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { ISlashCommand, SlashCommand } from "./slash-command";
-import { Util } from "src/util";
+import { Util } from "../../../../util";
 import { InjectRepository } from "@nestjs/typeorm";
+import { EnsureChannelCommand } from "../../../platforms/commands/ensure-channel.command";
 
 function addShared(
     builder: SlashCommandSubcommandBuilder,
@@ -166,8 +166,8 @@ export class ActionCommand implements ISlashCommand {
     } = {};
 
     constructor(
-        @InjectRepository(Action)
-        private readonly actionRepo: Repository<Action>,
+        @InjectRepository(ActionDescriptor)
+        private readonly actionRepo: Repository<ActionDescriptor>,
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
     ) {
@@ -234,7 +234,7 @@ export class ActionCommand implements ISlashCommand {
 
     async getBasicOptions(
         interaction: ChatInputCommandInteraction,
-    ): Promise<Partial<Action> | undefined> {
+    ): Promise<Partial<ActionDescriptor> | undefined> {
         const { options, channel: interactionChannel, guildId } = interaction;
 
         const channelOption = options.getChannel("for-channel", false);
@@ -358,7 +358,7 @@ export class ActionCommand implements ISlashCommand {
             where: { guildId: interaction.guildId },
         });
 
-        const actionToLabel = (action: Action) =>
+        const actionToLabel = (action: ActionDescriptor) =>
             `${action.id} - ${Util.firstUpperCase(action.type)} (${
                 action.channelId
             }, ${PLATFORM_NAME_LOOKUP[action.platform]})`;

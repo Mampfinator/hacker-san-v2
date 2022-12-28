@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { CacheCollection } from "src/shared/util/cache-collection";
+import { CacheCollection } from "../../shared/util/cache-collection";
 import { TwitterApi, UserV2 } from "twitter-api-v2";
 import { TwitterConfig } from "../config/config";
 

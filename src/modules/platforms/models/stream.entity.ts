@@ -1,4 +1,4 @@
-import { Platform } from "src/constants";
+import { Platform } from "../../../constants";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 export enum StreamStatus {

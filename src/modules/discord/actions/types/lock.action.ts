@@ -1,7 +1,7 @@
 import { ChannelType } from "discord.js";
-import { ActionPayload, ActionType, IActionType } from "../action";
+import { ActionPayload, Action, IActionType } from "../action";
 
-@ActionType("lock")
+@Action({type: "lock"})
 export class LockAction implements IActionType {
     private readonly emojis = {
         lock: "🔒",

@@ -2,12 +2,12 @@ import { Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { DiscordClientService } from "../client/discord-client.service";
 import { TriggerActionsCommand } from "./trigger-actions.command";
-import { Action } from "../models/action.entity";
+import { ActionDescriptor } from "../models/action.entity";
 import { Repository } from "typeorm";
 import { IActionType } from "../actions/action";
 import { DiscordUtil, ignoreDiscordAPIErrors } from "../util";
 import { DiscordRESTService } from "../discord-rest.service";
-import { NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+import { Channel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectActions } from "../actions/actions-helper";
 
@@ -26,8 +26,8 @@ export class TriggerActionsHandler
     constructor(
         private readonly client: DiscordClientService,
         private readonly rest: DiscordRESTService,
-        @InjectRepository(Action)
-        private readonly actionsRepo: Repository<Action>,
+        @InjectRepository(ActionDescriptor)
+        private readonly actionsRepo: Repository<ActionDescriptor>,
         @InjectActions()
         private readonly actions: Map<string, IActionType & { type: string }>,
     ) {}
@@ -64,7 +64,7 @@ export class TriggerActionsHandler
 
             // fetching channels apparently sometimes has a chance to never return (or throw) when the channel doesn't exist.
             const channel = await new Promise<
-                ThreadChannel | NonThreadGuildBasedChannel
+                Channel
             >(async (res, rej) => {
                 let resolved = false;
                 setTimeout(() => {

@@ -3,8 +3,8 @@ import { CommandBus } from "@nestjs/cqrs";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmbedBuilder } from "discord.js";
-import { TriggerActionsCommand } from "src/modules/discord/commands/trigger-actions.command";
-import { Event } from "src/modules/discord/models/action.entity";
+import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger-actions.command";
+import { Event } from "../../../modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
 import {

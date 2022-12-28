@@ -1,5 +1,5 @@
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { ListenEvent } from "src/events/listen.event";
+import { ListenEvent } from "../../../events/listen.event";
 import { YouTubeService } from "../youtube.service";
 
 @EventsHandler(ListenEvent)

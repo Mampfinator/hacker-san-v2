@@ -1,8 +1,8 @@
 import { Logger } from "@nestjs/common";
 import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { Class, Platform } from "src/constants";
-import { EnsureTwitterChannelCommand } from "src/modules/twitter/commands/ensure-twitter-channel.command";
-import { EnsureYouTubeChannelCommand } from "src/modules/youtube/commands/ensure-youtube-channel.command";
+import { Class, Platform } from "../../../constants";
+import { EnsureTwitterChannelCommand } from "../../../modules/twitter/commands/ensure-twitter-channel.command";
+import { EnsureYouTubeChannelCommand } from "../../../modules/youtube/commands/ensure-youtube-channel.command";
 import { EnsureChannelCommand } from "./ensure-channel.command";
 
 export interface IEnsureChannelCommand {

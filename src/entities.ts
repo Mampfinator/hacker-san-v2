@@ -1,4 +1,4 @@
-import { Action } from "./modules/discord/models/action.entity";
+import { ActionDescriptor } from "./modules/discord/models/action.entity";
 import { GuildSettings } from "./modules/discord/models/settings.entity";
 import { ChannelEntity } from "./modules/platforms/models/channel.entity";
 import { TwitterSpace } from "./modules/twitter/models/twitter-space.entity";
@@ -12,7 +12,7 @@ export const Entities = [
     YouTubeChannel,
     CommunityPost,
     YouTubeVideo,
-    Action,
+    ActionDescriptor,
     TwitterUser,
     TwitterSpace,
     ChannelEntity,

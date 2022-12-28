@@ -11,9 +11,9 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createHmac } from "crypto";
-import { YouTubeConfig } from "src/modules/config/config";
-import { RawBody } from "src/shared/decorators/raw-body.decorator";
-import { XML } from "src/shared/decorators/xml.decorator";
+import { YouTubeConfig } from "../../../modules/config/config";
+import { RawBody } from "../../../shared/decorators/raw-body.decorator";
+import { XML } from "../../../shared/decorators/xml.decorator";
 import { YouTubeLiveStatus } from "../model/youtube-video.entity";
 import { YouTubeEventSubService } from "./youtube-eventsub.service";
 import { YouTubeVideosService } from "./youtube-video.service";

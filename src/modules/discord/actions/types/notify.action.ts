@@ -1,8 +1,8 @@
 import { ChannelType, EmbedBuilder } from "discord.js";
-import { ActionPayload, ActionType, IActionType } from "../action";
+import { Action, ActionPayload, IActionType } from "../action";
 import { ActionUtil } from "../util";
 
-@ActionType("notify")
+@Action({type: "notify"})
 export class NotifyAction implements IActionType {
     async execute({ data, command, channel }: ActionPayload) {
         if (channel.type !== ChannelType.GuildText) return;

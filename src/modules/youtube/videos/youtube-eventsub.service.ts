@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
-import { YouTubeConfig } from "src/modules/config/config";
+import { YouTubeConfig } from "../../../modules/config/config";
 import {
     YOUTUBE_EVENTSUB_HUB_URL,
     YOUTUBE_EVENTSUB_TOPIC_BASE,

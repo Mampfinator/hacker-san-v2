@@ -1,71 +1,51 @@
-import { Injectable } from "@nestjs/common";
-import {
-    ChannelType,
-    Client,
-    NonThreadGuildBasedChannel,
-    ThreadChannel,
-} from "discord.js";
+import { applyDecorators, Injectable, SetMetadata } from "@nestjs/common";
+import { Channel, GuildChannel } from "discord.js";
+import { Class, RestrainedClassDecorator } from "../../../constants";
 import { TriggerActionsCommand } from "../commands/trigger-actions.command";
-import { Action } from "../models/action.entity";
+import { ActionDescriptor } from "../models/action.entity";
+import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "./action.constants";
 
 export interface ActionPayload {
     data: any;
-    channel: ThreadChannel | NonThreadGuildBasedChannel;
+    channel: Channel;
     command: TriggerActionsCommand;
 }
 
 export interface IActionType {
-    execute(payload: ActionPayload): any;
+    execute(payload: ActionPayload): any; 
 }
 
-interface ActionType extends IActionType {
+export interface ActionOptions {
     type: string;
+    /**
+     * Used for sorting & batching actions. If no group is specified, the group is considered to be 0.
+     */
+    getGroup?: (action: ActionDescriptor) => number;
 }
 
-const actions: ActionClass[] = [];
+const actions: Class<IActionType>[] = [];
 export const getActions = () => [...actions];
 
-interface ActionClass extends Function {
-    new (...args: any[]): IActionType;
+
+function AddAction(constructor: Class<IActionType>) {
+    actions.push(constructor);
 }
 
-export const ActionType = (type: string) => {
-    return (target: ActionClass) => {
-        Object.defineProperty(target.prototype, "type", {
-            enumerable: true,
-            configurable: false,
-            get: () => type,
-        });
-        Injectable()(target); // is there maybe a better way to do this?
+function defaultGroup() { return 0 };
 
-        actions.push(target);
-    };
-};
+export function Action(options: ActionOptions): RestrainedClassDecorator<IActionType> {
+    return applyDecorators(
+        Injectable(),
+        AddAction,
+        SetMetadata(ACTION_TYPE_KEY, options.type),
+        SetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
+    )
+}
 
-export async function handleAction<T extends Client>(
-    client: T,
-    actionTypes: Map<string, ActionType>,
-    command: TriggerActionsCommand,
-    action: Action,
-) {
-    const { discordChannelId, discordThreadId, data } = action;
+export function getActionType(action: Class<IActionType>) {
+    return Reflect.getMetadata(ACTION_TYPE_KEY, action);
+}
 
-    const channel = await (client.channels.fetch(
-        discordChannelId,
-    ) as Promise<NonThreadGuildBasedChannel>);
-
-    let thread: ThreadChannel;
-    if (channel.type == ChannelType.GuildText && discordThreadId)
-        thread = await (channel as any).threads?.fetch(discordThreadId);
-
-    const actionType = actionTypes.get(action.type);
-    if (!actionType) {
-        throw new Error(`Could not find actionType ${action.type}.`);
-    }
-
-    await actionType.execute({
-        data,
-        channel: thread ?? channel,
-        command,
-    });
+export function getActionGrouper(action: Class<IActionType>) {
+    return Reflect.getMetadata(ACTION_GROUP_KEY, action);
 }

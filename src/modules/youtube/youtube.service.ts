@@ -1,8 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { Repository } from "typeorm";
-import { YouTubeChannel } from "./model/youtube-channel.entity";
-import { SyncVideosCommand } from "./videos/commands/sync-videos.command";
 import { YouTubeEventSubService } from "./videos/youtube-eventsub.service";
 import { YouTubeVideosService } from "./videos/youtube-video.service";
 import { sleep } from "./util";
@@ -17,17 +14,16 @@ import { YouTubeCommunityPostsService } from "./community-posts/youtube-communit
 import { Interval, SchedulerRegistry } from "@nestjs/schedule";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { InjectRepository } from "@nestjs/typeorm";
 import { launch } from "puppeteer";
 import { CookieJar } from "tough-cookie";
 import { getStoreByPage } from "puppeteer-tough-cookie-store";
 import { wrapper } from "axios-cookiejar-support";
-import { Primitive } from "src/util";
+import { Primitive } from "../../util";
 import { FullChannelCrawlCommand } from "./commands/full-channel-crawl.command";
 import { VideoRenderer } from "yt-scraping-utilities";
 import { ChannelQuery } from "../platforms/queries";
 import { ChannelEntity } from "../platforms/models/channel.entity";
-import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 export interface FetchRawOptions {
     maxRetries?: number;

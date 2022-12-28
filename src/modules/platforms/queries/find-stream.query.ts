@@ -1,5 +1,5 @@
 import { IQuery } from "@nestjs/cqrs";
-import { Platform } from "src/constants";
+import { Platform } from "../../../constants";
 import { FindManyOptions, FindOneOptions, In } from "typeorm";
 import { StreamEntity, StreamStatus } from "../models/stream.entity";
 

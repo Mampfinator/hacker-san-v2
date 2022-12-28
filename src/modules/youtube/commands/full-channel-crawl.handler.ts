@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { Util } from "src/util";
+import { Util } from "../../../util";
 import {
     extractVideoRenderer,
     extractVideoRenderers,

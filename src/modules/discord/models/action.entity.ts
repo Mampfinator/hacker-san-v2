@@ -31,8 +31,8 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
     );
 });
 
-@Entity()
-export class Action {
+@Entity({name: "action"})
+export class ActionDescriptor {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
             name: `${this.id} | On: ${Util.firstUpperCase(

@@ -1,6 +1,6 @@
 import { ICommand, IQueryHandler, QueryBus, QueryHandler } from "@nestjs/cqrs";
-import { TwitterChannelsQuery } from "src/modules/twitter/queries/twitter-channels.query";
-import { YouTubeChannelsQuery } from "src/modules/youtube/queries/youtube-channels.query";
+import { TwitterChannelsQuery } from "../../../modules/twitter/queries/twitter-channels.query";
+import { YouTubeChannelsQuery } from "../../../modules/youtube/queries/youtube-channels.query";
 import { ChannelsQuery } from "./channels.query";
 
 export interface ChannelsQueryResult {

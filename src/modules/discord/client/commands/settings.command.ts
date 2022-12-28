@@ -6,16 +6,16 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { FindOperator, IsNull, Repository } from "typeorm";
-import { Action, Platform } from "../../models/action.entity";
+import { ActionDescriptor, Platform } from "../../models/action.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
-import { Util } from "src/util";
-import { MultipageMessage } from "src/shared/util/multipage-message";
+import { Util } from "../../../../util";
+import { MultipageMessage } from "../../../../shared/util/multipage-message";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { GuildSettings } from "../../models/settings.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
-import { EnsureChannelCommand } from "src/modules/platforms/commands/ensure-channel.command";
+import { EnsureChannelResult } from "../../../../modules/platforms/commands/ensure-channel.handler";
+import { EnsureChannelCommand } from "../../../../modules/platforms/commands/ensure-channel.command";
 import { InjectRepository } from "@nestjs/typeorm";
 
 @SlashCommand({
@@ -112,8 +112,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 })
 export class SettingsCommand implements ISlashCommand {
     constructor(
-        @InjectRepository(Action)
-        private readonly actionRepo: Repository<Action>,
+        @InjectRepository(ActionDescriptor)
+        private readonly actionRepo: Repository<ActionDescriptor>,
         @InjectRepository(GuildSettings)
         private readonly settingsRepo: Repository<GuildSettings>,
         private readonly commandBus: CommandBus,

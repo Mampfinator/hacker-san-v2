@@ -1,12 +1,14 @@
 import { EmbedBuilder } from "discord.js";
 import { ICommand } from "@nestjs/cqrs";
-
-import { Platform } from "src/constants";
+import { Platform } from "../../../constants";
 
 export interface TriggerActionsCommandOptions {
     platform: Platform;
     event: string;
-    url: string; // A URL to the event. Needs to be present for every event type.
+    /**
+     * A URL to the event. So youtube.com/watch?v=..., twitch.tv/..., etc.
+     */
+    url: string; 
     channelId: string;
     embed?: EmbedBuilder;
 }

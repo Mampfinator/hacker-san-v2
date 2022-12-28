@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EnsureChannelResult } from "src/modules/platforms/commands/ensure-channel.handler";
+import { EnsureChannelResult } from "../../../modules/platforms/commands/ensure-channel.handler";
 import { UserV2 } from "twitter-api-v2";
 import { Repository } from "typeorm";
 import { TwitterUser } from "../models/twitter-user.entity";

@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
+import { ChannelsQueryResult } from "../../../modules/platforms/queries/channels.handler";
 import { Repository } from "typeorm";
 import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { YouTubeChannelsQuery } from "./youtube-channels.query";

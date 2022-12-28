@@ -8,13 +8,14 @@ import {
     ThreadChannel,
     SlashCommandStringOption,
 } from "discord.js";
-import { Action } from "./models/action.entity";
+import { ActionDescriptor } from "./models/action.entity";
 import {
     PLATFORM_NAME_LOOKUP,
     Platform,
     SUPPORTED_PLATFORMS,
     EVENT_NAME_LOOKUP,
-} from "src/constants";
+    Class,
+} from "../../constants"
 import {
     AttachmentType,
     ChannelInfo,
@@ -25,10 +26,8 @@ import {
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./client/discord-client.service";
 import { QueryBus } from "@nestjs/cqrs";
-import { ChannelsQuery } from "../platforms/queries/channels.query";
-import { ChannelsQueryResult } from "../platforms/queries/channels.handler";
-import { getActions } from "./actions/action";
-import { Util } from "src/util";
+import { getActions, getActionType } from "./actions/action";
+import { Util } from "../../util";
 import { Logger } from "@nestjs/common";
 import { DiscordRESTService } from "./discord-rest.service";
 import { Routes } from "discord-api-types/v10";
@@ -115,9 +114,9 @@ export namespace DiscordUtil {
     }
 
     export async function fetchChannelOrThread(
-        action: Action,
+        action: ActionDescriptor,
         client: DiscordClientService,
-    ): Promise<NonThreadGuildBasedChannel | ThreadChannel> {
+    ): Promise<Channel> {
         /*const guild = await client.guilds.fetch({guild: action.guildId, cache: false});
         if (!guild) return;
 
@@ -138,7 +137,7 @@ export namespace DiscordUtil {
     }
 
     export async function fetchChannelOrThreadUncached(
-        action: Action,
+        action: ActionDescriptor,
         rest: DiscordRESTService,
     ) {
         const channel = (await rest.get(
@@ -203,7 +202,7 @@ export namespace DiscordUtil {
         description?: string,
     ) {
         const choices = getActions().map(action => {
-            const { type } = action.prototype;
+            const type = getActionType(action);
 
             return { value: type, name: Util.firstUpperCase(type) };
         });

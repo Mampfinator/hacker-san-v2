@@ -10,28 +10,26 @@ import {
     ActivityType,
     PresenceStatusData,
 } from "discord.js";
-import { DiscordConfig } from "src/modules/config/config";
+import { DiscordConfig } from "../../../modules/config/config";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
 import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { FetchPostsCommand } from "src/modules/youtube/community-posts/commands/fetch-posts.command";
+import { FetchPostsCommand } from "../../youtube";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
-import { Platform, SUPPORTED_PLATFORMS } from "src/constants";
-import { ChannelsQuery } from "src/modules/platforms/queries/channels.query";
-import { ChannelsQueryResult } from "src/modules/platforms/queries/channels.handler";
-import { Util } from "src/util";
-import { MultipageMessage } from "src/shared/util/multipage-message";
+import { Platform, SUPPORTED_PLATFORMS } from "../../../constants";
+import { Util } from "../../../util";
+import { MultipageMessage } from "../../../shared/util/multipage-message";
 import { getActions } from "../actions/action";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectCommands } from "./commands/slash-commands.provider";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { ChannelQuery } from "src/modules/platforms/queries";
-import { ChannelEntity } from "src/modules/platforms/models/channel.entity";
+import { ChannelQuery } from "../../../modules/platforms/queries";
+import { ChannelEntity } from "../../../modules/platforms/models/channel.entity";
 
 @Injectable()
 export class DiscordClientService extends Client {

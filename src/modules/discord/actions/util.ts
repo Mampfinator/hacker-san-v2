@@ -1,5 +1,5 @@
 import { TriggerActionsCommand } from "../commands/trigger-actions.command";
-import { Util } from "src/util";
+import { Util } from "../../../util"
 
 export namespace ActionUtil {
     export function interpolate(
