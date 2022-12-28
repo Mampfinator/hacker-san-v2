@@ -8,7 +8,7 @@ export interface TriggerActionsCommandOptions {
     /**
      * A URL to the event. So youtube.com/watch?v=..., twitch.tv/..., etc.
      */
-    url: string; 
+    url: string;
     channelId: string;
     embed?: EmbedBuilder;
 }

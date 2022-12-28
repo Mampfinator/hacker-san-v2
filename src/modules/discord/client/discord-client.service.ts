@@ -45,7 +45,7 @@ export class DiscordClientService extends Client {
         @InjectRepository(GuildSettings)
         private readonly settingsRepository: Repository<GuildSettings>,
         @InjectCommands() slashCommands: SlashCommand[],
-        private readonly eventEmitter: EventEmitter2
+        private readonly eventEmitter: EventEmitter2,
     ) {
         super({
             intents: ["Guilds", "GuildMessages", "MessageContent"],
@@ -57,7 +57,12 @@ export class DiscordClientService extends Client {
         }
 
         for (const platform of SUPPORTED_PLATFORMS) {
-            this.statusReady.set(platform, !configService.getOrThrow<boolean>(`${platform.toUpperCase()}.active`));
+            this.statusReady.set(
+                platform,
+                !configService.getOrThrow<boolean>(
+                    `${platform.toUpperCase()}.active`,
+                ),
+            );
         }
     }
 
@@ -102,7 +107,11 @@ export class DiscordClientService extends Client {
     async platformReady(platform: Platform) {
         this.statusReady.set(platform, true);
 
-        if ([...this.statusReady.values()].reduce((prev, cur) => prev && (cur == undefined || cur))) {
+        if (
+            [...this.statusReady.values()].reduce(
+                (prev, cur) => prev && (cur == undefined || cur),
+            )
+        ) {
             this.status = "online";
             this.refreshPresence();
         }
@@ -158,7 +167,7 @@ export class DiscordClientService extends Client {
         }
 
         this.logger.log(`Signed in as ${this.user.tag} (${this.user.id}).`);
-        
+
         this.eventEmitter.emit("discord.ready", "discord");
     }
 
@@ -247,10 +256,14 @@ export class DiscordClientService extends Client {
         let name: string;
 
         if (this.status === "dnd") {
-            name = "starting..."
+            name = "starting...";
         } else {
-            const channels = (await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({query: {}}))).length;
-            
+            const channels = (
+                await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
+                    new ChannelQuery({ query: {} }),
+                )
+            ).length;
+
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;
 
@@ -258,11 +271,7 @@ export class DiscordClientService extends Client {
                 channels,
                 "channel",
                 "channels",
-            )} in ${guilds} ${Util.pluralize(
-                guilds,
-                "server",
-                "servers",
-            )}.`;
+            )} in ${guilds} ${Util.pluralize(guilds, "server", "servers")}.`;
         }
 
         this.user.setPresence({

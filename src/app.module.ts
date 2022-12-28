@@ -48,7 +48,7 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
         }),
         ScheduleModule.forRoot(),
         EventEmitterModule.forRoot({
-            wildcard: true
+            wildcard: true,
         }),
         CqrsModule,
         DiscordModule,

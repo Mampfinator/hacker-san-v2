@@ -14,7 +14,7 @@ import {
     Platform,
     SUPPORTED_PLATFORMS,
     EVENT_NAME_LOOKUP,
-} from "../../constants"
+} from "../../constants";
 import {
     AttachmentType,
     ChannelInfo,

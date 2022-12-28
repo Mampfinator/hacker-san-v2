@@ -7,10 +7,7 @@ import {
     parseRawData,
     VideoRenderer,
 } from "yt-scraping-utilities";
-import {
-    ContinuationItemRenderer,
-    YouTubeService,
-} from "../youtube.service";
+import { ContinuationItemRenderer, YouTubeService } from "../youtube.service";
 import { FullChannelCrawlCommand } from "./full-channel-crawl.command";
 import { GridVideoRenderer } from "yt-scraping-utilities/dist/youtube-types";
 import { Logger } from "@nestjs/common";

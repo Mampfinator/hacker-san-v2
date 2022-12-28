@@ -5,7 +5,10 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
-import { TwitterConfig, YouTubeConfig } from "../../../../modules/config/config";
+import {
+    TwitterConfig,
+    YouTubeConfig,
+} from "../../../../modules/config/config";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 
 @SlashCommand({

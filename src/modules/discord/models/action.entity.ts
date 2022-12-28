@@ -31,7 +31,7 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
     );
 });
 
-@Entity({name: "action"})
+@Entity({ name: "action" })
 export class ActionDescriptor {
     public toEmbedField(inline?: boolean): EmbedField {
         return {

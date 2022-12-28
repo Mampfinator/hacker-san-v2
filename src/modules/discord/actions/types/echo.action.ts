@@ -2,7 +2,7 @@ import { ChannelType } from "discord.js";
 import { ActionPayload, Action, IActionType } from "../action";
 import { ActionUtil } from "../util";
 
-@Action({type: "echo"})
+@Action({ type: "echo" })
 export class EchoAction implements IActionType {
     async execute({ action, channel, command }: ActionPayload) {
         const { message } = action.data as { message: string };

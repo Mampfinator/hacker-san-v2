@@ -12,7 +12,7 @@ export interface ActionPayload {
 }
 
 export interface IActionType {
-    execute(payload: ActionPayload): any; 
+    execute(payload: ActionPayload): any;
 }
 
 export interface ActionOptions {
@@ -26,20 +26,23 @@ export interface ActionOptions {
 const actions: Class<IActionType>[] = [];
 export const getActions = () => [...actions];
 
-
 function AddAction(constructor: Class<IActionType>) {
     actions.push(constructor);
 }
 
-function defaultGroup() { return 0 };
+function defaultGroup() {
+    return 0;
+}
 
-export function Action(options: ActionOptions): RestrainedClassDecorator<IActionType> {
+export function Action(
+    options: ActionOptions,
+): RestrainedClassDecorator<IActionType> {
     return applyDecorators(
         Injectable(),
         AddAction,
         SetMetadata(ACTION_TYPE_KEY, options.type),
         SetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
-    )
+    );
 }
 
 export function getActionType(action: Class<IActionType>) {

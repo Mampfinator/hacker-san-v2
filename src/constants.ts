@@ -28,4 +28,6 @@ export const EVENT_NAME_LOOKUP: { [Property in Event]: string } = {
     // "stream:offline": "Stream Offline",
 };
 
-export type RestrainedClassDecorator<T extends object> = (constructor: Class<T>) => any;
+export type RestrainedClassDecorator<T extends object> = (
+    constructor: Class<T>,
+) => any;

@@ -152,7 +152,7 @@ export class YouTubeService implements OnModuleInit {
         private readonly videos: YouTubeVideosService,
         private readonly postService: YouTubeCommunityPostsService,
         config: ConfigService,
-        private readonly eventEmitter: EventEmitter2
+        private readonly eventEmitter: EventEmitter2,
     ) {
         this.skipSync = config.getOrThrow<boolean>("SKIP_SYNC");
     }

@@ -44,9 +44,7 @@ export class TriggerActionsHandler
         );
 
         for (const action of actions) {
-            const channel = await new Promise<
-                Channel
-            >(async (res, rej) => {
+            const channel = await new Promise<Channel>(async (res, rej) => {
                 let resolved = false;
                 setTimeout(() => {
                     if (!resolved) rej(new ChannelFetchHungError());
@@ -73,11 +71,7 @@ export class TriggerActionsHandler
             this.logger.debug(`Executing action in ${channel.id}.`);
 
             try {
-                await this.actionOrchestrator.execute(
-                    command,
-                    action,
-                    channel
-                );
+                await this.actionOrchestrator.execute(command, action, channel);
             } catch (error) {
                 this.logger.warn(error);
                 ignoreDiscordAPIErrors(error);
