@@ -1,5 +1,5 @@
 import { applyDecorators, Injectable, SetMetadata } from "@nestjs/common";
-import { Channel, GuildChannel } from "discord.js";
+import { Channel } from "discord.js";
 import { Class, RestrainedClassDecorator } from "../../../constants";
 import { TriggerActionsCommand } from "../commands/trigger-actions.command";
 import { ActionDescriptor } from "../models/action.entity";

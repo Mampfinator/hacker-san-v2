@@ -9,7 +9,6 @@ import {
 } from "yt-scraping-utilities";
 import {
     ContinuationItemRenderer,
-    RendererType,
     YouTubeService,
 } from "../youtube.service";
 import { FullChannelCrawlCommand } from "./full-channel-crawl.command";

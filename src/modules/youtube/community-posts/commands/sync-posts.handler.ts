@@ -2,26 +2,16 @@ import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { SyncPostsCommand } from "./sync-posts.command";
 import { CommunityPost as CommunityPostEntity } from "../model/community-post.entity";
 import { Repository } from "typeorm";
-import { FetchPostsCommand } from "./fetch-posts.command";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Cookie, CookieJar } from "tough-cookie";
-import axios from "axios";
-import { wrapper } from "axios-cookiejar-support";
 import { YouTubeService } from "../../youtube.service";
 import {
     findActiveTab,
     parseRawData,
     CommunityPost,
-    extractCommunityPosts,
     extractPost,
 } from "yt-scraping-utilities";
 import { findValuesByKeys } from "yt-scraping-utilities/dist/util";
-import {
-    YOUTUBE_BROWSE_ENDPOINT,
-    YOUTUBE_CLIENT_VERSION,
-} from "../../constants";
 import { Logger } from "@nestjs/common";
-import { createHash } from "crypto";
 
 @CommandHandler(SyncPostsCommand)
 export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand> {

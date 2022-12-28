@@ -14,7 +14,6 @@ import {
     Platform,
     SUPPORTED_PLATFORMS,
     EVENT_NAME_LOOKUP,
-    Class,
 } from "../../constants"
 import {
     AttachmentType,

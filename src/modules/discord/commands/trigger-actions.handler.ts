@@ -4,12 +4,9 @@ import { DiscordClientService } from "../client/discord-client.service";
 import { TriggerActionsCommand } from "./trigger-actions.command";
 import { ActionDescriptor } from "../models/action.entity";
 import { Repository } from "typeorm";
-import { IActionType } from "../actions/action";
 import { DiscordUtil, ignoreDiscordAPIErrors } from "../util";
-import { DiscordRESTService } from "../discord-rest.service";
-import { Channel, NonThreadGuildBasedChannel, ThreadChannel } from "discord.js";
+import { Channel } from "discord.js";
 import { InjectRepository } from "@nestjs/typeorm";
-import { InjectActions } from "../actions/actions-helper";
 import { ActionOrchestrator } from "../actions/action.orchestrator";
 
 class ChannelFetchHungError extends Error {
