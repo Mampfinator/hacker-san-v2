@@ -248,7 +248,11 @@ export class YouTubeService implements OnModuleInit {
         }
 
         if (invalidIds.length > 0) {
-            this.logger.log(`Found ${invalidIds.length} invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`);
+            this.logger.log(
+                `Found ${
+                    invalidIds.length
+                } invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`,
+            );
             // TODO: figure out which tables need purging
         } else {
             this.logger.log("No invalid channel IDs. No purging necessary.");
@@ -338,7 +342,9 @@ export class YouTubeService implements OnModuleInit {
     }
 
     public async init() {
-        await this.purgeInvalidChannels().catch(error => this.logger.error(error));
+        await this.purgeInvalidChannels().catch(error =>
+            this.logger.error(error),
+        );
         await this.sync().catch(error => this.logger.error(error));
 
         // start checking for new posts as soon as all posts are synced.

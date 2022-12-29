@@ -36,7 +36,8 @@ export class FullChannelCrawlHandler implements ICommandHandler<FullChannelCrawl
             source: videoPage,
         });
 
-        const videos: VideoRenderer[] = extractGridVideoRenderers(ytInitialData);
+        const videos: VideoRenderer[] =
+            extractGridVideoRenderers(ytInitialData);
 
         const { visitorData } = ytInitialData.responseContext.webResponseContextExtensionData.ytConfigData;
 
