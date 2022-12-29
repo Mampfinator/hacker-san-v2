@@ -251,29 +251,37 @@ export class YouTubeService implements OnModuleInit {
     private async purgeInvalidChannels() {
         this.logger.log("Verifying YouTube channel IDs.");
 
-        const channelIds = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
-            new ChannelQuery({
-                one: false,
-                query: {where: {platform: "youtube"}}
-            })
-        ).then(channels => channels.map(channel => channel.platformId));
+        const channelIds = await this.queryBus
+            .execute<ChannelQuery, ChannelEntity[]>(
+                new ChannelQuery({
+                    one: false,
+                    query: { where: { platform: "youtube" } },
+                }),
+            )
+            .then(channels => channels.map(channel => channel.platformId));
 
         let invalidIds: string[] = [];
 
         for (let i = 0; i < channelIds.length; i += 50) {
             const batch = channelIds.slice(i, 50);
-            const {data: {items: channels}} = await this.apiService.channels.list({
+            const {
+                data: { items: channels },
+            } = await this.apiService.channels.list({
                 id: batch,
-                part: ["id"]
+                part: ["id"],
             });
 
-            invalidIds.push(...batch.filter(id => 
-                !channels.find(c => c.id === id)
-            ));
+            invalidIds.push(
+                ...batch.filter(id => !channels.find(c => c.id === id)),
+            );
         }
 
         if (invalidIds.length > 0) {
-            this.logger.log(`Found ${invalidIds.length} invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`);
+            this.logger.log(
+                `Found ${
+                    invalidIds.length
+                } invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`,
+            );
             // TODO: figure out which tables need purging
         } else {
             this.logger.log("No invalid channel IDs. No purging necessary.");
@@ -392,7 +400,9 @@ export class YouTubeService implements OnModuleInit {
     }
 
     public async init() {
-        await this.purgeInvalidChannels().catch(error => this.logger.error(error));
+        await this.purgeInvalidChannels().catch(error =>
+            this.logger.error(error),
+        );
         await this.sync().catch(error => this.logger.error(error));
 
         // start checking for new posts as soon as all posts are synced.
