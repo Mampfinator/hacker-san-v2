@@ -236,7 +236,7 @@ export class DiscordClientService extends Client {
             });
         } else {
             const reply = new MultipageMessage({
-                channel: message.channel as any,
+                message,
             });
 
             for (const embed of embeds) {
@@ -244,9 +244,7 @@ export class DiscordClientService extends Client {
             }
 
             await reply.send({
-                asReply: true,
-                message,
-                replyOptions: { allowedMentions: { repliedUser: false } },
+                replyPing: false,
             });
         }
     }

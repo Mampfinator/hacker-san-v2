@@ -97,6 +97,7 @@ export namespace DiscordUtil {
                 const { playlist } = post;
                 embedContent += `\n\nPlaylist: ${playlist.title} [link](https://youtube.com/playlist?list=${playlist.id})`;
                 embed.setImage(playlist.thumbail);
+                break;
             case AttachmentType.Poll:
                 const { choices } = post;
                 embedContent += "\n\u200b\n\u200b";
@@ -116,14 +117,6 @@ export namespace DiscordUtil {
         action: ActionDescriptor,
         client: DiscordClientService,
     ): Promise<Channel> {
-        /*const guild = await client.guilds.fetch({guild: action.guildId, cache: false});
-        if (!guild) return;
-
-        const { discordChannelId: channelId }= action;
-        console.log(`Attempting to fetch channel with ID ${channelId}.`);
-        const channel = await guild.channels.fetch(channelId, {cache: false});
-        if (!channel) return;*/
-
         const channel = await client.channels.fetch(action.discordChannelId);
 
         const final = action.discordThreadId
@@ -222,21 +215,6 @@ export namespace DiscordUtil {
         if (!platform) return [];
 
         const input = (options.getFocused() as string).trim().toLowerCase();
-
-        /*const { channels } = await queryBus.execute<
-            ChannelsQuery,
-            ChannelsQueryResult
-        >(new ChannelsQuery(platform));
-
-        //? TODO: find an SQL only option.
-        return channels
-            .filter(
-                channel =>
-                    channel.name.toLowerCase().includes(input) || channel.id.toLowerCase().includes(input),
-            )
-            .map(channel => ({ name: channel.name, value: channel.id }))
-            .slice(0, 25); // limit to 25 results because Discord has a limit of 25 autocomplete suggestions.
-        */
 
         const channels = await queryBus.execute<ChannelQuery, YouTubeChannel[]>(
             new ChannelQuery({
