@@ -1,136 +1,75 @@
-// TODO: fix
-
-import {
-    ChatInputCommandInteraction,
-    Message,
+import { 
+    BaseMessageOptions, 
+    CommandInteraction, 
+    Message, 
+    MessageComponentCollectorOptions, 
+    TextBasedChannel, 
+    BaseChannel,
     ActionRowBuilder,
     ButtonBuilder,
-    MessageComponentCollectorOptions,
-    MessageEditOptions,
-    EmbedBuilder,
-    MessageOptions,
-    ReplyMessageOptions,
-    TextBasedChannel,
     ButtonStyle,
+    APIActionRowComponent,
+    InteractionResponse,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
 } from "discord.js";
+import { RequireOnlyOne } from "yt-scraping-utilities/dist/util";
 
 type ComponentId = "first" | "back" | "next" | "last";
-const componentIds = new Set<ComponentId>(["first", "back", "next", "last"]);
+
+interface BaseMultipageMessageOptions {
+    channel: TextBasedChannel;
+    message: Message;
+    interaction: CommandInteraction;
+
+    collectorOptions?: MessageComponentCollectorOptions<any>;
+}
+
+export type MultipageMessageOptions = RequireOnlyOne<BaseMultipageMessageOptions, "channel" | "message" | "interaction">;
+
+export interface SendOptions {
+    /**
+     * Only valid if sendTarget is Message.
+     */
+    replyPing?: boolean; 
+
+    /**
+     * Only valid if sendTarget is CommandInteraction.
+     */
+    ephemeral?: boolean;
+}
+
+
 
 export class MultipageMessage {
-    private readonly pages: MessageOptions[] = [];
-    private index = 0;
-    private message?: Message;
+    private _index = 0;
+    private pages: BaseMessageOptions[] = [];
+    private message: Message | InteractionResponse;
 
-    private readonly channel?: TextBasedChannel;
-    private readonly interaction?: ChatInputCommandInteraction<any>;
+    private readonly sendTarget: TextBasedChannel | Message | CommandInteraction;
+    private collectorOptions: MessageComponentCollectorOptions<any>;
 
-    private readonly componentCollectorOptions: MessageComponentCollectorOptions<any>;
-
-    constructor(options: {
-        channel?: TextBasedChannel;
-        interaction?: ChatInputCommandInteraction<any>;
-        collectorOptions?: MessageComponentCollectorOptions<any>;
-    }) {
-        this.channel = options.channel;
-        this.interaction = options.interaction;
-        if (!this.channel && !this.interaction)
-            throw new Error("No channel or interaction provided");
-
-        this.componentCollectorOptions = options.collectorOptions ?? {};
+    constructor(
+        options: MultipageMessageOptions
+    ) {
+        this.collectorOptions = options.collectorOptions ?? {};
+        this.sendTarget = options.channel ?? options.message ?? options.interaction;
     }
 
-    public addPage(message: MessageOptions): number {
+    public get index() {
+        return this._index;
+    }
+
+    private set index(value: number) {
+        this._index = value;
+    }
+
+    public addPage(message: BaseMessageOptions) {
         return this.pages.push(message);
     }
 
-    public async send(options?: {
-        asReply?: boolean;
-        message?: Message;
-        replyOptions?: ReplyMessageOptions;
-    }) {
-        // scuff, but works
-        const page = this.setupMessage(this.pages[this.index]) as any;
-
-        let message: Message;
-        switch (true) {
-            case options?.asReply:
-                message = await options.message.reply({
-                    ...page,
-                    ...(options.replyOptions ?? {}),
-                });
-                break;
-            case this.channel !== undefined:
-                message = await this.channel.send(page);
-                break;
-            case this.interaction.deferred || this.interaction.replied:
-                message = await this.interaction.editReply(page);
-                break;
-            default:
-                message = await this.interaction.reply({
-                    ...page,
-                    fetchReply: true,
-                });
-        }
-
-        this.message = message;
-
-        const collector = message.createMessageComponentCollector(
-            // @ts-ignore
-            this.componentCollectorOptions,
-        );
-        collector.on("collect", async interaction => {
-            await this.handleCollect(interaction.customId as ComponentId);
-            interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setDescription(
-                            `Now viewing page ${this.index + 1}/${
-                                this.pages.length
-                            }`,
-                        )
-                        .setColor("Green"),
-                ],
-                ephemeral: true,
-            });
-        });
-
-        collector.on("end", () => {
-            this.message?.edit(this.pages[this.index] as MessageEditOptions); // remove navigation components
-        });
-    }
-
-    private async handleCollect(command: ComponentId) {
-        if (!componentIds.has(command)) return;
-
-        switch (command) {
-            case "first":
-                this.index = 0;
-            case "back":
-                this.index = Math.max(0, this.index - 1);
-                break;
-            case "next":
-                this.index = Math.min(this.pages.length - 1, this.index + 1);
-                break;
-            case "last":
-                this.index = this.pages.length - 1;
-        }
-        await this.edit();
-    }
-
-    private async edit() {
-        const message = this.setupMessage(this.pages[this.index]) as any;
-
-        if (this.channel) await this.message.edit(message);
-        else await this.interaction.editReply(message);
-    }
-
-    private setupMessage(message: MessageOptions): MessageOptions {
-        // FIXME
-        // @ts-ignore
-        const components = [ActionRowBuilder.from(message.components ?? [])];
-
-        const row = new ActionRowBuilder().addComponents(
+    private addNavigation(page: BaseMessageOptions): BaseMessageOptions {
+        const navigationRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId("first")
                 .setEmoji("⬅️")
@@ -153,9 +92,96 @@ export class MultipageMessage {
                 .setStyle(ButtonStyle.Secondary),
         );
 
-        components.push(row);
+        const components: ActionRowBuilder<any>[] = [
+            ...(page.components as APIActionRowComponent<any>[])?.map(ActionRowBuilder.from) ?? [],
+            navigationRow,
+        ]
+        components.push(navigationRow);
 
-        // @ts-ignore
-        return { ...message, components };
+        return {...page, components: components.map(row => row.toJSON())};
+    }
+
+    public async send(options?: SendOptions) {
+        if (this.pages.length == 0) throw new Error("Can not send a multipage message with 0 pages.");
+        if (this.pages.length == 1) throw new Error("Can not send a multipage message with only 1 page.");
+
+        const page = this.addNavigation(this.pages[0]);
+
+        switch (true) {
+            case this.sendTarget instanceof BaseChannel:
+                this.message = await (this.sendTarget as TextBasedChannel).send(page);
+                break;
+            case this.sendTarget instanceof CommandInteraction:
+                this.message = await (this.sendTarget as CommandInteraction).reply({
+                    ...page,
+                    ephemeral: options?.ephemeral ?? false,
+                });
+                break;
+            case this.sendTarget instanceof Message:
+                this.message = await (this.sendTarget as Message).reply({
+                    ...page, 
+                    allowedMentions: {repliedUser: options?.replyPing ?? false}
+                });
+                break;
+            default:
+                throw new Error("Could not send multipage embed: unknown send target type!");
+        }
+
+        // TODO: find a way of doing this without @ts-ignore.
+        //@ts-ignore
+        const collector = this.message.createMessageComponentCollector({...this.collectorOptions});
+
+        collector.on("collect", async interaction => {
+            await this.handleCollect(interaction.customId as ComponentId);
+            interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor("Green")
+                        .setDescription(`Now showing page ${this.index+1}/${this.pages.length}`),
+                ],
+                ephemeral: true,
+            });
+        });
+
+
+        return this.message;
+    }
+
+    private async handleCollect(componentId: ComponentId) {
+        switch (componentId) {
+            case "first":
+                this.index = 0;
+            case "back":
+                this.index = Math.max(0, this.index - 1);
+                break;
+            case "next":
+                this.index = Math.min(this.pages.length - 1, this.index + 1);
+                break;
+            case "last":
+                this.index = this.pages.length - 1;
+                break;
+            default:  // the component interaction was not meant for us; we just return and do nothing.
+                return;
+        }
+
+        await this.edit();
+    }
+
+    private async edit() {
+        const page = this.addNavigation(this.pages[this.index]);
+
+        switch (true) {
+            case this.message instanceof Message: {
+                    await (this.message as Message).edit(page);
+                }
+                break;
+            case this.message instanceof InteractionResponse: {
+                    const interaction = this.message.interaction as ChatInputCommandInteraction;
+                    await interaction.editReply(page);
+                }
+                break;
+            default:
+                throw new Error("Invalid internal message value: " + JSON.stringify(this.message));
+        }
     }
 }
