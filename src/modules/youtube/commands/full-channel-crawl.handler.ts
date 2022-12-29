@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Util } from "../../../util";
 import {
-    extractVideoRenderer,
-    extractVideoRenderers,
+    extractGridVideoRenderer,
+    extractGridVideoRenderers,
     findActiveTab,
     parseRawData,
     VideoRenderer,
@@ -38,7 +38,7 @@ export class FullChannelCrawlHandler
             source: videoPage,
         });
 
-        const videos: VideoRenderer[] = extractVideoRenderers(ytInitialData);
+        const videos: VideoRenderer[] = extractGridVideoRenderers(ytInitialData);
 
         const { visitorData } =
             ytInitialData.responseContext.webResponseContextExtensionData
@@ -69,7 +69,7 @@ export class FullChannelCrawlHandler
                 "gridVideoRenderer",
                 false
             >({ token, clickTrackingParams, visitorData });
-            const girdVideoRenderers = continuationItems
+            const gridVideoRenderers = continuationItems
                 .filter(item => "gridVideoRenderer" in item)
                 .map(
                     ({
@@ -80,7 +80,7 @@ export class FullChannelCrawlHandler
                 );
 
             const continuationRenderer = Util.last(continuationItems);
-            videos.push(...girdVideoRenderers.map(extractVideoRenderer));
+            videos.push(...gridVideoRenderers.map(extractGridVideoRenderer));
 
             if ("gridVideoRenderer" in continuationRenderer) {
                 token = undefined;
