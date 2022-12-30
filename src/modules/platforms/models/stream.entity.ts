@@ -7,6 +7,9 @@ export enum StreamStatus {
     Upcoming = "upcoming",
 }
 
+/**
+ * Represents a watchable resource (a stream, video upload, a Space, ...)
+ */
 @Entity({ name: "stream" })
 export class StreamEntity {
     @PrimaryGeneratedColumn()

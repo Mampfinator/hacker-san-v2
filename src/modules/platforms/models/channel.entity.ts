@@ -1,6 +1,9 @@
 import { Platform, SUPPORTED_PLATFORMS } from "../../../constants";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
+/**
+ * Represents a paltform-independent creator channel.
+ */
 @Entity({ name: "channel" })
 export class ChannelEntity {
     @PrimaryGeneratedColumn("uuid")
