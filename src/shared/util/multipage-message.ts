@@ -1,9 +1,9 @@
-import { 
-    BaseMessageOptions, 
-    CommandInteraction, 
-    Message, 
-    MessageComponentCollectorOptions, 
-    TextBasedChannel, 
+import {
+    BaseMessageOptions,
+    CommandInteraction,
+    Message,
+    MessageComponentCollectorOptions,
+    TextBasedChannel,
     BaseChannel,
     ActionRowBuilder,
     ButtonBuilder,
@@ -25,13 +25,16 @@ interface BaseMultipageMessageOptions {
     collectorOptions?: MessageComponentCollectorOptions<any>;
 }
 
-export type MultipageMessageOptions = RequireOnlyOne<BaseMultipageMessageOptions, "channel" | "message" | "interaction">;
+export type MultipageMessageOptions = RequireOnlyOne<
+    BaseMultipageMessageOptions,
+    "channel" | "message" | "interaction"
+>;
 
 export interface SendOptions {
     /**
      * Only valid if sendTarget is Message.
      */
-    replyPing?: boolean; 
+    replyPing?: boolean;
 
     /**
      * Only valid if sendTarget is CommandInteraction.
@@ -39,21 +42,21 @@ export interface SendOptions {
     ephemeral?: boolean;
 }
 
-
-
 export class MultipageMessage {
     private _index = 0;
     private pages: BaseMessageOptions[] = [];
     private message: Message | InteractionResponse;
 
-    private readonly sendTarget: TextBasedChannel | Message | CommandInteraction;
+    private readonly sendTarget:
+        | TextBasedChannel
+        | Message
+        | CommandInteraction;
     private collectorOptions: MessageComponentCollectorOptions<any>;
 
-    constructor(
-        options: MultipageMessageOptions
-    ) {
+    constructor(options: MultipageMessageOptions) {
         this.collectorOptions = options.collectorOptions ?? {};
-        this.sendTarget = options.channel ?? options.message ?? options.interaction;
+        this.sendTarget =
+            options.channel ?? options.message ?? options.interaction;
     }
 
     public get index() {
@@ -93,43 +96,59 @@ export class MultipageMessage {
         );
 
         const components: ActionRowBuilder<any>[] = [
-            ...(page.components as APIActionRowComponent<any>[])?.map(ActionRowBuilder.from) ?? [],
+            ...((page.components as APIActionRowComponent<any>[])?.map(
+                ActionRowBuilder.from,
+            ) ?? []),
             navigationRow,
-        ]
+        ];
         components.push(navigationRow);
 
-        return {...page, components: components.map(row => row.toJSON())};
+        return { ...page, components: components.map(row => row.toJSON()) };
     }
 
     public async send(options?: SendOptions) {
-        if (this.pages.length == 0) throw new Error("Can not send a multipage message with 0 pages.");
-        if (this.pages.length == 1) throw new Error("Can not send a multipage message with only 1 page.");
+        if (this.pages.length == 0)
+            throw new Error("Can not send a multipage message with 0 pages.");
+        if (this.pages.length == 1)
+            throw new Error(
+                "Can not send a multipage message with only 1 page.",
+            );
 
         const page = this.addNavigation(this.pages[0]);
 
         switch (true) {
             case this.sendTarget instanceof BaseChannel:
-                this.message = await (this.sendTarget as TextBasedChannel).send(page);
+                this.message = await (this.sendTarget as TextBasedChannel).send(
+                    page,
+                );
                 break;
             case this.sendTarget instanceof CommandInteraction:
-                this.message = await (this.sendTarget as CommandInteraction).reply({
+                this.message = await (
+                    this.sendTarget as CommandInteraction
+                ).reply({
                     ...page,
                     ephemeral: options?.ephemeral ?? false,
                 });
                 break;
             case this.sendTarget instanceof Message:
                 this.message = await (this.sendTarget as Message).reply({
-                    ...page, 
-                    allowedMentions: {repliedUser: options?.replyPing ?? false}
+                    ...page,
+                    allowedMentions: {
+                        repliedUser: options?.replyPing ?? false,
+                    },
                 });
                 break;
             default:
-                throw new Error("Could not send multipage embed: unknown send target type!");
+                throw new Error(
+                    "Could not send multipage embed: unknown send target type!",
+                );
         }
 
         // TODO: find a way of doing this without @ts-ignore.
         //@ts-ignore
-        const collector = this.message.createMessageComponentCollector({...this.collectorOptions});
+        const collector = this.message.createMessageComponentCollector({
+            ...this.collectorOptions,
+        });
 
         collector.on("collect", async interaction => {
             await this.handleCollect(interaction.customId as ComponentId);
@@ -137,12 +156,15 @@ export class MultipageMessage {
                 embeds: [
                     new EmbedBuilder()
                         .setColor("Green")
-                        .setDescription(`Now showing page ${this.index+1}/${this.pages.length}`),
+                        .setDescription(
+                            `Now showing page ${this.index + 1}/${
+                                this.pages.length
+                            }`,
+                        ),
                 ],
                 ephemeral: true,
             });
         });
-
 
         return this.message;
     }
@@ -160,7 +182,7 @@ export class MultipageMessage {
             case "last":
                 this.index = this.pages.length - 1;
                 break;
-            default:  // the component interaction was not meant for us; we just return and do nothing.
+            default: // the component interaction was not meant for us; we just return and do nothing.
                 return;
         }
 
@@ -171,17 +193,23 @@ export class MultipageMessage {
         const page = this.addNavigation(this.pages[this.index]);
 
         switch (true) {
-            case this.message instanceof Message: {
+            case this.message instanceof Message:
+                {
                     await (this.message as Message).edit(page);
                 }
                 break;
-            case this.message instanceof InteractionResponse: {
-                    const interaction = this.message.interaction as ChatInputCommandInteraction;
+            case this.message instanceof InteractionResponse:
+                {
+                    const interaction = this.message
+                        .interaction as ChatInputCommandInteraction;
                     await interaction.editReply(page);
                 }
                 break;
             default:
-                throw new Error("Invalid internal message value: " + JSON.stringify(this.message));
+                throw new Error(
+                    "Invalid internal message value: " +
+                        JSON.stringify(this.message),
+                );
         }
     }
 }

@@ -67,6 +67,18 @@ export namespace Util {
     export function last<T extends Array<any>>(array: T): LastArrayElement<T> {
         return array[array.length - 1];
     }
+
+    /**
+     * Assigns all enumerable properties from `source` to `target` if the property's value is not `undefined`.
+     * @param target the object to assign to.
+     * @param source the object to assign from.
+     */
+    export function assignIfDefined(target: object, source: object) {
+        for (const [key, value] of Object.entries(source)) {
+            if (typeof value == "undefined") continue;
+            target[key] = value;
+        }
+    }
 }
 
 export type Primitive = string | number | boolean;

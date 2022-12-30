@@ -9,6 +9,5 @@ export { UnsubscribeCommand } from "./unsubscribe.command";
 export const YouTubeVideoCommandHandlers = [
     SubscribeHandler,
     UnsubscribeHandler,
-    SyncPostsHandler,
     FetchPostsHandler,
 ];

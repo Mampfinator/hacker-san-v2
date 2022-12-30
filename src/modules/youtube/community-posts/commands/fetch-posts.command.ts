@@ -1,26 +1,25 @@
 import { ICommand } from "@nestjs/cqrs";
+import { Util } from "../../../../util";
 
-export interface FetchPostCommandOptions {
+export interface FetchPostsCommandOptions {
+    channelId: string;
     includeChannelInfo?: boolean;
-    force?: boolean;
-    postId?: string;
-    channelId?: string;
+    /**
+     * Whether to fetch all posts or only the most recent ones.
+     */
+    fetchAll?: boolean;
 }
 
-export class FetchPostsCommand implements ICommand {
-    public readonly includeChannelInfo?: boolean;
-    public readonly force?: boolean;
-    public readonly postId?: string;
-    public readonly channelId?: string;
+export class FetchPostsCommand implements ICommand, FetchPostsCommandOptions {
+    public readonly channelId: string;
+    public readonly includeChannelInfo = false;
+    public readonly fetchAll = false;
 
-    constructor(options: FetchPostCommandOptions = {}) {
-        if (options.channelId && options.postId)
-            throw new Error("Cannot specify both channelId and postId.");
-        if (!options.channelId && !options.postId)
-            throw new Error(
-                "Must specify either channelId or postId to fetch.",
+    constructor(options: FetchPostsCommandOptions) {
+        if (typeof options.channelId !== "string")
+            throw new TypeError(
+                `Expected options.channelId to be of type string, received ${typeof options.channelId}.`,
             );
-
-        Object.assign(this, options);
+        Util.assignIfDefined(this, options);
     }
 }

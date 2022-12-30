@@ -30,6 +30,7 @@ import { InjectCommands } from "./commands/slash-commands.provider";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { ChannelQuery } from "../../../modules/platforms/queries";
 import { ChannelEntity } from "../../../modules/platforms/models/channel.entity";
+import { FetchPostCommand } from "../../youtube/community-posts/commands/fetch-post.command";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -220,9 +221,9 @@ export class DiscordClientService extends Client {
         const embeds: EmbedBuilder[] = [];
         for (const id of ids) {
             const { posts, channel } = await this.commandBus.execute<
-                FetchPostsCommand,
+                FetchPostCommand,
                 { posts: CommunityPost[]; channel: ChannelInfo }
-            >(new FetchPostsCommand({ postId: id, includeChannelInfo: true }));
+            >(new FetchPostCommand({ includeChannel: true, postId: id }));
             const embed = DiscordUtil.postToEmbed(posts[0], channel);
 
             this.logger.debug(`Generated embed for ${id}.`);
