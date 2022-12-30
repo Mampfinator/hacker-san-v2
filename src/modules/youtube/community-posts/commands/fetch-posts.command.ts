@@ -3,6 +3,9 @@ import { Util } from "../../../../util";
 
 export interface FetchPostsCommandOptions {
     channelId: string;
+    /**
+     * Whether to include ChannelInfo in the result. Changes return type to `{posts: CommunityPost[], channel: ChannelInfo}`.
+     */
     includeChannelInfo?: boolean;
     /**
      * Whether to fetch all posts or only the most recent ones.

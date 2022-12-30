@@ -27,7 +27,12 @@ export class FetchPostHandler implements ICommandHandler<FetchPostCommand> {
         );
 
         // this is ugly, but it'll do.
-        this.cache.set(postId, includeChannel ? (result as {post: CommunityPost}).post : result as CommunityPost);
+        this.cache.set(
+            postId,
+            includeChannel
+                ? (result as { post: CommunityPost }).post
+                : (result as CommunityPost),
+        );
 
         return result;
     }
