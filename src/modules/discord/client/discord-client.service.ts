@@ -16,7 +16,6 @@ import { GuildSettings } from "../models/settings.entity";
 import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { FetchPostsCommand } from "../../youtube";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
@@ -220,11 +219,11 @@ export class DiscordClientService extends Client {
 
         const embeds: EmbedBuilder[] = [];
         for (const id of ids) {
-            const { posts, channel } = await this.commandBus.execute<
+            const { post, channel } = await this.commandBus.execute<
                 FetchPostCommand,
-                { posts: CommunityPost[]; channel: ChannelInfo }
+                { post: CommunityPost; channel: ChannelInfo }
             >(new FetchPostCommand({ includeChannel: true, postId: id }));
-            const embed = DiscordUtil.postToEmbed(posts[0], channel);
+            const embed = DiscordUtil.postToEmbed(post, channel);
 
             this.logger.debug(`Generated embed for ${id}.`);
             embeds.push(embed);
