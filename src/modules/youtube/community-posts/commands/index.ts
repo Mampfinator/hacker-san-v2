@@ -6,8 +6,7 @@ export const YouTubeCommunityPostCommandHandlers = [
     FetchPostHandler,
     FetchPostsHandler,
     SyncPostsHandler,
-]
-
+];
 
 export * from "./fetch-post.command";
 export * from "./fetch-posts.command";
