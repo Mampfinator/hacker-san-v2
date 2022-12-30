@@ -3,6 +3,8 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { YouTubeCommandHandlers } from "./commands";
+import { YouTubeCommunityPostCommandHandlers } from "./community-posts/commands";
+import { YouTubeCommunityPostsRequestService } from "./community-posts/community-posts.request.service";
 import { CommunityPost } from "./community-posts/model/community-post.entity";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { YouTubeListenHandler } from "./events/listen.handler";
@@ -27,6 +29,8 @@ import { YouTubeService } from "./youtube.service";
         YouTubeService,
         YouTubeApiService,
         YouTubeCommunityPostsService,
+        YouTubeCommunityPostsRequestService,
+        ...YouTubeCommunityPostCommandHandlers,
         YouTubeEventSubService,
         YouTubeVideosService,
         ...YouTubeCommandHandlers,

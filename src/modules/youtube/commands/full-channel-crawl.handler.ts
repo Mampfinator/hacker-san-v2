@@ -38,7 +38,8 @@ export class FullChannelCrawlHandler
             source: videoPage,
         });
 
-        const videos: VideoRenderer[] = extractGridVideoRenderers(ytInitialData);
+        const videos: VideoRenderer[] =
+            extractGridVideoRenderers(ytInitialData);
 
         const { visitorData } =
             ytInitialData.responseContext.webResponseContextExtensionData

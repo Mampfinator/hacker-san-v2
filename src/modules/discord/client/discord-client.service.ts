@@ -16,7 +16,6 @@ import { GuildSettings } from "../models/settings.entity";
 import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { FetchPostsCommand } from "../../youtube";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
 import { handleAutocomplete } from "./commands/autocomplete";
@@ -30,6 +29,7 @@ import { InjectCommands } from "./commands/slash-commands.provider";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { ChannelQuery } from "../../../modules/platforms/queries";
 import { ChannelEntity } from "../../../modules/platforms/models/channel.entity";
+import { FetchPostCommand } from "../../youtube/community-posts/commands/fetch-post.command";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -219,11 +219,11 @@ export class DiscordClientService extends Client {
 
         const embeds: EmbedBuilder[] = [];
         for (const id of ids) {
-            const { posts, channel } = await this.commandBus.execute<
-                FetchPostsCommand,
-                { posts: CommunityPost[]; channel: ChannelInfo }
-            >(new FetchPostsCommand({ postId: id, includeChannelInfo: true }));
-            const embed = DiscordUtil.postToEmbed(posts[0], channel);
+            const { post, channel } = await this.commandBus.execute<
+                FetchPostCommand,
+                { post: CommunityPost; channel: ChannelInfo }
+            >(new FetchPostCommand({ includeChannel: true, postId: id }));
+            const embed = DiscordUtil.postToEmbed(post, channel);
 
             this.logger.debug(`Generated embed for ${id}.`);
             embeds.push(embed);
