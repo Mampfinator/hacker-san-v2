@@ -1,9 +1,4 @@
-import {
-    MiddlewareConsumer,
-    Module,
-    NestModule,
-    RequestMethod,
-} from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from "@nestjs/common";
 import { RawBodyMiddleware } from "./shared/middleware/raw-body.middleware";
 import { JsonBodyMiddleware } from "./shared/middleware/json-body.middleware";
 import { ConfigModule, ConfigService } from "@nestjs/config";

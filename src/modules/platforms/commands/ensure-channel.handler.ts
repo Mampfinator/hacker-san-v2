@@ -24,30 +24,18 @@ export interface EnsureChannelResult {
 }
 
 @CommandHandler(EnsureChannelCommand)
-export class EnsureChannelHandler
-    implements ICommandHandler<EnsureChannelCommand>
-{
+export class EnsureChannelHandler implements ICommandHandler<EnsureChannelCommand> {
     private readonly logger = new Logger(EnsureChannelHandler.name);
     constructor(private readonly commandBus: CommandBus) {}
 
-    async execute({
-        platform,
-        channelId,
-    }: EnsureChannelCommand): Promise<EnsureChannelResult> {
+    async execute({ platform, channelId }: EnsureChannelCommand): Promise<EnsureChannelResult> {
         //let newCommand: IEnsureChannelCommand;
 
         const newCommand = new platformHandlers[platform](channelId);
 
-        const result = await this.commandBus.execute<
-            IEnsureChannelCommand,
-            EnsureChannelResult
-        >(newCommand);
+        const result = await this.commandBus.execute<IEnsureChannelCommand, EnsureChannelResult>(newCommand);
 
-        this.logger.debug(
-            `Success: ${result.success} ${
-                result.error ? `; Error: ${result.error}` : ""
-            }`,
-        );
+        this.logger.debug(`Success: ${result.success} ${result.error ? `; Error: ${result.error}` : ""}`);
 
         return result;
     }

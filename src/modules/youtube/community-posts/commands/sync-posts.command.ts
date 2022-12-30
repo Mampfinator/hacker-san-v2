@@ -22,16 +22,9 @@ export class SyncPostsCommand implements ICommand, SyncPostsCommandOptions {
     public readonly channelId?: string;
     public readonly posts?: CommunityPost[];
 
-    constructor(
-        options: RequireOnlyOne<SyncPostsCommandOptions, "channelId" | "posts">,
-    ) {
-        if (
-            (options.channelId && options.posts) ||
-            (!options.channelId && !options.posts)
-        )
-            throw new TypeError(
-                "Either channelId or posts need to be provided for syncing.",
-            );
+    constructor(options: RequireOnlyOne<SyncPostsCommandOptions, "channelId" | "posts">) {
+        if ((options.channelId && options.posts) || (!options.channelId && !options.posts))
+            throw new TypeError("Either channelId or posts need to be provided for syncing.");
 
         Util.assignIfDefined(this, options);
     }

@@ -14,9 +14,7 @@ import { Logger } from "@nestjs/common";
 import { findValuesByKeys } from "yt-scraping-utilities/dist/util";
 
 @CommandHandler(FullChannelCrawlCommand)
-export class FullChannelCrawlHandler
-    implements ICommandHandler<FullChannelCrawlCommand>
-{
+export class FullChannelCrawlHandler implements ICommandHandler<FullChannelCrawlCommand> {
     private readonly logger = new Logger(FullChannelCrawlHandler.name);
 
     constructor(private readonly youtubeService: YouTubeService) {}
@@ -38,21 +36,16 @@ export class FullChannelCrawlHandler
             source: videoPage,
         });
 
-        const videos: VideoRenderer[] =
-            extractGridVideoRenderers(ytInitialData);
+        const videos: VideoRenderer[] = extractGridVideoRenderers(ytInitialData);
 
-        const { visitorData } =
-            ytInitialData.responseContext.webResponseContextExtensionData
-                .ytConfigData;
+        const { visitorData } = ytInitialData.responseContext.webResponseContextExtensionData.ytConfigData;
 
         const [initialContRenderer] = findValuesByKeys(
-            findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer
-                .contents[0],
+            findActiveTab(ytInitialData).tabRenderer.content.sectionListRenderer.contents[0],
             ["continuationItemRenderer"],
         ) as ContinuationItemRenderer[];
 
-        let { token, clickTrackingParams } =
-            this.extractInfo(initialContRenderer);
+        let { token, clickTrackingParams } = this.extractInfo(initialContRenderer);
 
         this.logger.debug(
             `Continuation request params: \nvisitorData: ${visitorData}\ntoken: ${token}\nclickTrackingParams: ${clickTrackingParams}`,
@@ -65,20 +58,14 @@ export class FullChannelCrawlHandler
                         appendContinuationItemsAction: { continuationItems },
                     },
                 ],
-            } = await this.youtubeService.doContinuationRequest<
-                GridVideoRenderer,
-                "gridVideoRenderer",
-                false
-            >({ token, clickTrackingParams, visitorData });
+            } = await this.youtubeService.doContinuationRequest<GridVideoRenderer, "gridVideoRenderer", false>({
+                token,
+                clickTrackingParams,
+                visitorData,
+            });
             const gridVideoRenderers = continuationItems
                 .filter(item => "gridVideoRenderer" in item)
-                .map(
-                    ({
-                        gridVideoRenderer,
-                    }: {
-                        gridVideoRenderer: GridVideoRenderer;
-                    }) => gridVideoRenderer,
-                );
+                .map(({ gridVideoRenderer }: { gridVideoRenderer: GridVideoRenderer }) => gridVideoRenderer);
 
             const continuationRenderer = Util.last(continuationItems);
             videos.push(...gridVideoRenderers.map(extractGridVideoRenderer));
@@ -87,10 +74,7 @@ export class FullChannelCrawlHandler
                 token = undefined;
                 break;
             } else {
-                const {
-                    token: newToken,
-                    clickTrackingParams: newClickTrackingParams,
-                } = this.extractInfo(
+                const { token: newToken, clickTrackingParams: newClickTrackingParams } = this.extractInfo(
                     continuationRenderer.continuationItemRenderer,
                 );
                 token = newToken;
@@ -106,10 +90,8 @@ export class FullChannelCrawlHandler
         token: string;
     } {
         return {
-            clickTrackingParams:
-                continuationRenderer?.continuationEndpoint?.clickTrackingParams,
-            token: continuationRenderer?.continuationEndpoint
-                ?.continuationCommand?.token,
+            clickTrackingParams: continuationRenderer?.continuationEndpoint?.clickTrackingParams,
+            token: continuationRenderer?.continuationEndpoint?.continuationCommand?.token,
         };
     }
 }

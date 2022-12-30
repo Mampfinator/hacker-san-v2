@@ -11,9 +11,7 @@ export class ChannelQueryHandler implements IQueryHandler<ChannelQuery> {
         private readonly channelRepository: Repository<ChannelEntity>,
     ) {}
 
-    async execute({
-        options,
-    }: ChannelQuery): Promise<ChannelEntity | ChannelEntity[]> {
+    async execute({ options }: ChannelQuery): Promise<ChannelEntity | ChannelEntity[]> {
         const { platform, platformId, query } = options;
         let { one } = options;
 

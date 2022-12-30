@@ -9,12 +9,7 @@ import {
     SlashCommandStringOption,
 } from "discord.js";
 import { ActionDescriptor } from "./models/action.entity";
-import {
-    PLATFORM_NAME_LOOKUP,
-    Platform,
-    SUPPORTED_PLATFORMS,
-    EVENT_NAME_LOOKUP,
-} from "../../constants";
+import { PLATFORM_NAME_LOOKUP, Platform, SUPPORTED_PLATFORMS, EVENT_NAME_LOOKUP } from "../../constants";
 import {
     AttachmentType,
     ChannelInfo,
@@ -43,10 +38,7 @@ export namespace DiscordUtil {
         return posts.map(post => postToEmbed(post, channelInfo));
     }
 
-    export function postToEmbed(
-        post: CommunityPost,
-        channelInfo: Partial<ChannelInfo>,
-    ): EmbedBuilder {
+    export function postToEmbed(post: CommunityPost, channelInfo: Partial<ChannelInfo>): EmbedBuilder {
         const { content, attachmentType, id: postId } = post;
 
         const { avatarUrl, name, id: channelId } = channelInfo;
@@ -61,10 +53,7 @@ export namespace DiscordUtil {
 
         if (content)
             embedContent = content
-                .map(
-                    ({ text, url }) =>
-                        `${url ? "[" : ""}${text}${url ? `](${url})` : ""}`,
-                )
+                .map(({ text, url }) => `${url ? "[" : ""}${text}${url ? `](${url})` : ""}`)
                 .join(" ");
 
         embed
@@ -72,9 +61,7 @@ export namespace DiscordUtil {
             .setColor("#ff0000")
             .setFooter({
                 text: `ID: ${postId} | ${
-                    attachmentType == AttachmentType.None
-                        ? "text"
-                        : attachmentType.toLowerCase()
+                    attachmentType == AttachmentType.None ? "text" : attachmentType.toLowerCase()
                 }-post`,
             });
 
@@ -103,9 +90,7 @@ export namespace DiscordUtil {
                 embedContent += "\n\u200b\n\u200b";
                 embed.addFields({
                     name: "Poll",
-                    value: choices
-                        .map(choice => `\u2022 \u200b ${choice.text}`)
-                        .join("\n"),
+                    value: choices.map(choice => `\u2022 \u200b ${choice.text}`).join("\n"),
                 });
         }
         embed.setDescription(embedContent);
@@ -120,25 +105,16 @@ export namespace DiscordUtil {
         const channel = await client.channels.fetch(action.discordChannelId);
 
         const final = action.discordThreadId
-            ? await (channel as TextChannel).threads.fetch(
-                  action.discordThreadId,
-              )
+            ? await (channel as TextChannel).threads.fetch(action.discordThreadId)
             : (channel as NonThreadGuildBasedChannel);
 
         return final;
     }
 
-    export async function fetchChannelOrThreadUncached(
-        action: ActionDescriptor,
-        rest: DiscordRESTService,
-    ) {
-        const channel = (await rest.get(
-            Routes.channel(action.discordChannelId),
-        )) as NonThreadGuildBasedChannel;
+    export async function fetchChannelOrThreadUncached(action: ActionDescriptor, rest: DiscordRESTService) {
+        const channel = (await rest.get(Routes.channel(action.discordChannelId))) as NonThreadGuildBasedChannel;
         if (!action.discordThreadId) return channel;
-        const threads = (await rest.get(
-            Routes.threads(action.discordChannelId),
-        )) as ThreadChannel[];
+        const threads = (await rest.get(Routes.threads(action.discordChannelId))) as ThreadChannel[];
         return threads.find(thread => thread.id === action.discordThreadId);
     }
 
@@ -159,10 +135,7 @@ export namespace DiscordUtil {
         }
     }
 
-    export function makePlatformOption(
-        builder: SlashCommandStringOption,
-        description?: string,
-    ) {
+    export function makePlatformOption(builder: SlashCommandStringOption, description?: string) {
         const choices = SUPPORTED_PLATFORMS.map(platform => ({
             name: PLATFORM_NAME_LOOKUP[platform],
             value: platform,
@@ -174,10 +147,7 @@ export namespace DiscordUtil {
             .setChoices(...choices);
     }
 
-    export function makeEventOption(
-        builder: SlashCommandStringOption,
-        description?: string,
-    ) {
+    export function makeEventOption(builder: SlashCommandStringOption, description?: string) {
         const choices = Object.keys(EVENT_NAME_LOOKUP).map(event => ({
             name: EVENT_NAME_LOOKUP[event],
             value: event,
@@ -189,10 +159,7 @@ export namespace DiscordUtil {
             .setChoices(...choices);
     }
 
-    export function makeActionTypeOption(
-        builder: SlashCommandStringOption,
-        description?: string,
-    ) {
+    export function makeActionTypeOption(builder: SlashCommandStringOption, description?: string) {
         const choices = getActions().map(action => {
             const type = getActionType(action);
 
@@ -205,13 +172,8 @@ export namespace DiscordUtil {
             .setChoices(...choices);
     }
 
-    export async function handleChannelAutocomplete(
-        { options }: AutocompleteInteraction,
-        queryBus: QueryBus,
-    ) {
-        const platform = options.getString("platform", false) as
-            | Platform
-            | undefined;
+    export async function handleChannelAutocomplete({ options }: AutocompleteInteraction, queryBus: QueryBus) {
+        const platform = options.getString("platform", false) as Platform | undefined;
         if (!platform) return [];
 
         const input = (options.getFocused() as string).trim().toLowerCase();
@@ -244,12 +206,7 @@ export namespace DiscordUtil {
 }
 
 export function discordAPIError(error: any) {
-    if (
-        error.prototype &&
-        (error instanceof DiscordAPIError ||
-            error instanceof DiscordAPIRESTError)
-    )
-        return true;
+    if (error.prototype && (error instanceof DiscordAPIError || error instanceof DiscordAPIRESTError)) return true;
 }
 
 const ignoreLogger = new Logger("IgnoreLogger");

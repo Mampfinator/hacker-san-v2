@@ -48,9 +48,7 @@ export class YouTubeCommunityPostsService {
         );
 
         if (!fullChannelInfo) {
-            this.logger.debug(
-                `Failed getting channel info from ${channel.channelId}.`,
-            );
+            this.logger.debug(`Failed getting channel info from ${channel.channelId}.`);
             const cachedChannel = await this.channelRepo.findOne({
                 where: { channelId: channel.channelId },
             });
@@ -67,15 +65,11 @@ export class YouTubeCommunityPostsService {
                 avatarUrl: fullChannelInfo.avatarUrl,
             };
 
-            await this.commandBus.execute(
-                new CacheChannelInfoCommand(fullChannelInfo),
-            );
+            await this.commandBus.execute(new CacheChannelInfoCommand(fullChannelInfo));
         }
 
         if (typeof posts === "undefined") {
-            this.logger.warn(
-                `Failed getting community posts for ${channel.channelId}`,
-            );
+            this.logger.warn(`Failed getting community posts for ${channel.channelId}`);
             for (const error of errors) {
                 this.logger.error(error);
             }
@@ -88,12 +82,8 @@ export class YouTubeCommunityPostsService {
             where: { id: In(ids) },
         });
 
-        for (const post of posts.filter(
-            post => !knownPosts.some(({ id }) => post.id == id),
-        )) {
-            this.logger.debug(
-                `Found new community post for ${channel.channelId}: ${post.id}`,
-            );
+        for (const post of posts.filter(post => !knownPosts.some(({ id }) => post.id == id))) {
+            this.logger.debug(`Found new community post for ${channel.channelId}: ${post.id}`);
 
             await this.communityPostRepo.insert({
                 id: post.id,

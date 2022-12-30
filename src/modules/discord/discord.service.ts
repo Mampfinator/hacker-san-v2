@@ -7,10 +7,7 @@ import { DiscordClientService } from "./client/discord-client.service";
 export class DiscordService implements OnApplicationBootstrap {
     private readonly logger = new Logger(DiscordService.name);
 
-    constructor(
-        private readonly client: DiscordClientService,
-        private readonly config: ConfigService,
-    ) {}
+    constructor(private readonly client: DiscordClientService, private readonly config: ConfigService) {}
 
     async onApplicationBootstrap() {
         await this.start();

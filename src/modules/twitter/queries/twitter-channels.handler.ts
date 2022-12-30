@@ -6,9 +6,7 @@ import { TwitterUser } from "../models/twitter-user.entity";
 import { TwitterChannelsQuery } from "./twitter-channels.query";
 
 @QueryHandler(TwitterChannelsQuery)
-export class TwitterChannelsHandler
-    implements IQueryHandler<TwitterChannelsQuery>
-{
+export class TwitterChannelsHandler implements IQueryHandler<TwitterChannelsQuery> {
     constructor(
         @InjectRepository(TwitterUser)
         private readonly userRepo: Repository<TwitterUser>,

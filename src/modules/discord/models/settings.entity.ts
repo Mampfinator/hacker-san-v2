@@ -9,8 +9,7 @@ function pushUnique<T>(arr: T[], value: T) {
 }
 
 const defaultPrimaryChannels = {};
-for (const platform of SUPPORTED_PLATFORMS)
-    defaultPrimaryChannels[platform] = [];
+for (const platform of SUPPORTED_PLATFORMS) defaultPrimaryChannels[platform] = [];
 
 @Entity()
 export class GuildSettings {
@@ -20,9 +19,7 @@ export class GuildSettings {
 
     public removePrimaryChannel(id: string, platform: Platform): boolean {
         const ids = this.primaryChannels[platform];
-        this.primaryChannels[platform] = ids.filter(
-            channelId => channelId !== id,
-        );
+        this.primaryChannels[platform] = ids.filter(channelId => channelId !== id);
         return ids.length !== this.primaryChannels[platform].length;
     }
 

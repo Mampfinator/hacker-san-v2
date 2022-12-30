@@ -20,11 +20,7 @@ let exceptionFilter: GlobalExceptionFilter;
 
     const { httpAdapter } = app.get(HttpAdapterHost);
 
-    exceptionFilter = new GlobalExceptionFilter(
-        httpAdapter,
-        discordClientService,
-        config,
-    ).ignore(
+    exceptionFilter = new GlobalExceptionFilter(httpAdapter, discordClientService, config).ignore(
         exception => exception instanceof HttpException,
         exception => exception instanceof DiscordAPIError,
         exception => exception instanceof DiscordAPIRESTError,
@@ -35,11 +31,7 @@ let exceptionFilter: GlobalExceptionFilter;
     const logger = new Logger("Bootstrap");
     await app.listen(config.getOrThrow("PORT"));
 
-    logger.log(
-        `App started. Listening on port ${config.get(
-            "PORT",
-        )}. Requests expected at ${config.get("URL")}`,
-    );
+    logger.log(`App started. Listening on port ${config.get("PORT")}. Requests expected at ${config.get("URL")}`);
 
     const appService = app.get(AppService);
     appService.triggerListen();

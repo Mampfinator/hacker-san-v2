@@ -6,9 +6,7 @@ import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { YouTubeChannelsQuery } from "./youtube-channels.query";
 
 @QueryHandler(YouTubeChannelsQuery)
-export class YouTubeChannelsHandler
-    implements IQueryHandler<YouTubeChannelsQuery>
-{
+export class YouTubeChannelsHandler implements IQueryHandler<YouTubeChannelsQuery> {
     constructor(
         @InjectRepository(YouTubeChannel)
         private readonly channelRepo: Repository<YouTubeChannel>,

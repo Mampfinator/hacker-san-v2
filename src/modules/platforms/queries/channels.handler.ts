@@ -20,21 +20,13 @@ export class ChannelsHandler implements IQueryHandler<ChannelsQuery> {
 
         switch (platform) {
             case "twitter":
-                result = await this.queryBus.execute<
-                    ICommand,
-                    ChannelsQueryResult
-                >(new TwitterChannelsQuery());
+                result = await this.queryBus.execute<ICommand, ChannelsQueryResult>(new TwitterChannelsQuery());
                 break;
             case "youtube":
-                result = await this.queryBus.execute<
-                    ICommand,
-                    ChannelsQueryResult
-                >(new YouTubeChannelsQuery());
+                result = await this.queryBus.execute<ICommand, ChannelsQueryResult>(new YouTubeChannelsQuery());
                 break;
             default:
-                throw new Error(
-                    `Unexpected platform in GetChannelsHandler: ${platform}`,
-                );
+                throw new Error(`Unexpected platform in GetChannelsHandler: ${platform}`);
         }
 
         return result;

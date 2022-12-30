@@ -1,14 +1,6 @@
 import { ConfigService } from "@nestjs/config";
-import {
-    ChatInputCommandInteraction,
-    CacheType,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
-import {
-    TwitterConfig,
-    YouTubeConfig,
-} from "../../../../modules/config/config";
+import { ChatInputCommandInteraction, CacheType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { TwitterConfig, YouTubeConfig } from "../../../../modules/config/config";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 
 @SlashCommand({
@@ -23,19 +15,13 @@ export class InfoCommand implements ISlashCommand {
     async execute(interaction: ChatInputCommandInteraction<CacheType>) {
         const embed = new EmbedBuilder()
             .setColor("Aqua")
-            .setDescription(
-                `Author: <@159382108681404416> (Sir Eatsalot#6644)`,
-            );
+            .setDescription(`Author: <@159382108681404416> (Sir Eatsalot#6644)`);
 
-        const { active: youtubeActive } =
-            this.config.get<YouTubeConfig>("YOUTUBE");
-        const { active: twitterActive } =
-            this.config.get<TwitterConfig>("TWITTER");
+        const { active: youtubeActive } = this.config.get<YouTubeConfig>("YOUTUBE");
+        const { active: twitterActive } = this.config.get<TwitterConfig>("TWITTER");
         embed.addFields({
             name: "Supported Platforms",
-            value: `${youtubeActive ? " YouTube |" : ""} ${
-                twitterActive ? " Twitter |" : ""
-            }`,
+            value: `${youtubeActive ? " YouTube |" : ""} ${twitterActive ? " Twitter |" : ""}`,
         });
 
         await interaction.reply({

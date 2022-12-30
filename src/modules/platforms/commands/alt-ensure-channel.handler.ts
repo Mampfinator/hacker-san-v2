@@ -1,12 +1,7 @@
 // WIP.
 // Slated to replace the old EnsureChannelHandler.
 
-import {
-    CommandBus,
-    CommandHandler,
-    ICommand,
-    ICommandHandler,
-} from "@nestjs/cqrs";
+import { CommandBus, CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Class, Platform } from "../../../constants";
 import { ValidateTwitterChannelCommand } from "../../../modules/twitter/commands/validate-twitter-channel.command";
@@ -37,19 +32,14 @@ const validators: { [Property in Platform]: Class<IValidateChannelCommand> } = {
 };
 
 @CommandHandler(EnsureChannelCommand)
-export class AltEnsureChannelHander
-    implements ICommandHandler<EnsureChannelCommand>
-{
+export class AltEnsureChannelHander implements ICommandHandler<EnsureChannelCommand> {
     constructor(
         @InjectRepository(ChannelEntity)
         private readonly channelRepo: Repository<ChannelEntity>,
         private readonly commandBus: CommandBus,
     ) {}
 
-    async execute({
-        channelId,
-        platform,
-    }: EnsureChannelCommand): Promise<EnsureChannelResult> {
+    async execute({ channelId, platform }: EnsureChannelCommand): Promise<EnsureChannelResult> {
         const existingChannel = await this.channelRepo.findOne({
             where: { id: channelId },
         });

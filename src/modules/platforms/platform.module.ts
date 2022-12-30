@@ -8,10 +8,7 @@ import { QueryHandlers } from "./queries";
 import { ChannelsHandler } from "./queries/channels.handler";
 
 @Module({
-    imports: [
-        CqrsModule,
-        TypeOrmModule.forFeature([ChannelEntity, StreamEntity]),
-    ],
+    imports: [CqrsModule, TypeOrmModule.forFeature([ChannelEntity, StreamEntity])],
     providers: [EnsureChannelHandler, ChannelsHandler, ...QueryHandlers],
 })
 export class PlatformModule {}

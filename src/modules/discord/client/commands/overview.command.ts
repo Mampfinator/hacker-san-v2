@@ -1,9 +1,5 @@
 import { QueryBus } from "@nestjs/cqrs";
-import {
-    ChatInputCommandInteraction,
-    CacheType,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, CacheType, SlashCommandBuilder } from "discord.js";
 import { SUPPORTED_PLATFORMS, Platform } from "../../../../constants";
 import { ChannelsQueryResult } from "../../../platforms/queries/channels.handler";
 import { ChannelsQuery } from "../../../platforms/queries/channels.query";
@@ -32,9 +28,7 @@ export class OverviewCommand implements ISlashCommand {
             return;
         }
 
-        const channelsPromises: Promise<
-            ChannelsQueryResult & { platform: Platform }
-        >[] = [];
+        const channelsPromises: Promise<ChannelsQueryResult & { platform: Platform }>[] = [];
 
         const settings = await this.settingsRepo.findOne({
             where: { id: interaction.guildId },
@@ -43,9 +37,7 @@ export class OverviewCommand implements ISlashCommand {
         for (const platform of SUPPORTED_PLATFORMS) {
             channelsPromises.push(
                 this.queryBus
-                    .execute<ChannelsQuery, ChannelsQueryResult>(
-                        new ChannelsQuery(platform),
-                    )
+                    .execute<ChannelsQuery, ChannelsQueryResult>(new ChannelsQuery(platform))
                     .then(result => ({ ...result, platform })),
             );
         }
@@ -62,15 +54,10 @@ export class OverviewCommand implements ISlashCommand {
             // :GuraPain:
             channels = channels.filter(channel => channelIds.has(channel.id));
 
-            const content = channels
-                .map(channel => JSON.stringify(channel, null, 4))
-                .join("\n");
+            const content = channels.map(channel => JSON.stringify(channel, null, 4)).join("\n");
 
             reply.addPage({
-                content:
-                    content.length > 0
-                        ? content
-                        : "No channels for this platform.",
+                content: content.length > 0 ? content : "No channels for this platform.",
             });
         }
 

@@ -5,9 +5,7 @@ import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { CacheChannelInfoCommand } from "./cache-channel-info.command";
 
 @CommandHandler(CacheChannelInfoCommand)
-export class CacheChannelInfoHandler
-    implements ICommandHandler<CacheChannelInfoCommand>
-{
+export class CacheChannelInfoHandler implements ICommandHandler<CacheChannelInfoCommand> {
     constructor(
         @InjectRepository(YouTubeChannel)
         private readonly channelRepo: Repository<YouTubeChannel>,

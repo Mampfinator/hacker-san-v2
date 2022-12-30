@@ -8,29 +8,21 @@ export interface StreamQueryOptions<T extends boolean> {
     platformId?: string;
 
     one?: T;
-    query?: T extends true
-        ? FindOneOptions<StreamEntity>
-        : FindManyOptions<StreamEntity>;
+    query?: T extends true ? FindOneOptions<StreamEntity> : FindManyOptions<StreamEntity>;
 }
 
 export class FindStreamQuery implements IQuery {
     constructor(public readonly options: StreamQueryOptions<boolean>) {
         if (options.platform && !options.platformId) {
-            throw new Error(
-                "platformId is required when platform is specified",
-            );
+            throw new Error("platformId is required when platform is specified");
         }
 
         if (options.platformId && !options.platform) {
-            throw new Error(
-                "platform is required when platformId is specified",
-            );
+            throw new Error("platform is required when platformId is specified");
         }
 
         if (options.query && (options.platform || options.platformId)) {
-            throw new Error(
-                "query cannot be specified when platform or platformId is specified",
-            );
+            throw new Error("query cannot be specified when platform or platformId is specified");
         }
     }
 

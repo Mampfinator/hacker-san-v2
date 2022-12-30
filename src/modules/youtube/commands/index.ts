@@ -6,8 +6,4 @@ export { CacheChannelInfoCommand } from "./cache-channel-info.command";
 export { EnsureYouTubeChannelCommand } from "./ensure-youtube-channel.command";
 export { FullChannelCrawlCommand } from "./full-channel-crawl.command";
 
-export const YouTubeCommandHandlers = [
-    EnsureYouTubeChannelHandler,
-    CacheChannelInfoHandler,
-    FullChannelCrawlHandler,
-];
+export const YouTubeCommandHandlers = [EnsureYouTubeChannelHandler, CacheChannelInfoHandler, FullChannelCrawlHandler];

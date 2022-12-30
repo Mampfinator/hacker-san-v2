@@ -12,9 +12,7 @@ import { EnsureYouTubeChannelCommand } from "./ensure-youtube-channel.command";
 const channelIdRegex = /^UC[A-z0-9\-_]{22}$/;
 
 @CommandHandler(EnsureYouTubeChannelCommand)
-export class EnsureYouTubeChannelHandler
-    implements ICommandHandler<EnsureYouTubeChannelCommand>
-{
+export class EnsureYouTubeChannelHandler implements ICommandHandler<EnsureYouTubeChannelCommand> {
     constructor(
         @InjectRepository(YouTubeChannel)
         private readonly channelRepo: Repository<YouTubeChannel>,
@@ -23,9 +21,7 @@ export class EnsureYouTubeChannelHandler
         private readonly commandBus: CommandBus,
     ) {}
 
-    async execute({
-        channelId: rawChannelId,
-    }: EnsureYouTubeChannelCommand): Promise<EnsureChannelResult> {
+    async execute({ channelId: rawChannelId }: EnsureYouTubeChannelCommand): Promise<EnsureChannelResult> {
         try {
             const channelId = rawChannelId.trim().match(channelIdRegex)?.[0];
             if (!channelId)
@@ -56,9 +52,7 @@ export class EnsureYouTubeChannelHandler
                 });
 
                 await this.eventSub.subscribe(channelId);
-                await this.commandBus.execute(
-                    new SyncPostsCommand({ channelId }),
-                );
+                await this.commandBus.execute(new SyncPostsCommand({ channelId }));
                 await this.commandBus.execute(new SyncVideosCommand(channelId));
 
                 return {

@@ -16,9 +16,7 @@ class ChannelFetchHungError extends Error {
 }
 
 @CommandHandler(TriggerActionsCommand)
-export class TriggerActionsHandler
-    implements ICommandHandler<TriggerActionsCommand>
-{
+export class TriggerActionsHandler implements ICommandHandler<TriggerActionsCommand> {
     private readonly logger = new Logger(TriggerActionsHandler.name);
 
     constructor(
@@ -39,9 +37,7 @@ export class TriggerActionsHandler
             },
         });
 
-        this.logger.debug(
-            `Found ${actions.length} actions for ${channelId} (${platform}, ${event}).`,
-        );
+        this.logger.debug(`Found ${actions.length} actions for ${channelId} (${platform}, ${event}).`);
 
         for (const action of actions) {
             const channel = await new Promise<Channel>(async (res, rej) => {
@@ -50,17 +46,12 @@ export class TriggerActionsHandler
                     if (!resolved) rej(new ChannelFetchHungError());
                 }, 1000);
 
-                const channel = await DiscordUtil.fetchChannelOrThread(
-                    action,
-                    this.client,
-                );
+                const channel = await DiscordUtil.fetchChannelOrThread(action, this.client);
                 resolved = true;
                 res(channel);
             }).catch(error => {
                 if (error instanceof ChannelFetchHungError) {
-                    return this.logger.warn(
-                        `Channel fetch hung for action ${action.id} (${action.type}).`,
-                    );
+                    return this.logger.warn(`Channel fetch hung for action ${action.id} (${action.type}).`);
                 }
 
                 throw error;

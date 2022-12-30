@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    CacheType,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, CacheType, SlashCommandBuilder } from "discord.js";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 
 @SlashCommand({

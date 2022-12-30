@@ -10,10 +10,7 @@ import { TwitterSpacesService } from "./spaces/twitter-spaces.service";
 import { TwitterApiService } from "./twitter-api.service";
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([TwitterUser, TwitterSpace]),
-        CqrsModule,
-    ],
+    imports: [TypeOrmModule.forFeature([TwitterUser, TwitterSpace]), CqrsModule],
     providers: [
         TwitterApiService,
         TwitterSpacesService,

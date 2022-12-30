@@ -30,10 +30,7 @@ type MapBase = new <K, V>(entries?: ReadonlyArray<readonly [K, V]>) => {
 };
 
 const MapBase: MapBase = Map;
-export class CacheCollection<TKey, TValue> extends MapBase<
-    TKey,
-    CacheEntry<TValue>
-> {
+export class CacheCollection<TKey, TValue> extends MapBase<TKey, CacheEntry<TValue>> {
     private readonly ttl: number;
 
     constructor(options?: CacheCollectionOptions) {
@@ -42,10 +39,7 @@ export class CacheCollection<TKey, TValue> extends MapBase<
         this.ttl = options?.ttl ?? DEFAULT_TTL;
 
         if (options?.autoSweep) {
-            setInterval(
-                () => this.sweep(),
-                options?.sweepFrequency ?? DEFAULT_SWEEP_INTERVAL,
-            );
+            setInterval(() => this.sweep(), options?.sweepFrequency ?? DEFAULT_SWEEP_INTERVAL);
         }
     }
 
@@ -59,9 +53,7 @@ export class CacheCollection<TKey, TValue> extends MapBase<
         return this;
     }
 
-    public findOne(
-        predicate: (value: TValue, key: TKey) => boolean,
-    ): TValue | undefined {
+    public findOne(predicate: (value: TValue, key: TKey) => boolean): TValue | undefined {
         for (const [key, { value }] of this) {
             if (predicate(value, key)) return value;
         }

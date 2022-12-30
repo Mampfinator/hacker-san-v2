@@ -16,14 +16,9 @@ export class TwitterApiService extends TwitterApi {
         super(token);
     }
 
-    public async fetchUserByName(
-        name: string,
-        force?: boolean,
-    ): Promise<UserV2 | undefined> {
+    public async fetchUserByName(name: string, force?: boolean): Promise<UserV2 | undefined> {
         if (!force) {
-            const exists = this.userCache.findOne(
-                user => user.username === name,
-            );
+            const exists = this.userCache.findOne(user => user.username === name);
             if (exists) return exists;
         }
 
@@ -37,18 +32,13 @@ export class TwitterApiService extends TwitterApi {
         }
     }
 
-    public async fetchUserById(
-        id: string,
-        force?: boolean,
-    ): Promise<UserV2 | undefined> {
+    public async fetchUserById(id: string, force?: boolean): Promise<UserV2 | undefined> {
         if (!force && this.userCache.has(id)) return this.userCache.get(id);
 
         const { data: user } = await this.v2.user(id, {
             "user.fields": ["profile_image_url"],
         });
         if (!user) throw new Error(`Could not find user with id ${id}.`);
-
-        ///const [user] = users;
 
         if (user) {
             this.userCache.set(user.id, user);

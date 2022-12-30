@@ -6,8 +6,4 @@ import { UnsubscribeHandler } from "./unsubscribe.handler";
 export { SubscribeCommand } from "./subscribe.command";
 export { UnsubscribeCommand } from "./unsubscribe.command";
 
-export const YouTubeVideoCommandHandlers = [
-    SubscribeHandler,
-    UnsubscribeHandler,
-    FetchPostsHandler,
-];
+export const YouTubeVideoCommandHandlers = [SubscribeHandler, UnsubscribeHandler, FetchPostsHandler];

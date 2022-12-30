@@ -63,20 +63,11 @@ export type RendererType<ItemType extends object, ItemKey extends string> = {
     [key in Uncapitalize<ItemKey>]: ItemType;
 };
 
-export interface AppendContinuationItemsAction<
-    ItemType extends YouTubeBaseItem,
-    ItemKey extends string,
-> {
+export interface AppendContinuationItemsAction<ItemType extends YouTubeBaseItem, ItemKey extends string> {
     clickTrackingParams: string;
     appendContinuationItemsAction: {
         continuationItems:
-            | [
-                  ...RendererType<ItemType, ItemKey>[],
-                  RendererType<
-                      ContinuationItemRenderer,
-                      "continuationItemRenderer"
-                  >,
-              ]
+            | [...RendererType<ItemType, ItemKey>[], RendererType<ContinuationItemRenderer, "continuationItemRenderer">]
             | RendererType<ItemType, ItemKey>[];
         targetId: string;
     };
@@ -98,9 +89,7 @@ export interface ContinuationResponse<
         trackingParams: string;
     };
 
-    onResponseReceivedEndpoints: DirectAction extends false
-        ? never
-        : [AppendContinuationItemsAction<T, ItemKey>];
+    onResponseReceivedEndpoints: DirectAction extends false ? never : [AppendContinuationItemsAction<T, ItemKey>];
 
     onResponseReceivedActions: DirectAction extends true
         ? never
@@ -144,8 +133,6 @@ export class YouTubeService implements OnModuleInit {
     public client: AxiosInstance;
 
     constructor(
-        //@InjectRepository(YouTubeChannel)
-        //private readonly channels: Repository<YouTubeChannel>,
         private readonly queryBus: QueryBus,
         private readonly schedulerRegistry: SchedulerRegistry,
         private readonly commandBus: CommandBus,
@@ -178,9 +165,7 @@ export class YouTubeService implements OnModuleInit {
         const jar = new CookieJar();
 
         let promises: Promise<any>[] = [];
-        for (const cookie of await this.cookies.getCookies(
-            "https://youtube.com",
-        )) {
+        for (const cookie of await this.cookies.getCookies("https://youtube.com")) {
             promises.push(jar.setCookie(cookie, "https://youtube.com"));
         }
 
@@ -188,10 +173,7 @@ export class YouTubeService implements OnModuleInit {
         for (let i = 0; i < results.length; i++) {
             const result = results[i];
             if (!result || result.status == "fulfilled") continue;
-            this.logger.error(
-                `Could not copy cookie ${i} to new cookie jar: ${result.reason}`,
-                result.reason.stack,
-            );
+            this.logger.error(`Could not copy cookie ${i} to new cookie jar: ${result.reason}`, result.reason.stack);
         }
 
         return jar;
@@ -224,9 +206,7 @@ export class YouTubeService implements OnModuleInit {
                 ++failed;
 
                 if (failed > 5) {
-                    const cookies = await cookieJar.getCookies(
-                        "https://youtube.com/",
-                    );
+                    const cookies = await cookieJar.getCookies("https://youtube.com/");
                     if (cookies.length > 0) success = true; // we only need some cookies set. And outside the GDPR region, we may not get the consent screen in the first place.
                 }
             }
@@ -240,9 +220,7 @@ export class YouTubeService implements OnModuleInit {
         }
 
         this.logger.debug(
-            `Got cookies from YouTube via Puppeteer: \n${cookies
-                .map(cookie => cookie.toString())
-                .join("\n")}`,
+            `Got cookies from YouTube via Puppeteer: \n${cookies.map(cookie => cookie.toString()).join("\n")}`,
         );
 
         this.client = this.getAxiosInstance({ method: "GET" });
@@ -271,17 +249,11 @@ export class YouTubeService implements OnModuleInit {
                 part: ["id"],
             });
 
-            invalidIds.push(
-                ...batch.filter(id => !channels.find(c => c.id === id)),
-            );
+            invalidIds.push(...batch.filter(id => !channels.find(c => c.id === id)));
         }
 
         if (invalidIds.length > 0) {
-            this.logger.log(
-                `Found ${
-                    invalidIds.length
-                } invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`,
-            );
+            this.logger.log(`Found ${invalidIds.length} invalid YouTube IDs (${invalidIds.join(", ")}) . Purging...`);
             // TODO: figure out which tables need purging
         } else {
             this.logger.log("No invalid channel IDs. No purging necessary.");
@@ -289,20 +261,14 @@ export class YouTubeService implements OnModuleInit {
     }
 
     private async sync() {
-        const channels = await this.queryBus.execute<
-            ChannelQuery,
-            ChannelEntity[]
-        >(
+        const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
             new ChannelQuery({
                 one: false,
                 query: { where: { platform: "youtube" } },
             }),
         );
 
-        //const channels = await this.channels.find();
-        const channelLoggers = channels.map(
-            ({ platformId }) => new Logger(`YouTubeStartup:${platformId}`),
-        );
+        const channelLoggers = channels.map(({ platformId }) => new Logger(`YouTubeStartup:${platformId}`));
 
         if (this.skipSync) this.logger.log("Skipping synchronization.");
         else {
@@ -333,37 +299,24 @@ export class YouTubeService implements OnModuleInit {
             if (!this.skipSync) {
                 logger.debug(`Syncing community posts.`);
                 communitypostPromises.push(
-                    this.commandBus
-                        .execute(new SyncPostsCommand({ channelId }))
-                        .then(() => {
-                            logger.debug("Synced community posts.");
-                        }),
+                    this.commandBus.execute(new SyncPostsCommand({ channelId })).then(() => {
+                        logger.debug("Synced community posts.");
+                    }),
                 );
 
                 logger.debug("Doing full channel crawl.");
-                const videos = await this.commandBus.execute<
-                    FullChannelCrawlCommand,
-                    VideoRenderer[]
-                >(new FullChannelCrawlCommand(channelId));
-                logger.debug(
-                    `Found ${videos.length} videos for full channel crawl.`,
+                const videos = await this.commandBus.execute<FullChannelCrawlCommand, VideoRenderer[]>(
+                    new FullChannelCrawlCommand(channelId),
                 );
-
-                /*logger.debug("Syncing videos.");
-                await this.commandBus.execute(new SyncVideosCommand(channelId));
-                logger.debug("Synced videos.");*/
+                logger.debug(`Found ${videos.length} videos for full channel crawl.`);
             }
         }
 
         const subResults = await Promise.allSettled(subscriptionPromises);
         const postResults = await Promise.allSettled(communitypostPromises);
 
-        const subResultErrors = subResults.filter(
-            res => res.status === "rejected",
-        );
-        const postResultErrors = postResults.filter(
-            res => res.status === "rejected",
-        );
+        const subResultErrors = subResults.filter(res => res.status === "rejected");
+        const postResultErrors = postResults.filter(res => res.status === "rejected");
 
         this.logger.log(
             `Started. ${
@@ -373,15 +326,10 @@ export class YouTubeService implements OnModuleInit {
             }`,
         );
 
-        if (subResultErrors.length > 0)
-            this.logger.log(
-                `There are ${subResultErrors.length} subscription errors`,
-            );
+        if (subResultErrors.length > 0) this.logger.log(`There are ${subResultErrors.length} subscription errors`);
         if (postResultErrors.length > 0)
             this.logger.log(
-                `There are ${
-                    postResults.filter(r => r.status === "rejected").length
-                } community post syncing errors`,
+                `There are ${postResults.filter(r => r.status === "rejected").length} community post syncing errors`,
             );
 
         for (let i = 0; i < channels.length; i++) {
@@ -400,9 +348,7 @@ export class YouTubeService implements OnModuleInit {
     }
 
     public async init() {
-        await this.purgeInvalidChannels().catch(error =>
-            this.logger.error(error),
-        );
+        await this.purgeInvalidChannels().catch(error => this.logger.error(error));
         await this.sync().catch(error => this.logger.error(error));
 
         // start checking for new posts as soon as all posts are synced.
@@ -435,17 +381,11 @@ export class YouTubeService implements OnModuleInit {
         returnResponse?: T,
     ) {
         const url = typeof optionsOrUrl == "string" ? optionsOrUrl : "";
-        const options =
-            typeof optionsOrUrl == "object"
-                ? optionsOrUrl
-                : (optionsOrReturnResponse as FetchRawOptions);
+        const options = typeof optionsOrUrl == "object" ? optionsOrUrl : (optionsOrReturnResponse as FetchRawOptions);
 
         return new Promise<any>(resolve => {
-            const callback: () => Promise<
-                string | AxiosResponse
-            > = async () => {
-                const instance: AxiosInstance =
-                    options?.useInstance ?? this.client;
+            const callback: () => Promise<string | AxiosResponse> = async () => {
+                const instance: AxiosInstance = options?.useInstance ?? this.client;
                 const res = await instance(url, options?.requestOptions);
                 if (returnResponse) return res;
                 else return res.data;
@@ -458,11 +398,7 @@ export class YouTubeService implements OnModuleInit {
     /**
      * Helper function that does continuation requests for the browse endpoint.
      */
-    public async doContinuationRequest<
-        T extends YouTubeBaseItem,
-        ItemKey extends string,
-        DirectAction extends boolean,
-    >(
+    public async doContinuationRequest<T extends YouTubeBaseItem, ItemKey extends string, DirectAction extends boolean>(
         options: ContinuationRequestOptions,
     ): Promise<ContinuationResponse<T, ItemKey, DirectAction>> {
         const { token, clickTrackingParams, visitorData } = options;
@@ -474,9 +410,7 @@ export class YouTubeService implements OnModuleInit {
             "X-Goog-EOM-Visitor-Id": visitorData,
             Origin: "https://youtube.com",
             Host: "www.youtube.com",
-            Cookies: await this.getCookies().then(jar =>
-                jar.getCookieString("https://youtube.com"),
-            ),
+            Cookies: await this.getCookies().then(jar => jar.getCookieString("https://youtube.com")),
         };
 
         const data: Record<string, any> = {
@@ -516,24 +450,15 @@ export class YouTubeService implements OnModuleInit {
         const item = this.requestQueue.shift();
         const value = await item.callback().catch(reason => {
             const retryCount = this.retryCounter.get(item) ?? 0;
-            if (
-                item.options?.maxRetries &&
-                retryCount < item.options.maxRetries
-            ) {
+            if (item.options?.maxRetries && retryCount < item.options.maxRetries) {
                 // TODO: check for 404, 403 (since that's the error YouTube returns when you get blocked) and don't requeue/stop the queue.
 
                 // requeue the item.
-                this.requestQueue[
-                    (item.options.requeuePriority ?? "low") == "high"
-                        ? "unshift"
-                        : "push"
-                ](item);
+                this.requestQueue[(item.options.requeuePriority ?? "low") == "high" ? "unshift" : "push"](item);
                 this.retryCounter.set(item, retryCount + 1);
             } else {
                 this.logger.warn(
-                    `Could not finish YouTube request: ${reason} ${
-                        reason.stack ? `\nStack: ${reason.stack}` : ""
-                    }.`,
+                    `Could not finish YouTube request: ${reason} ${reason.stack ? `\nStack: ${reason.stack}` : ""}.`,
                 );
             }
         });

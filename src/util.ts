@@ -15,11 +15,7 @@ export namespace Util {
         return batches;
     }
 
-    export function pluralize(
-        amount: number,
-        singular: string,
-        plural: string,
-    ) {
+    export function pluralize(amount: number, singular: string, plural: string) {
         return amount == 1 ? singular : plural;
     }
 
@@ -32,10 +28,7 @@ export namespace Util {
      * @param error The exception that was thrown.
      * @param handlers The handlers. If any handler does not return true, the error will be rethrown.
      */
-    export async function ignore(
-        error,
-        ...handlers: ((exception: any) => boolean | Promise<boolean>)[]
-    ) {
+    export async function ignore(error, ...handlers: ((exception: any) => boolean | Promise<boolean>)[]) {
         for (const handler of handlers) {
             if (!(await handler(error))) throw error;
         }
@@ -51,10 +44,7 @@ export namespace Util {
         return difference;
     }
 
-    export function symmetricSetDifference<T>(
-        setA: Set<T>,
-        setB: Set<T>,
-    ): Set<T> {
+    export function symmetricSetDifference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
         const difference = new Set(setA);
 
         for (const element of setB) {
@@ -82,11 +72,10 @@ export namespace Util {
 }
 
 export type Primitive = string | number | boolean;
-export type LastArrayElement<ValueType extends readonly unknown[]> =
-    ValueType extends readonly [infer ElementType]
-        ? ElementType
-        : ValueType extends readonly [infer _, ...infer Tail]
-        ? LastArrayElement<Tail>
-        : ValueType extends ReadonlyArray<infer ElementType>
-        ? ElementType
-        : never;
+export type LastArrayElement<ValueType extends readonly unknown[]> = ValueType extends readonly [infer ElementType]
+    ? ElementType
+    : ValueType extends readonly [infer _, ...infer Tail]
+    ? LastArrayElement<Tail>
+    : ValueType extends ReadonlyArray<infer ElementType>
+    ? ElementType
+    : never;

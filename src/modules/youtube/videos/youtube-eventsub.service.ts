@@ -2,10 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import { YouTubeConfig } from "../../../modules/config/config";
-import {
-    YOUTUBE_EVENTSUB_HUB_URL,
-    YOUTUBE_EVENTSUB_TOPIC_BASE,
-} from "./constants";
+import { YOUTUBE_EVENTSUB_HUB_URL, YOUTUBE_EVENTSUB_TOPIC_BASE } from "./constants";
 
 @Injectable()
 export class YouTubeEventSubService {
@@ -15,9 +12,7 @@ export class YouTubeEventSubService {
     constructor(private readonly configService: ConfigService) {}
 
     public async subscribe(channelId: string) {
-        this.logger.debug(
-            `Subscribing to push notifications for YouTube channel ${channelId}`,
-        );
+        this.logger.debug(`Subscribing to push notifications for YouTube channel ${channelId}`);
         if (this.futureLeases.has(channelId)) {
             const oldLease = this.futureLeases.get(channelId);
             clearTimeout(oldLease);
@@ -34,16 +29,10 @@ export class YouTubeEventSubService {
         return await this._doSubscribe("unsubscribe", channelId);
     }
 
-    private async _doSubscribe(
-        mode: "subscribe" | "unsubscribe",
-        channelId: string,
-    ) {
+    private async _doSubscribe(mode: "subscribe" | "unsubscribe", channelId: string) {
         const topic = `${YOUTUBE_EVENTSUB_TOPIC_BASE}?channel_id=${channelId}`;
-        const callbackUrl = `${this.configService.getOrThrow(
-            "URL",
-        )}/youtube/eventsub`;
-        const { secret } =
-            this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
+        const callbackUrl = `${this.configService.getOrThrow("URL")}/youtube/eventsub`;
+        const { secret } = this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
 
         return axios({
             method: "POST",
@@ -59,14 +48,10 @@ export class YouTubeEventSubService {
     }
 
     public scheduleLeaseRenewal(channelId: string, leaseSeconds: number) {
-        this.logger.debug(
-            `Scheduling lease renewal for YouTube channel ${channelId}`,
-        );
+        this.logger.debug(`Scheduling lease renewal for YouTube channel ${channelId}`);
 
         if (this.futureLeases.has(channelId)) {
-            this.logger.debug(
-                `Skipping lease renewal for ${channelId}: lease renewal already scheduled.`,
-            );
+            this.logger.debug(`Skipping lease renewal for ${channelId}: lease renewal already scheduled.`);
             return false;
         }
 

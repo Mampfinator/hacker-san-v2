@@ -16,14 +16,12 @@ export class LockAction implements IActionType {
             message?: string;
         };
         const permission = mode === "lock" ? false : null;
-        if (mode === "lock" && message)
-            await channel.send(this.makeMessage(mode, message));
+        if (mode === "lock" && message) await channel.send(this.makeMessage(mode, message));
         await channel.permissionOverwrites.create(channel.guildId, {
             SendMessages: permission,
         });
 
-        if (mode === "unlock" && message)
-            await channel.send(this.makeMessage(mode, message));
+        if (mode === "unlock" && message) await channel.send(this.makeMessage(mode, message));
     }
 
     private makeMessage(mode: "lock" | "unlock", message: string) {

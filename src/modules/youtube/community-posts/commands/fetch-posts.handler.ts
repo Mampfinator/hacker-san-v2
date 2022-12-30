@@ -7,9 +7,7 @@ import { YouTubeCommunityPostsRequestService } from "../community-posts.request.
 export class FetchPostsHandler implements ICommandHandler<FetchPostsCommand> {
     private readonly logger = new Logger(FetchPostsHandler.name);
 
-    constructor(
-        private readonly requestService: YouTubeCommunityPostsRequestService,
-    ) {}
+    constructor(private readonly requestService: YouTubeCommunityPostsRequestService) {}
 
     async execute(options: FetchPostsCommand): Promise<any> {
         return this.requestService.fetchPosts(options);

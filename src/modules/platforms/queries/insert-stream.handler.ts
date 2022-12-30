@@ -15,9 +15,7 @@ export class InsertStreamHandler implements IQueryHandler<InsertStreamQuery> {
     ) {}
 
     async execute(query: InsertStreamQuery): Promise<boolean> {
-        const result = await this.streamRepo
-            .insert(query.stream)
-            .catch(error => this.logger.error(error, error.stack));
+        const result = await this.streamRepo.insert(query.stream).catch(error => this.logger.error(error, error.stack));
         return typeof result !== "undefined";
     }
 }

@@ -7,10 +7,7 @@ import { DiscordConfig } from "./modules/config/config";
 import { DiscordClientService } from "./modules/discord/client/discord-client.service";
 
 @Catch()
-export class GlobalExceptionFilter
-    extends BaseExceptionFilter
-    implements ExceptionFilter
-{
+export class GlobalExceptionFilter extends BaseExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(GlobalExceptionFilter.name);
     private readonly sendDm: boolean;
     private readonly ownerId?: string;
@@ -23,8 +20,7 @@ export class GlobalExceptionFilter
         config: ConfigService,
     ) {
         super(applicationRef);
-        const { dmOwnerOnError, ownerId } =
-            config.get<DiscordConfig>("DISCORD");
+        const { dmOwnerOnError, ownerId } = config.get<DiscordConfig>("DISCORD");
         this.sendDm = ownerId && dmOwnerOnError;
         this.ownerId = ownerId;
     }
@@ -39,8 +35,7 @@ export class GlobalExceptionFilter
         const ignore = this.ignoreChecks.some(check => check(exception));
         if (ignore) return;
 
-        const errorText =
-            exception?.toString?.() ?? exception ?? "Unknown error.";
+        const errorText = exception?.toString?.() ?? exception ?? "Unknown error.";
         const stack = exception?.stack;
 
         if (stack) this.logger.error(errorText, stack);
@@ -51,11 +46,7 @@ export class GlobalExceptionFilter
         if (sendDm) {
             const embed = new EmbedBuilder()
                 .setColor("DarkRed")
-                .setTitle(
-                    `Uncaught Exception: ${
-                        (exception as Error).name ?? "Unknown error type."
-                    }`,
-                )
+                .setTitle(`Uncaught Exception: ${(exception as Error).name ?? "Unknown error type."}`)
                 .setDescription(errorText);
             if ((exception as Error).stack) {
                 const newLines = (exception as Error).stack.split("\n");
@@ -81,15 +72,9 @@ export class GlobalExceptionFilter
                         value: codeBlock(traces[0]),
                     });
                 } else {
-                    for (
-                        let traceIndex = 0;
-                        traceIndex < traces.length;
-                        traceIndex++
-                    ) {
+                    for (let traceIndex = 0; traceIndex < traces.length; traceIndex++) {
                         embed.addFields({
-                            name: `Stacktrace ${traceIndex + 1}/${
-                                traces.length
-                            }`,
+                            name: `Stacktrace ${traceIndex + 1}/${traces.length}`,
                             value: codeBlock(traces[traceIndex]),
                         });
                     }

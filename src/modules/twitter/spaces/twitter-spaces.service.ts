@@ -7,18 +7,13 @@ import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger
 import { Event } from "../../../modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
-import {
-    TwitterSpace,
-    TwitterSpaceStatus,
-} from "../models/twitter-space.entity";
+import { TwitterSpace, TwitterSpaceStatus } from "../models/twitter-space.entity";
 import { TwitterUser } from "../models/twitter-user.entity";
 import { TwitterApiService } from "../twitter-api.service";
 
 @Injectable()
 export class TwitterSpacesService {
     private readonly logger = new Logger(TwitterSpacesService.name);
-    //private readonly apiClient: TwitterApi;
-    //private readonly token: string;
 
     constructor(
         private readonly commandBus: CommandBus,
@@ -37,12 +32,7 @@ export class TwitterSpacesService {
         try {
             const ids = users.map(u => u.id);
             const response = await this.apiClient.v2.spacesByCreators(ids, {
-                "space.fields": [
-                    "creator_id",
-                    "scheduled_start",
-                    "started_at",
-                    "title",
-                ],
+                "space.fields": ["creator_id", "scheduled_start", "started_at", "title"],
             });
 
             if (!response) return;
@@ -52,10 +42,7 @@ export class TwitterSpacesService {
                 where: { status: In(["live", "scheduled"]) },
             });
 
-            const spaces = new Map<
-                string,
-                { db?: TwitterSpace; api?: SpaceV2 }
-            >();
+            const spaces = new Map<string, { db?: TwitterSpace; api?: SpaceV2 }>();
 
             for (const space of dbSpaces) {
                 spaces.set(space.id, { db: space });
@@ -74,9 +61,7 @@ export class TwitterSpacesService {
                 if (api?.state === db?.status) continue;
 
                 if (!db) {
-                    let scheduledStart: number | undefined = Number(
-                        api.scheduled_start,
-                    );
+                    let scheduledStart: number | undefined = Number(api.scheduled_start);
                     if (isNaN(scheduledStart)) scheduledStart = undefined;
 
                     db = await this.spacesRepo.save({
@@ -105,11 +90,7 @@ export class TwitterSpacesService {
         }
     }
 
-    private async generateNotif(
-        id: string,
-        dbSpace?: TwitterSpace,
-        space?: SpaceV2,
-    ): Promise<void> {
+    private async generateNotif(id: string, dbSpace?: TwitterSpace, space?: SpaceV2): Promise<void> {
         const url = `https://twitter.com/i/spaces/${id}`;
 
         const userId = dbSpace?.channelId ?? space?.creator_id;
@@ -156,9 +137,7 @@ export class TwitterSpacesService {
         }
 
         if (space?.scheduled_start) {
-            const scheduledFor = Math.floor(
-                Number(Date.parse(space.scheduled_start)) / 1000,
-            );
+            const scheduledFor = Math.floor(Number(Date.parse(space.scheduled_start)) / 1000);
             embed.addFields({
                 name: "Scheduled for",
                 value: `<t:${scheduledFor}:T> (<t:${scheduledFor}:R>)`,

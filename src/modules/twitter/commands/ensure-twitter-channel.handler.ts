@@ -9,9 +9,7 @@ import { TwitterApiService } from "../twitter-api.service";
 import { EnsureTwitterChannelCommand } from "./ensure-twitter-channel.command";
 
 @CommandHandler(EnsureTwitterChannelCommand)
-export class EnsureTwitterChannelHandler
-    implements ICommandHandler<EnsureTwitterChannelCommand>
-{
+export class EnsureTwitterChannelHandler implements ICommandHandler<EnsureTwitterChannelCommand> {
     private readonly logger = new Logger(EnsureTwitterChannelHandler.name);
 
     constructor(
@@ -20,35 +18,24 @@ export class EnsureTwitterChannelHandler
         private readonly apiService: TwitterApiService,
     ) {}
 
-    async execute({
-        channelId,
-    }: EnsureTwitterChannelCommand): Promise<EnsureChannelResult> {
+    async execute({ channelId }: EnsureTwitterChannelCommand): Promise<EnsureChannelResult> {
         channelId = channelId.trim();
 
         try {
             const exists = await this.userRepo.findOne({
-                where: [
-                    { id: channelId },
-                    { name: channelId.replace("@", "") },
-                ],
+                where: [{ id: channelId }, { name: channelId.replace("@", "") }],
             });
             if (!exists) {
                 let user: UserV2;
                 switch (true) {
                     case /^[0-9]+$/.test(channelId):
-                        user = await this.apiService
-                            .fetchUserById(channelId)
-                            .catch();
+                        user = await this.apiService.fetchUserById(channelId).catch();
                         break;
                     case channelId.startsWith("@"):
-                        user = await this.apiService
-                            .fetchUserByName(channelId.replace("@", ""))
-                            .catch();
+                        user = await this.apiService.fetchUserByName(channelId.replace("@", "")).catch();
                         break;
                     default:
-                        this.logger.debug(
-                            `Got invalid channelId: ${channelId}.`,
-                        );
+                        this.logger.debug(`Got invalid channelId: ${channelId}.`);
                 }
 
                 if (!user) return { success: false };

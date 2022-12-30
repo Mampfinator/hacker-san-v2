@@ -15,11 +15,7 @@ import { ActionDescriptor } from "./models/action.entity";
 import { GuildSettings } from "./models/settings.entity";
 
 @Module({
-    imports: [
-        ConfigModule,
-        TypeOrmModule.forFeature([GuildSettings, ActionDescriptor]),
-        CqrsModule,
-    ],
+    imports: [ConfigModule, TypeOrmModule.forFeature([GuildSettings, ActionDescriptor]), CqrsModule],
     providers: [
         DiscordService,
         DiscordRESTService,

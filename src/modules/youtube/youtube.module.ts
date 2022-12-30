@@ -20,11 +20,7 @@ import { YouTubeApiService } from "./youtube-api.service";
 import { YouTubeService } from "./youtube.service";
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([YouTubeChannel, CommunityPost, YouTubeVideo]),
-        ScheduleModule,
-        CqrsModule,
-    ],
+    imports: [TypeOrmModule.forFeature([YouTubeChannel, CommunityPost, YouTubeVideo]), ScheduleModule, CqrsModule],
     providers: [
         YouTubeService,
         YouTubeApiService,
