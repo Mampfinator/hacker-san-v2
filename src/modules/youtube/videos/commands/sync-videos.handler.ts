@@ -25,13 +25,9 @@ export class SyncVideosHandler implements ICommandHandler<SyncVideosCommand> {
     async execute({ channelId }: SyncVideosCommand): Promise<any> {
         // Simplified for now. The user uploads playlist is nicer to fetch, but it's unreliable.
         // @ts-ignore
-        const { data: rawXml } = await axios.get(
-            `${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`,
-        );
+        const { data: rawXml } = await axios.get(`${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`);
         const xml = this.xmlParser.parse(rawXml);
-        const videoIds: string[] = xml.feed.entry.map(
-            entry => entry["yt:videoId"],
-        );
+        const videoIds: string[] = xml.feed.entry.map(entry => entry["yt:videoId"]);
 
         const { data: videoData } = await this.api.videos.list({
             id: [...new Set(videoIds)].slice(0, 50),

@@ -29,17 +29,13 @@ import { InjectRepository } from "@nestjs/typeorm";
 @SlashCommand({
     commandData: new SlashCommandBuilder()
         .setName("quick-setup")
-        .setDescription(
-            "Quick setup for default configuration. Creates multiple actions.",
-        )
+        .setDescription("Quick setup for default configuration. Creates multiple actions.")
         .setDMPermission(false)
         .addSubcommand(general =>
             general
                 .setName("general")
                 .setDescription("General setup for a channel.")
-                .addStringOption(platform =>
-                    DiscordUtil.makePlatformOption(platform).setRequired(true),
-                )
+                .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true))
                 .addStringOption(channel =>
                     channel
                         .setName("channel")
@@ -48,39 +44,29 @@ import { InjectRepository } from "@nestjs/typeorm";
                         .setAutocomplete(true),
                 )
                 .addRoleOption(pingRole =>
-                    pingRole
-                        .setName("ping-role")
-                        .setDescription("The role to ping on certain events."),
+                    pingRole.setName("ping-role").setDescription("The role to ping on certain events."),
                 )
                 .addChannelOption(notificationChannel =>
                     notificationChannel
                         .setName("notif-channel")
-                        .setDescription(
-                            "The notification channel that should be used.",
-                        ),
+                        .setDescription("The notification channel that should be used."),
                 )
                 .addChannelOption(streamChat =>
                     streamChat
                         .setName("stream-chat")
-                        .setDescription(
-                            "The stream chat. Will be unlocked on live, locked on offline.",
-                        ),
+                        .setDescription("The stream chat. Will be unlocked on live, locked on offline."),
                 )
                 .addChannelOption(tagsChannel =>
                     tagsChannel
                         .setName("tags-channel")
-                        .setDescription(
-                            "The tags channel. !tags {link} will be sent here on offline.",
-                        ),
+                        .setDescription("The tags channel. !tags {link} will be sent here on offline."),
                 ),
         )
         .addSubcommand(rename =>
             rename
                 .setName("rename")
                 .setDescription("Configure rename actions for live & offline.")
-                .addStringOption(platform =>
-                    DiscordUtil.makePlatformOption(platform).setRequired(true),
-                )
+                .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true))
                 .addStringOption(channel =>
                     channel
                         .setName("channel")
@@ -89,15 +75,10 @@ import { InjectRepository } from "@nestjs/typeorm";
                         .setAutocomplete(true),
                 )
                 .addStringOption(name =>
-                    name
-                        .setName("name")
-                        .setDescription("This channel's base name.")
-                        .setRequired(true),
+                    name.setName("name").setDescription("This channel's base name.").setRequired(true),
                 )
                 .addChannelOption(forChannel =>
-                    forChannel
-                        .setName("for-channel")
-                        .setDescription("The channel to rename."),
+                    forChannel.setName("for-channel").setDescription("The channel to rename."),
                 ),
         ),
 })
@@ -159,10 +140,7 @@ export class QuickSetupCommand implements ISlashCommand {
         const { options, channel } = interaction;
 
         const { channelId, platform } = this.getOptions(interaction);
-        const discordChannel = interaction.options.getChannel(
-            "for-channel",
-            false,
-        ) as GuildTextBasedChannel;
+        const discordChannel = interaction.options.getChannel("for-channel", false) as GuildTextBasedChannel;
 
         const name = interaction.options.getString("name");
 
@@ -179,9 +157,7 @@ export class QuickSetupCommand implements ISlashCommand {
             });
         }
 
-        const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(
-            discordChannel ?? channel,
-        );
+        const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(discordChannel ?? channel);
 
         const savedActions = await this.actionsRepo.save([
             this.actionsRepo.create({
@@ -215,20 +191,14 @@ export class QuickSetupCommand implements ISlashCommand {
             embeds: [
                 new EmbedBuilder()
                     .setTitle("Quick Setup")
-                    .setDescription(
-                        `Configured rename actions for ${channelName} (${guaranteedChannelId})`,
-                    )
+                    .setDescription(`Configured rename actions for ${channelName} (${guaranteedChannelId})`)
                     .setColor("Green")
-                    .addFields(
-                        savedActions.map(action => action.toEmbedField()),
-                    ),
+                    .addFields(savedActions.map(action => action.toEmbedField())),
             ],
         });
     }
 
-    async handleGeneral(
-        interaction: ChatInputCommandInteraction<CacheType>,
-    ): Promise<any> {
+    async handleGeneral(interaction: ChatInputCommandInteraction<CacheType>): Promise<any> {
         this.optionMap.set(interaction.id, {
             "convenience-options": new Set(),
             "notification-options": new Set(),
@@ -236,20 +206,13 @@ export class QuickSetupCommand implements ISlashCommand {
 
         await interaction.deferReply();
 
-        const {
-            channelId,
-            platform,
-            notificationChannel,
-            streamChannel,
-            tagsChannel,
-        } = this.getOptions(interaction);
+        const { channelId, platform, notificationChannel, streamChannel, tagsChannel } = this.getOptions(interaction);
 
         if (!notificationChannel && !streamChannel && !tagsChannel)
             return interaction.editReply({
                 embeds: [
                     new EmbedBuilder({
-                        description:
-                            "No channels to configure actions for. What exactly do you want me to do here?",
+                        description: "No channels to configure actions for. What exactly do you want me to do here?",
                     }),
                 ],
             });
@@ -262,11 +225,7 @@ export class QuickSetupCommand implements ISlashCommand {
         );
         if (!success)
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder({ description: "Invalid id." }).setColor(
-                        "Red",
-                    ),
-                ],
+                embeds: [new EmbedBuilder({ description: "Invalid id." }).setColor("Red")],
             });
 
         const notificationOptions: SelectMenuOptionBuilder[] = [];
@@ -277,14 +236,11 @@ export class QuickSetupCommand implements ISlashCommand {
                 new SelectMenuOptionBuilder()
                     .setLabel("Live & Uploads")
                     .setValue("live-and-uploads")
-                    .setDescription(
-                        "Send notifications when streams go live in the notification channel.",
-                    ),
+                    .setDescription("Send notifications when streams go live in the notification channel."),
                 new SelectMenuOptionBuilder({
                     label: "Offline (Notification channel)",
                     value: "offline:notif",
-                    description:
-                        "Send notifications when a stream goes offline in the notification channel.",
+                    description: "Send notifications when a stream goes offline in the notification channel.",
                 }),
             );
 
@@ -293,8 +249,7 @@ export class QuickSetupCommand implements ISlashCommand {
                     new SelectMenuOptionBuilder({
                         label: "Community Posts",
                         value: "community-posts",
-                        description:
-                            "Send notifications when a community post is made in the notification channel.",
+                        description: "Send notifications when a community post is made in the notification channel.",
                     }),
                 );
             }
@@ -305,8 +260,7 @@ export class QuickSetupCommand implements ISlashCommand {
                 new SelectMenuOptionBuilder({
                     label: "Offline (Stream chat)",
                     value: "offline:stream",
-                    description:
-                        "Send notifications when a stream goes offline in the stream chat.",
+                    description: "Send notifications when a stream goes offline in the stream chat.",
                 }),
             );
 
@@ -314,14 +268,12 @@ export class QuickSetupCommand implements ISlashCommand {
                 new SelectMenuOptionBuilder({
                     label: "Automatic KoroTagger Setup",
                     value: "auto-korotagger",
-                    description:
-                        "Echo !stream {link} for KoroTagger in stream chat when a stream goes live.",
+                    description: "Echo !stream {link} for KoroTagger in stream chat when a stream goes live.",
                 }),
                 new SelectMenuOptionBuilder({
                     label: "No automatic lock & unlock",
                     value: "no-lock",
-                    description:
-                        "Don't automatically lock and unlock the stream channel.",
+                    description: "Don't automatically lock and unlock the stream channel.",
                 }),
             );
         }
@@ -331,8 +283,7 @@ export class QuickSetupCommand implements ISlashCommand {
                 new SelectMenuOptionBuilder({
                     label: "Send tags",
                     value: "tags",
-                    description:
-                        "Use KoroTagger to print tags in the tags channel.",
+                    description: "Use KoroTagger to print tags in the tags channel.",
                 }),
             );
         }
@@ -357,10 +308,7 @@ export class QuickSetupCommand implements ISlashCommand {
                     .setOptions(convenienceOptions),
             ),
             new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId("submit")
-                    .setLabel("Submit")
-                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId("submit").setLabel("Submit").setStyle(ButtonStyle.Primary),
             ),
         );
 
@@ -368,9 +316,7 @@ export class QuickSetupCommand implements ISlashCommand {
             embeds: [
                 new EmbedBuilder()
                     .setTitle("Quick Setup")
-                    .setDescription(
-                        `Configure actions for ${name} (${channelId}, ${platform})`,
-                    )
+                    .setDescription(`Configure actions for ${name} (${channelId}, ${platform})`)
                     .setColor("Blue"),
             ],
             // @ts-ignore
@@ -382,12 +328,8 @@ export class QuickSetupCommand implements ISlashCommand {
             switch (componentInteraction.customId) {
                 case "notification-options":
                 case "convenience-options":
-                    const newSet = new Set(
-                        (componentInteraction as SelectMenuInteraction).values,
-                    );
-                    this.optionMap.get(interaction.id)[
-                        componentInteraction.customId
-                    ] = newSet;
+                    const newSet = new Set((componentInteraction as SelectMenuInteraction).values);
+                    this.optionMap.get(interaction.id)[componentInteraction.customId] = newSet;
 
                     await componentInteraction.reply({
                         content: "Options set.",
@@ -395,10 +337,7 @@ export class QuickSetupCommand implements ISlashCommand {
                     });
                     break;
                 case "submit":
-                    await this.handleSubmit(
-                        interaction,
-                        componentInteraction as MessageComponentInteraction,
-                    );
+                    await this.handleSubmit(interaction, componentInteraction as MessageComponentInteraction);
             }
         });
     }
@@ -407,14 +346,9 @@ export class QuickSetupCommand implements ISlashCommand {
         interaction: ChatInputCommandInteraction<CacheType>,
         componentInteraction: MessageComponentInteraction,
     ) {
-        const {
-            "convenience-options": convenienceOptions,
-            "notification-options": notificationOptions,
-        } = this.optionMap.get(interaction.id);
-        const selectedOptions = new Set([
-            ...convenienceOptions,
-            ...notificationOptions,
-        ]);
+        const { "convenience-options": convenienceOptions, "notification-options": notificationOptions } =
+            this.optionMap.get(interaction.id);
+        const selectedOptions = new Set([...convenienceOptions, ...notificationOptions]);
 
         // check if the user selected any options defined in notificationOptions
         if (selectedOptions.size === 0) {
@@ -428,29 +362,20 @@ export class QuickSetupCommand implements ISlashCommand {
             return;
         }
 
-        const nanoid: () => string = (
-            await Function('return import("nanoid")')()
-        ).customAlphabet(
+        const nanoid: () => string = (await Function('return import("nanoid")')()).customAlphabet(
             "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-",
             9,
         );
 
-        const {
-            channelId,
-            platform,
-            notificationChannel,
-            streamChannel,
-            tagsChannel,
-            pingRole,
-        } = this.getOptions(interaction);
+        const { channelId, platform, notificationChannel, streamChannel, tagsChannel, pingRole } =
+            this.getOptions(interaction);
 
         const actions: Partial<ActionDescriptor>[] = [];
 
         if (selectedOptions.has("live-and-uploads")) {
-            const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(
-                    notificationChannel as GuildBasedChannel,
-                );
+            const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(
+                notificationChannel as GuildBasedChannel,
+            );
 
             actions.push({
                 id: nanoid(),
@@ -462,9 +387,7 @@ export class QuickSetupCommand implements ISlashCommand {
                 discordThreadId,
                 guildId: interaction.guildId,
                 data: {
-                    message: `${
-                        pingRole ? `<@&${pingRole.id}>` : ""
-                    } {link} is now live!`,
+                    message: `${pingRole ? `<@&${pingRole.id}>` : ""} {link} is now live!`,
                 },
             });
 
@@ -478,25 +401,17 @@ export class QuickSetupCommand implements ISlashCommand {
                 discordThreadId,
                 guildId: interaction.guildId,
                 data: {
-                    message: `New upload: ${
-                        pingRole ? `<@&${pingRole.id}>` : ""
-                    } {link}`,
+                    message: `New upload: ${pingRole ? `<@&${pingRole.id}>` : ""} {link}`,
                 },
             });
         }
 
-        if (
-            selectedOptions.has("offline:notif") ||
-            selectedOptions.has("offline:stream")
-        ) {
+        if (selectedOptions.has("offline:notif") || selectedOptions.has("offline:stream")) {
             const useNotifChannel = selectedOptions.has("offline:notif");
 
-            const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(
-                    (useNotifChannel
-                        ? notificationChannel
-                        : streamChannel) as GuildBasedChannel,
-                );
+            const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(
+                (useNotifChannel ? notificationChannel : streamChannel) as GuildBasedChannel,
+            );
 
             actions.push({
                 id: nanoid(),
@@ -514,10 +429,9 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         if (selectedOptions.has("community-posts")) {
-            const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(
-                    notificationChannel as GuildBasedChannel,
-                );
+            const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(
+                notificationChannel as GuildBasedChannel,
+            );
 
             actions.push({
                 id: nanoid(),
@@ -535,8 +449,7 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         if (selectedOptions.has("tags")) {
-            const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(tagsChannel as GuildBasedChannel);
+            const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(tagsChannel as GuildBasedChannel);
 
             actions.push({
                 id: nanoid(),
@@ -554,8 +467,7 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         if (!selectedOptions.has("no-lock")) {
-            const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
+            const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
 
             actions.push({
                 id: nanoid(),
@@ -589,8 +501,7 @@ export class QuickSetupCommand implements ISlashCommand {
         }
 
         if (selectedOptions.has("auto-korotagger")) {
-            const { discordChannelId, discordThreadId } =
-                DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
+            const { discordChannelId, discordThreadId } = DiscordUtil.getChannelIds(streamChannel as GuildBasedChannel);
 
             actions.push({
                 id: nanoid(),
@@ -607,33 +518,22 @@ export class QuickSetupCommand implements ISlashCommand {
             });
         }
 
-        const savedActions = (await this.actionsRepo.save(actions)).map(
-            action => this.actionsRepo.create(action),
-        );
+        const savedActions = (await this.actionsRepo.save(actions)).map(action => this.actionsRepo.create(action));
         this.logger.debug(
-            `Saved ${savedActions.length} actions: ${savedActions
-                .map(action => action.type)
-                .join(", ")}`,
+            `Saved ${savedActions.length} actions: ${savedActions.map(action => action.type).join(", ")}`,
         );
 
         await componentInteraction.reply({
             embeds: [
                 new EmbedBuilder({ description: "Actions saved." })
                     .setColor("Green")
-                    .addFields(
-                        savedActions.map(action => action.toEmbedField()),
-                    ),
+                    .addFields(savedActions.map(action => action.toEmbedField())),
             ],
         });
     }
 
     @Autocomplete("channel")
-    private async getChannel(
-        interaction: AutocompleteInteraction,
-    ): Promise<AutocompleteReturn> {
-        return DiscordUtil.handleChannelAutocomplete(
-            interaction,
-            this.queryBus,
-        );
+    private async getChannel(interaction: AutocompleteInteraction): Promise<AutocompleteReturn> {
+        return DiscordUtil.handleChannelAutocomplete(interaction, this.queryBus);
     }
 }

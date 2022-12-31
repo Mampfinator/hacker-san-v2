@@ -11,9 +11,7 @@ export class FindStreamQueryHandler implements IQueryHandler<FindStreamQuery> {
         private readonly streamRepository: Repository<StreamEntity>,
     ) {}
 
-    async execute({
-        options,
-    }: FindStreamQuery): Promise<StreamEntity | StreamEntity[]> {
+    async execute({ options }: FindStreamQuery): Promise<StreamEntity | StreamEntity[]> {
         const { platform, platformId, query } = options;
         let { one } = options;
 

@@ -1,9 +1,5 @@
 import { QueryBus } from "@nestjs/cqrs";
-import {
-    ChatInputCommandInteraction,
-    CacheType,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, CacheType, SlashCommandBuilder } from "discord.js";
 import { SUPPORTED_PLATFORMS, Platform } from "../../../../constants";
 import { MultipageMessage } from "../../../../shared/util/multipage-message";
 import { Repository } from "typeorm";
@@ -63,15 +59,10 @@ export class OverviewCommand implements ISlashCommand {
         for (const [platform, channels] of channelsByPlatform) {
             const channelIds = new Set(settings.primaryChannels[platform]);
 
-            const content = channels
-                .map(channel => JSON.stringify(channel, null, 4))
-                .join("\n");
+            const content = channels.map(channel => JSON.stringify(channel, null, 4)).join("\n");
 
             reply.addPage({
-                content:
-                    content.length > 0
-                        ? content
-                        : "No channels for this platform.",
+                content: content.length > 0 ? content : "No channels for this platform.",
             });
         }
 

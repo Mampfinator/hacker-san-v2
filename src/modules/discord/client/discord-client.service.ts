@@ -57,32 +57,19 @@ export class DiscordClientService extends Client {
         }
 
         for (const platform of SUPPORTED_PLATFORMS) {
-            this.statusReady.set(
-                platform,
-                !configService.getOrThrow<boolean>(
-                    `${platform.toUpperCase()}.active`,
-                ),
-            );
+            this.statusReady.set(platform, !configService.getOrThrow<boolean>(`${platform.toUpperCase()}.active`));
         }
     }
 
     public async login(token?: string): Promise<string> {
         const events = [...getEvents(this).keys()];
-        this.logger.debug(
-            `Registering event handler for @On marked events: ${events.join(
-                ", ",
-            )}`,
-        );
+        this.logger.debug(`Registering event handler for @On marked events: ${events.join(", ")}`);
 
         for (const event of events) {
             this.on(event, (...args) => this.handleEvent(event, ...args));
         }
 
-        this.logger.debug(
-            `Found ${this.commands.size} commands: ${[
-                ...this.commands.keys(),
-            ].join(", ")}.`,
-        );
+        this.logger.debug(`Found ${this.commands.size} commands: ${[...this.commands.keys()].join(", ")}.`);
 
         this.logger.debug(
             `Found ${getActions().length} action types: ${getActions()
@@ -107,11 +94,7 @@ export class DiscordClientService extends Client {
     async platformReady(platform: Platform) {
         this.statusReady.set(platform, true);
 
-        if (
-            [...this.statusReady.values()].reduce(
-                (prev, cur) => prev && (cur == undefined || cur),
-            )
-        ) {
+        if ([...this.statusReady.values()].reduce((prev, cur) => prev && (cur == undefined || cur))) {
             this.status = "online";
             this.refreshPresence();
         }
@@ -142,13 +125,8 @@ export class DiscordClientService extends Client {
             }
         }
 
-        const { deployGlobalCommands, testGuildId } =
-            this.configService.get<DiscordConfig>("DISCORD");
-        this.logger.debug(
-            `Deploying slash commands ${
-                deployGlobalCommands ? "globally" : `to ${testGuildId}`
-            }.`,
-        );
+        const { deployGlobalCommands, testGuildId } = this.configService.get<DiscordConfig>("DISCORD");
+        this.logger.debug(`Deploying slash commands ${deployGlobalCommands ? "globally" : `to ${testGuildId}`}.`);
 
         for (const command of this.commands.values()) {
             const { commandData, forGuild } = getCommandMetadata(command);
@@ -156,12 +134,8 @@ export class DiscordClientService extends Client {
             await this.application.commands.create(
                 commandData,
                 deployGlobalCommands
-                    ? forGuild(
-                          this.configService.get<DiscordConfig>("DISCORD")
-                              .ownerGuild,
-                      )
-                    : this.configService.get<DiscordConfig>("DISCORD")
-                          .testGuildId,
+                    ? forGuild(this.configService.get<DiscordConfig>("DISCORD").ownerGuild)
+                    : this.configService.get<DiscordConfig>("DISCORD").testGuildId,
             );
             this.logger.debug(`Created command for ${commandData.name}`);
         }
@@ -183,9 +157,7 @@ export class DiscordClientService extends Client {
         await handler.execute(interaction);
 
         if (!interaction.replied) {
-            this.logger.warn(
-                `${commandName} (${interaction.id}) never got a reply!`,
-            );
+            this.logger.warn(`${commandName} (${interaction.id}) never got a reply!`);
         }
     }
 
@@ -198,9 +170,7 @@ export class DiscordClientService extends Client {
         const command = this.commands.get(commandName);
 
         if (!command)
-            return this.logger.warn(
-                `Could not handle autocomplete for ${commandName} - ${name}: Command not found.`,
-            );
+            return this.logger.warn(`Could not handle autocomplete for ${commandName} - ${name}: Command not found.`);
         handleAutocomplete(interaction, command);
     }
 
@@ -257,19 +227,17 @@ export class DiscordClientService extends Client {
             name = "starting...";
         } else {
             const channels = (
-                await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
-                    new ChannelQuery({ query: {} }),
-                )
+                await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({ query: {} }))
             ).length;
 
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;
 
-            name = `${channels} ${Util.pluralize(
-                channels,
-                "channel",
-                "channels",
-            )} in ${guilds} ${Util.pluralize(guilds, "server", "servers")}.`;
+            name = `${channels} ${Util.pluralize(channels, "channel", "channels")} in ${guilds} ${Util.pluralize(
+                guilds,
+                "server",
+                "servers",
+            )}.`;
         }
 
         this.user.setPresence({

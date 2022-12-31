@@ -9,10 +9,7 @@ export const actionTypeFactory: FactoryProvider = {
     useFactory: (...args: (IActionType & { prototype: any })[]) => {
         const map = new Map();
         for (const type of args) {
-            map.set(
-                Reflect.getMetadata(ACTION_TYPE_KEY, type.prototype ?? type),
-                type,
-            );
+            map.set(Reflect.getMetadata(ACTION_TYPE_KEY, type.prototype ?? type), type);
         }
 
         return map;

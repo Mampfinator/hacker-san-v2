@@ -12,8 +12,7 @@ export class NotifyAction implements IActionType {
         const notification: { content: string; embeds?: EmbedBuilder[] } = {
             content: ActionUtil.interpolate(message, command),
         };
-        if (command.options.embed)
-            notification.embeds = [command.options.embed];
+        if (command.options.embed) notification.embeds = [command.options.embed];
         await channel.send(notification);
     }
 }

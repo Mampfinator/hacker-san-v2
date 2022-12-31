@@ -36,12 +36,7 @@ export class TwitterSpacesService {
 
         try {
             const response = await this.apiClient.v2.spacesByCreators(ids, {
-                "space.fields": [
-                    "creator_id",
-                    "scheduled_start",
-                    "started_at",
-                    "title",
-                ],
+                "space.fields": ["creator_id", "scheduled_start", "started_at", "title"],
             });
 
             if (!response) return;
@@ -51,10 +46,7 @@ export class TwitterSpacesService {
                 where: { status: In(["live", "scheduled"]) },
             });
 
-            const spaces = new Map<
-                string,
-                { db?: TwitterSpace; api?: SpaceV2 }
-            >();
+            const spaces = new Map<string, { db?: TwitterSpace; api?: SpaceV2 }>();
 
             for (const space of dbSpaces) {
                 spaces.set(space.id, { db: space });
@@ -73,9 +65,7 @@ export class TwitterSpacesService {
                 if (api?.state === db?.status) continue;
 
                 if (!db) {
-                    let scheduledStart: number | undefined = Number(
-                        api.scheduled_start,
-                    );
+                    let scheduledStart: number | undefined = Number(api.scheduled_start);
                     if (isNaN(scheduledStart)) scheduledStart = undefined;
 
                     db = await this.spacesRepo.save({
@@ -104,11 +94,7 @@ export class TwitterSpacesService {
         }
     }
 
-    private async generateNotif(
-        id: string,
-        dbSpace?: TwitterSpace,
-        space?: SpaceV2,
-    ): Promise<void> {
+    private async generateNotif(id: string, dbSpace?: TwitterSpace, space?: SpaceV2): Promise<void> {
         const url = `https://twitter.com/i/spaces/${id}`;
 
         const userId = dbSpace?.channelId ?? space?.creator_id;
@@ -155,9 +141,7 @@ export class TwitterSpacesService {
         }
 
         if (space?.scheduled_start) {
-            const scheduledFor = Math.floor(
-                Number(Date.parse(space.scheduled_start)) / 1000,
-            );
+            const scheduledFor = Math.floor(Number(Date.parse(space.scheduled_start)) / 1000);
             embed.addFields({
                 name: "Scheduled for",
                 value: `<t:${scheduledFor}:T> (<t:${scheduledFor}:R>)`,

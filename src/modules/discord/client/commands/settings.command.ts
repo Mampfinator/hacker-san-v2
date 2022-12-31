@@ -28,23 +28,10 @@ import { InjectRepository } from "@nestjs/typeorm";
                 .setName("actions")
                 .setDescription("View configured actions for this guild.")
                 .addStringOption(platform =>
-                    DiscordUtil.makePlatformOption(
-                        platform,
-                        "The platform for which to retrieve actions.",
-                    ),
+                    DiscordUtil.makePlatformOption(platform, "The platform for which to retrieve actions."),
                 )
-                .addStringOption(type =>
-                    DiscordUtil.makeActionTypeOption(
-                        type,
-                        "The type of action to retrieve.",
-                    ),
-                )
-                .addStringOption(event =>
-                    DiscordUtil.makeEventOption(
-                        event,
-                        "The event to retrieve actions for.",
-                    ),
-                )
+                .addStringOption(type => DiscordUtil.makeActionTypeOption(type, "The type of action to retrieve."))
+                .addStringOption(event => DiscordUtil.makeEventOption(event, "The event to retrieve actions for."))
                 .addStringOption(channel =>
                     channel
                         .setName("channel")
@@ -56,9 +43,7 @@ import { InjectRepository } from "@nestjs/typeorm";
                 .addChannelOption(forChannel =>
                     forChannel
                         .setName("for-channel")
-                        .setDescription(
-                            "The Discord channel for which to retrieve actions.",
-                        ),
+                        .setDescription("The Discord channel for which to retrieve actions."),
                 ),
         )
         .addSubcommandGroup(channels =>
@@ -68,21 +53,14 @@ import { InjectRepository } from "@nestjs/typeorm";
                 .addSubcommand(add =>
                     add
                         .setName("add")
-                        .setDescription(
-                            "Add a primary channel. These are used for /overview.",
-                        )
+                        .setDescription("Add a primary channel. These are used for /overview.")
                         .addStringOption(platform =>
-                            DiscordUtil.makePlatformOption(
-                                platform,
-                                "The channel's platform.",
-                            ).setRequired(true),
+                            DiscordUtil.makePlatformOption(platform, "The channel's platform.").setRequired(true),
                         )
                         .addStringOption(channel =>
                             channel
                                 .setName("channel")
-                                .setDescription(
-                                    "The channel's ID or, for Twitter, @handle.",
-                                )
+                                .setDescription("The channel's ID or, for Twitter, @handle.")
                                 .setRequired(true)
                                 .setAutocomplete(true),
                         ),
@@ -92,17 +70,12 @@ import { InjectRepository } from "@nestjs/typeorm";
                         .setName("remove")
                         .setDescription("Remove a primary channel.")
                         .addStringOption(platform =>
-                            DiscordUtil.makePlatformOption(
-                                platform,
-                                "The channel's platform.",
-                            ).setRequired(true),
+                            DiscordUtil.makePlatformOption(platform, "The channel's platform.").setRequired(true),
                         )
                         .addStringOption(channel =>
                             channel
                                 .setName("channel")
-                                .setDescription(
-                                    "The channel's ID or, for Twitter, @handle.",
-                                )
+                                .setDescription("The channel's ID or, for Twitter, @handle.")
                                 .setRequired(true)
                                 .setAutocomplete(true),
                         ),
@@ -127,17 +100,12 @@ export class SettingsCommand implements ISlashCommand {
 
         if (!interaction.memberPermissions.has("ManageGuild", true))
             return interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor("Red")
-                        .setDescription("You lack the permissions to do this!"),
-                ],
+                embeds: [new EmbedBuilder().setColor("Red").setDescription("You lack the permissions to do this!")],
                 ephemeral: true,
             });
 
         const { options } = interaction;
-        const subcommand =
-            options.getSubcommandGroup(false) ?? options.getSubcommand();
+        const subcommand = options.getSubcommandGroup(false) ?? options.getSubcommand();
 
         switch (subcommand) {
             case "view":
@@ -162,21 +130,17 @@ export class SettingsCommand implements ISlashCommand {
     async viewActions(interaction: ChatInputCommandInteraction) {
         const { options, guildId, guild } = interaction;
         const channelId = options.getString("channel", false),
-            discordChannel = options.getChannel(
-                "for-channel",
-                false,
-            ) as GuildBasedChannel,
+            discordChannel = options.getChannel("for-channel", false) as GuildBasedChannel,
             platform = options.getString("platform", false) as Platform,
             type = options.getString("type", false),
             event = options.getString("event", false);
 
         let channels = {};
         if (discordChannel) {
-            let { discordThreadId, discordChannelId } =
-                DiscordUtil.getChannelIds(discordChannel) as {
-                    discordThreadId: string | null | FindOperator<any>;
-                    discordChannelId: string;
-                };
+            let { discordThreadId, discordChannelId } = DiscordUtil.getChannelIds(discordChannel) as {
+                discordThreadId: string | null | FindOperator<any>;
+                discordChannelId: string;
+            };
             discordThreadId = discordThreadId ?? IsNull();
 
             channels = { discordThreadId, discordChannelId };
@@ -195,11 +159,7 @@ export class SettingsCommand implements ISlashCommand {
 
         if (!actions || actions.length == 0) {
             return interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor("Blue")
-                        .setDescription("No actions found!"),
-                ],
+                embeds: [new EmbedBuilder().setColor("Blue").setDescription("No actions found!")],
             });
         }
 
@@ -209,9 +169,7 @@ export class SettingsCommand implements ISlashCommand {
 
         if (description.length > 0) description = "**Filters**: " + description;
 
-        const pagefields = Util.batch(
-            actions.map((action, i) => action.toEmbedField(i % 2 == 0)),
-        );
+        const pagefields = Util.batch(actions.map((action, i) => action.toEmbedField(i % 2 == 0)));
 
         const message = new MultipageMessage({ interaction });
 
@@ -222,9 +180,7 @@ export class SettingsCommand implements ISlashCommand {
             message.addPage({
                 embeds: [
                     new EmbedBuilder({ description })
-                        .setTitle(
-                            `Actions for ${guild.name} (${i}/${pagefields.length})`,
-                        )
+                        .setTitle(`Actions for ${guild.name} (${i}/${pagefields.length})`)
                         .setThumbnail(guild.iconURL())
                         .setDescription(description)
                         .setColor("Blue")
@@ -253,9 +209,7 @@ export class SettingsCommand implements ISlashCommand {
                     embeds: [
                         new EmbedBuilder()
                             .setColor("Blue")
-                            .setDescription(
-                                "Channel is already one of this server's primary channels!",
-                            ),
+                            .setDescription("Channel is already one of this server's primary channels!"),
                     ],
                     ephemeral: true,
                 });
@@ -265,11 +219,7 @@ export class SettingsCommand implements ISlashCommand {
             );
             if (!success)
                 return await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor("Blue")
-                            .setDescription("Invalid ID."),
-                    ],
+                    embeds: [new EmbedBuilder().setColor("Blue").setDescription("Invalid ID.")],
                     ephemeral: true,
                 });
 
@@ -278,9 +228,7 @@ export class SettingsCommand implements ISlashCommand {
                 embeds: [
                     new EmbedBuilder()
                         .setColor("Green")
-                        .setDescription(
-                            `Successfully added ${id} (${platform}) to this server's primary channels.`,
-                        ),
+                        .setDescription(`Successfully added ${id} (${platform}) to this server's primary channels.`),
                 ],
             });
         } else if (mode == "remove") {
@@ -290,9 +238,7 @@ export class SettingsCommand implements ISlashCommand {
                     embeds: [
                         new EmbedBuilder()
                             .setColor("Red")
-                            .setDescription(
-                                "Channel is not a primary channel of this server.",
-                            ),
+                            .setDescription("Channel is not a primary channel of this server."),
                     ],
                     ephemeral: true,
                 });
@@ -310,12 +256,7 @@ export class SettingsCommand implements ISlashCommand {
     }
 
     @Autocomplete("channel")
-    private async getChannel(
-        interaction: AutocompleteInteraction,
-    ): Promise<AutocompleteReturn> {
-        return DiscordUtil.handleChannelAutocomplete(
-            interaction,
-            this.queryBus,
-        );
+    private async getChannel(interaction: AutocompleteInteraction): Promise<AutocompleteReturn> {
+        return DiscordUtil.handleChannelAutocomplete(interaction, this.queryBus);
     }
 }

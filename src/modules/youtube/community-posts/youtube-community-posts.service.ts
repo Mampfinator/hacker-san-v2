@@ -60,9 +60,7 @@ export class YouTubeCommunityPostsService {
                 avatarUrl: fullChannelInfo.avatarUrl,
             };
 
-            await this.commandBus.execute(
-                new CacheChannelInfoCommand(fullChannelInfo),
-            );
+            await this.commandBus.execute(new CacheChannelInfoCommand(fullChannelInfo));
         }
 
         if (typeof posts === "undefined") {

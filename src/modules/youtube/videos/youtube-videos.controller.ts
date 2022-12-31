@@ -58,9 +58,7 @@ export class YouTubeVideosController {
     ) {
         if (!topic || !mode || !challenge) throw new BadRequestException();
         const [, channelId] = topic.split("=");
-        this.logger.log(
-            `Got challenge request for ${channelId}. Scheduling lease renewal in ${lease}.`,
-        );
+        this.logger.log(`Got challenge request for ${channelId}. Scheduling lease renewal in ${lease}.`);
         this.eventSub.scheduleLeaseRenewal(channelId, Number(lease));
 
         return challenge;
@@ -74,13 +72,10 @@ export class YouTubeVideosController {
         @Headers("link") link: string,
         @Query("hub.topic") topic: string,
     ) {
-        this.logger.debug(
-            `Got YouTube EventSub POST: ${hubSignature} for ${topic}.`,
-        );
+        this.logger.debug(`Got YouTube EventSub POST: ${hubSignature} for ${topic}.`);
         if (!link) throw new BadRequestException();
 
-        const { secret } =
-            this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
+        const { secret } = this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
         if (secret && !hubSignature) {
             this.logger.log(`Expected hub signature, got none.`);
             throw new ForbiddenException();
@@ -92,22 +87,17 @@ export class YouTubeVideosController {
             let computedSignature: string;
 
             try {
-                computedSignature = hmac
-                    .update(Buffer.from(rawBody, "utf-8"))
-                    .digest("hex");
+                computedSignature = hmac.update(Buffer.from(rawBody, "utf-8")).digest("hex");
             } catch {
                 throw new ForbiddenException();
             }
 
-            if (computedSignature !== signature)
-                throw new HttpException("Invalid signature", 204); // as per PubSubHubbub spec
+            if (computedSignature !== signature) throw new HttpException("Invalid signature", 204); // as per PubSubHubbub spec
         }
 
         const videoId = xmlBody.feed?.entry?.["yt:videoId"];
         if (!videoId) {
-            return this.logger.log(
-                `No videoId provided: ${xmlBody.feed.entry}`,
-            );
+            return this.logger.log(`No videoId provided: ${xmlBody.feed.entry}`);
         }
 
         const { inserted, video } = await this.videos.process(videoId);
@@ -117,10 +107,7 @@ export class YouTubeVideosController {
             this.logger.debug(
                 `Got notification for new YouTube video: ${videoId} (inserted? ${inserted}, status: ${status})`,
             );
-            this.videos.generateNotif(
-                video,
-                status == YouTubeLiveStatus.Offline ? "upload" : status,
-            );
+            this.videos.generateNotif(video, status == YouTubeLiveStatus.Offline ? "upload" : status);
         }
     }
 }

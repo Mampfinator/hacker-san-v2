@@ -34,9 +34,7 @@ function defaultGroup() {
     return 0;
 }
 
-export function Action(
-    options: ActionOptions,
-): RestrainedClassDecorator<IActionType> {
+export function Action(options: ActionOptions): RestrainedClassDecorator<IActionType> {
     return applyDecorators(
         Injectable(),
         AddAction,

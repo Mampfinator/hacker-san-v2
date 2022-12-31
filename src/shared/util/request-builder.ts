@@ -37,10 +37,7 @@ export class RequestBuilder {
     }
 
     public setBasicAuth(clientId: string, secret: string): this {
-        this.addHeader(
-            "Authorization",
-            `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`,
-        );
+        this.addHeader("Authorization", `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`);
         return this;
     }
 

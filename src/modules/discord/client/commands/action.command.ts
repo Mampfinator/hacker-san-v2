@@ -22,14 +22,10 @@ import { EnsureChannelCommand } from "../../../platforms/commands/ensure-channel
 
 function addShared(
     builder: SlashCommandSubcommandBuilder,
-    before: (
-        builder: SlashCommandSubcommandBuilder,
-    ) => SlashCommandSubcommandBuilder,
+    before: (builder: SlashCommandSubcommandBuilder) => SlashCommandSubcommandBuilder,
 ): SlashCommandSubcommandBuilder {
     return before(builder)
-        .addStringOption(platform =>
-            DiscordUtil.makePlatformOption(platform).setRequired(true),
-        )
+        .addStringOption(platform => DiscordUtil.makePlatformOption(platform).setRequired(true))
         .addStringOption(event =>
             event
                 .setName("event")
@@ -53,9 +49,7 @@ function addShared(
         .addChannelOption(channel =>
             channel
                 .setName("for-channel")
-                .setDescription(
-                    "The channel to execute in. Defaults to this channel.",
-                )
+                .setDescription("The channel to execute in. Defaults to this channel.")
                 .setRequired(false),
         );
 }
@@ -82,27 +76,18 @@ function addShared(
             addShared(lock, lock =>
                 lock
                     .setName("lock")
-                    .setDescription(
-                        "Lock or unlock this channel when the corresponding event is fired.",
-                    )
+                    .setDescription("Lock or unlock this channel when the corresponding event is fired.")
                     .addStringOption(mode =>
                         mode
                             .setName("mode")
-                            .setDescription(
-                                "Whether to lock or unlock the channel",
-                            )
-                            .setChoices(
-                                { name: "lock", value: "lock" },
-                                { name: "unlock", value: "unlock" },
-                            )
+                            .setDescription("Whether to lock or unlock the channel")
+                            .setChoices({ name: "lock", value: "lock" }, { name: "unlock", value: "unlock" })
                             .setRequired(true),
                     ),
             ).addStringOption(message =>
                 message
                     .setName("message")
-                    .setDescription(
-                        "Message to send after unlocking/before locking.",
-                    )
+                    .setDescription("Message to send after unlocking/before locking.")
                     .setRequired(false),
             ),
         )
@@ -110,14 +95,9 @@ function addShared(
             addShared(rename, rename =>
                 rename
                     .setName("rename")
-                    .setDescription(
-                        "Rename this channel when the corresponding event is fired.",
-                    )
+                    .setDescription("Rename this channel when the corresponding event is fired.")
                     .addStringOption(name =>
-                        name
-                            .setName("name")
-                            .setDescription("The channel's new name")
-                            .setRequired(true),
+                        name.setName("name").setDescription("The channel's new name").setRequired(true),
                     ),
             ),
         )
@@ -125,9 +105,7 @@ function addShared(
             addShared(echo, echo =>
                 echo
                     .setName("echo")
-                    .setDescription(
-                        "Send a message in this channel when the corresponding event is fired.",
-                    )
+                    .setDescription("Send a message in this channel when the corresponding event is fired.")
                     .addStringOption(message =>
                         message
                             .setName("message")
@@ -142,15 +120,11 @@ function addShared(
             addShared(notify, notify =>
                 notify
                     .setName("notify")
-                    .setDescription(
-                        "Send a notification in this channel when the corresponding event is fired.",
-                    )
+                    .setDescription("Send a notification in this channel when the corresponding event is fired.")
                     .addStringOption(message =>
                         message
                             .setName("message")
-                            .setDescription(
-                                "A message to send on notification.",
-                            )
+                            .setDescription("A message to send on notification.")
                             .setRequired(true),
                     ),
             ),
@@ -160,9 +134,7 @@ export class ActionCommand implements ISlashCommand {
     private readonly logger = new Logger(ActionCommand.name);
 
     private readonly actionMethods: {
-        [key: string]: (
-            interaction: ChatInputCommandInteraction,
-        ) => any | Promise<any>;
+        [key: string]: (interaction: ChatInputCommandInteraction) => any | Promise<any>;
     } = {};
 
     constructor(
@@ -171,19 +143,11 @@ export class ActionCommand implements ISlashCommand {
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
     ) {
-        this.actionMethods.lock = (interaction: ChatInputCommandInteraction) =>
-            this.handleLock(interaction);
-        this.actionMethods.rename = (
-            interaction: ChatInputCommandInteraction,
-        ) => this.handleRename(interaction);
-        this.actionMethods.echo = (interaction: ChatInputCommandInteraction) =>
-            this.handleEcho(interaction);
-        this.actionMethods.notify = (
-            interaction: ChatInputCommandInteraction,
-        ) => this.handleNotify(interaction);
-        this.actionMethods.remove = (
-            interaction: ChatInputCommandInteraction,
-        ) => this.handleRemove(interaction);
+        this.actionMethods.lock = (interaction: ChatInputCommandInteraction) => this.handleLock(interaction);
+        this.actionMethods.rename = (interaction: ChatInputCommandInteraction) => this.handleRename(interaction);
+        this.actionMethods.echo = (interaction: ChatInputCommandInteraction) => this.handleEcho(interaction);
+        this.actionMethods.notify = (interaction: ChatInputCommandInteraction) => this.handleNotify(interaction);
+        this.actionMethods.remove = (interaction: ChatInputCommandInteraction) => this.handleRemove(interaction);
     }
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -199,13 +163,14 @@ export class ActionCommand implements ISlashCommand {
                 ephemeral: true,
             });
 
-        const subcommand = (
-            interaction.options as CommandInteractionOptionResolver<any>
-        ).getSubcommand() as "remove" | "lock" | "rename" | "echo" | "notify";
+        const subcommand = (interaction.options as CommandInteractionOptionResolver<any>).getSubcommand() as
+            | "remove"
+            | "lock"
+            | "rename"
+            | "echo"
+            | "notify";
 
-        const dataOption: { data: any } | void = await this.actionMethods[
-            subcommand
-        ](interaction);
+        const dataOption: { data: any } | void = await this.actionMethods[subcommand](interaction);
         if (dataOption) {
             const options = await this.getBasicOptions(interaction);
             if (!options) return; // getBasicOptions handles the reply in this case.
@@ -218,11 +183,7 @@ export class ActionCommand implements ISlashCommand {
                 );
                 await interaction.reply({
                     embeds: [
-                        new EmbedBuilder()
-                            .setDescription(
-                                `Added new callback with ID ${action.id}`,
-                            )
-                            .setColor("Green"),
+                        new EmbedBuilder().setDescription(`Added new callback with ID ${action.id}`).setColor("Green"),
                     ],
                     ephemeral: true,
                 });
@@ -232,20 +193,14 @@ export class ActionCommand implements ISlashCommand {
         }
     }
 
-    async getBasicOptions(
-        interaction: ChatInputCommandInteraction,
-    ): Promise<Partial<ActionDescriptor> | undefined> {
+    async getBasicOptions(interaction: ChatInputCommandInteraction): Promise<Partial<ActionDescriptor> | undefined> {
         const { options, channel: interactionChannel, guildId } = interaction;
 
         const channelOption = options.getChannel("for-channel", false);
         const channel = (channelOption ?? interactionChannel) as TextChannel;
 
-        const discordChannelId = channel.isThread()
-            ? (channel as ThreadChannel).parentId
-            : channel.id;
-        const discordThreadId = channel.isThread()
-            ? (channel as ThreadChannel).id
-            : undefined;
+        const discordChannelId = channel.isThread() ? (channel as ThreadChannel).parentId : channel.id;
+        const discordThreadId = channel.isThread() ? (channel as ThreadChannel).id : undefined;
 
         let channelId = options.getString("channel");
         const platform = options.getString("platform") as Platform;
@@ -262,17 +217,11 @@ export class ActionCommand implements ISlashCommand {
 
         if (!success) {
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor("Red")
-                        .setDescription("Error: invalid channel ID"),
-                ],
+                embeds: [new EmbedBuilder().setColor("Red").setDescription("Error: invalid channel ID")],
                 ephemeral: true,
             });
 
-            this.logger.debug(
-                `Failed to insert channel ID: ${error ?? "Invalid ID."}`,
-            );
+            this.logger.debug(`Failed to insert channel ID: ${error ?? "Invalid ID."}`);
             return;
         }
 
@@ -348,9 +297,7 @@ export class ActionCommand implements ISlashCommand {
     }
 
     @Autocomplete("action")
-    private async getActionsWithMatchingIds(
-        interaction: AutocompleteInteraction,
-    ): Promise<AutocompleteReturn> {
+    private async getActionsWithMatchingIds(interaction: AutocompleteInteraction): Promise<AutocompleteReturn> {
         if (!interaction.guildId) interaction.respond([]);
         const value = interaction.options.getFocused() as string;
 
@@ -359,18 +306,16 @@ export class ActionCommand implements ISlashCommand {
         });
 
         const actionToLabel = (action: ActionDescriptor) =>
-            `${action.id} - ${Util.firstUpperCase(action.type)} (${
-                action.channelId
-            }, ${PLATFORM_NAME_LOOKUP[action.platform]})`;
+            `${action.id} - ${Util.firstUpperCase(action.type)} (${action.channelId}, ${
+                PLATFORM_NAME_LOOKUP[action.platform]
+            })`;
 
         return actions
             .filter(action => {
                 return (
                     action.id.toLowerCase().includes(value.toLowerCase()) ||
                     value.includes(action.type) ||
-                    action.channelId
-                        .toLowerCase()
-                        .includes(value.toLowerCase()) ||
+                    action.channelId.toLowerCase().includes(value.toLowerCase()) ||
                     action.platform.toLowerCase().includes(value.toLowerCase())
                 );
             })
@@ -379,12 +324,7 @@ export class ActionCommand implements ISlashCommand {
     }
 
     @Autocomplete("channel")
-    private async getChannel(
-        interaction: AutocompleteInteraction,
-    ): Promise<AutocompleteReturn> {
-        return DiscordUtil.handleChannelAutocomplete(
-            interaction,
-            this.queryBus,
-        );
+    private async getChannel(interaction: AutocompleteInteraction): Promise<AutocompleteReturn> {
+        return DiscordUtil.handleChannelAutocomplete(interaction, this.queryBus);
     }
 }

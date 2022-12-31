@@ -37,15 +37,11 @@ export interface SlashCommand extends ISlashCommand {
  */
 export const SlashCommand = (options: SlashCommandOptions) => {
     return (target: Class<ISlashCommand>) => {
-        if (!options.commandData)
-            throw new TypeError("Command data needs to be supplied.");
+        if (!options.commandData) throw new TypeError("Command data needs to be supplied.");
         if (!(typeof target.prototype.execute === "function"))
-            throw new TypeError(
-                "SlashCommand decorated class needs an execute function!",
-            );
+            throw new TypeError("SlashCommand decorated class needs an execute function!");
 
-        const commandData =
-            options.commandData.toJSON?.() ?? options.commandData;
+        const commandData = options.commandData.toJSON?.() ?? options.commandData;
         // very, very, *very* crude validation, but it's gotta do for now.
         if (!commandData.name || !commandData.description)
             throw new Error(`Invalid commandData passed for ${target.name}`);
@@ -57,8 +53,7 @@ export const SlashCommand = (options: SlashCommandOptions) => {
                 configurable: false,
             },
             [IS_RESTRICTED_KEY]: {
-                value: (guildId: string) =>
-                    options.restricted ? guildId : undefined,
+                value: (guildId: string) => (options.restricted ? guildId : undefined),
                 enumerable: true,
                 configurable: false,
             },

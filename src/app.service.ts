@@ -7,10 +7,7 @@ import { ListenEvent } from "./events/listen.event";
 export class AppService {
     private readonly logger = new Logger(AppService.name);
 
-    constructor(
-        private readonly eventBus: EventBus,
-        private readonly eventEmitter: EventEmitter2,
-    ) {}
+    constructor(private readonly eventBus: EventBus, private readonly eventEmitter: EventEmitter2) {}
 
     public async triggerListen() {
         this.eventBus.publish(new ListenEvent());

@@ -4,10 +4,7 @@ export const getEvents = (target: object) => {
         Reflect.defineMetadata(eventStorageKey, new Map(), target);
     }
 
-    return Reflect.getMetadata(eventStorageKey, target) as Map<
-        string,
-        (string | symbol)[]
-    >;
+    return Reflect.getMetadata(eventStorageKey, target) as Map<string, (string | symbol)[]>;
 };
 
 /**

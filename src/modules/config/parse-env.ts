@@ -10,15 +10,10 @@ export interface EnvOptions {
     TWITTER_TOKEN?: string;
 }
 
-const checkRequired = (
-    input: Record<string, any>,
-    keys: (keyof EnvOptions)[],
-) => {
+const checkRequired = (input: Record<string, any>, keys: (keyof EnvOptions)[]) => {
     for (const key of keys) {
         if (typeof input[key] == "undefined") {
-            throw new Error(
-                `[Environment]: Option ${key} is required but missing.`,
-            );
+            throw new Error(`[Environment]: Option ${key} is required but missing.`);
         }
     }
 };
@@ -26,9 +21,7 @@ const checkRequired = (
 export function parseEnv(): EnvOptions {
     let envFile: EnvOptions | undefined;
     try {
-        envFile = parse(
-            readFileSync(join(process.cwd(), ".env")),
-        ) as unknown as EnvOptions;
+        envFile = parse(readFileSync(join(process.cwd(), ".env"))) as unknown as EnvOptions;
     } catch {}
 
     const envConfig: EnvOptions = {

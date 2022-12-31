@@ -55,17 +55,12 @@ export class YouTubeVideosService {
         private readonly schedulerRegistry: SchedulerRegistry,
         config: ConfigService,
     ) {
-        this.channelScanInterval = config.get<number>(
-            "YOUTUBE.channelScanInterval",
-        );
+        this.channelScanInterval = config.get<number>("YOUTUBE.channelScanInterval");
     }
 
     @OnEvent("listeners.ready")
     private scheduleRescans() {
-        const interval = setInterval(
-            () => this.rescanVideos(),
-            this.channelScanInterval,
-        );
+        const interval = setInterval(() => this.rescanVideos(), this.channelScanInterval);
         this.schedulerRegistry.addInterval("CHECK_CHANNEL_VIDEOS", interval);
     }
 
@@ -127,9 +122,7 @@ export class YouTubeVideosService {
                 status = YouTubeLiveStatus.Upcoming;
                 break;
             default:
-                this.logger.warn(
-                    `Could not discern live status for ${video.id}. Status: ${liveBroadcastContent}`,
-                );
+                this.logger.warn(`Could not discern live status for ${video.id}. Status: ${liveBroadcastContent}`);
                 return;
         }
 
@@ -141,10 +134,7 @@ export class YouTubeVideosService {
     public async checkVideoStatusChange() {
         const dbVideos = await this.videoRepo.find({
             where: {
-                status: In([
-                    YouTubeLiveStatus.Live,
-                    YouTubeLiveStatus.Upcoming,
-                ]),
+                status: In([YouTubeLiveStatus.Live, YouTubeLiveStatus.Upcoming]),
             },
         });
 
@@ -157,10 +147,7 @@ export class YouTubeVideosService {
             })
         ).data.items;
 
-        const videos: Map<
-            string,
-            { db?: YouTubeVideo; api?: youtube_v3.Schema$Video }
-        > = new Map();
+        const videos: Map<string, { db?: YouTubeVideo; api?: youtube_v3.Schema$Video }> = new Map();
 
         for (const video of dbVideos) {
             if (!videos.has(video.id)) videos.set(video.id, { db: video });
@@ -208,10 +195,7 @@ export class YouTubeVideosService {
         }
     }
 
-    private simplifyVideo(
-        video: youtube_v3.Schema$Video,
-        videoId?: string,
-    ): SimplifiedYouTubeVideo {
+    private simplifyVideo(video: youtube_v3.Schema$Video, videoId?: string): SimplifiedYouTubeVideo {
         const id = videoId ?? video.id;
         if (!video)
             return {
@@ -240,8 +224,7 @@ export class YouTubeVideosService {
         rawVideo: SimplifiedYouTubeVideo | youtube_v3.Schema$Video,
         statusChange: YouTubeStatusChange,
     ): void {
-        if ((rawVideo as youtube_v3.Schema$Video).snippet)
-            rawVideo = this.simplifyVideo(rawVideo);
+        if ((rawVideo as youtube_v3.Schema$Video).snippet) rawVideo = this.simplifyVideo(rawVideo);
 
         // TypeScript you massive pain in the backside
         const video = rawVideo as SimplifiedYouTubeVideo;
@@ -258,10 +241,7 @@ export class YouTubeVideosService {
 
     private async rescanVideos() {
         if (this.channelList.length == 0) {
-            const channels = await this.queryBus.execute<
-                ChannelQuery,
-                ChannelEntity[]
-            >(
+            const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
                 new ChannelQuery({
                     query: { where: { platform: "youtube" } },
                     one: false,
@@ -274,12 +254,8 @@ export class YouTubeVideosService {
         if (!channelId) return;
         const url = `${YOUTUBE_VIDEO_FEED_URL}?channel_id=${channelId}`;
 
-        const xml = await axios
-            .get(url)
-            .then(res => this.rssParser.parse(res.data));
-        const videoIds: string[] = xml.feed.entry
-            .map(entry => entry["yt:videoId"])
-            .filter(id => id);
+        const xml = await axios.get(url).then(res => this.rssParser.parse(res.data));
+        const videoIds: string[] = xml.feed.entry.map(entry => entry["yt:videoId"]).filter(id => id);
 
         const databaseVideos = await this.videoRepo.find({
             where: {
@@ -288,32 +264,20 @@ export class YouTubeVideosService {
             },
         });
 
-        const difference = Util.symmetricSetDifference(
-            new Set(videoIds),
-            new Set(databaseVideos.map(v => v.id)),
-        );
+        const difference = Util.symmetricSetDifference(new Set(videoIds), new Set(databaseVideos.map(v => v.id)));
 
         for (const videoId of difference) {
-            const { unavailable, video, inserted } = await this.process(
-                videoId,
-            );
+            const { unavailable, video, inserted } = await this.process(videoId);
 
             if (unavailable) {
-                this.generateNotif(
-                    { ...(video ?? {}), id: videoId, channelId },
-                    "offline",
-                );
+                this.generateNotif({ ...(video ?? {}), id: videoId, channelId }, "offline");
                 continue;
             }
 
-            const newStatus = this.simplifyVideo(video)
-                .liveStatus as YouTubeLiveStatus;
+            const newStatus = this.simplifyVideo(video).liveStatus as YouTubeLiveStatus;
             this.generateNotif(
                 video,
-                this.getStatusChange(
-                    databaseVideos.find(video => video.id == videoId)?.status,
-                    newStatus,
-                ),
+                this.getStatusChange(databaseVideos.find(video => video.id == videoId)?.status, newStatus),
             );
         }
     }
@@ -323,8 +287,7 @@ export class YouTubeVideosService {
         newStatus: YouTubeLiveStatus,
     ): YouTubeStatusChange | null {
         if (oldStatus == newStatus) return null;
-        if (!oldStatus && newStatus == YouTubeLiveStatus.Offline)
-            return "upload";
+        if (!oldStatus && newStatus == YouTubeLiveStatus.Offline) return "upload";
         else return newStatus as YouTubeStatusChange;
     }
 }
