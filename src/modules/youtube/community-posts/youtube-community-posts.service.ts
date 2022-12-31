@@ -48,9 +48,7 @@ export class YouTubeCommunityPostsService {
         );
 
         if (!fullChannelInfo) {
-            this.logger.debug(
-                `Failed getting channel info from ${channel.platformId}.`,
-            );
+            this.logger.debug(`Failed getting channel info from ${channel.platformId}.`);
 
             // TODO: fix
         } else {
@@ -64,9 +62,7 @@ export class YouTubeCommunityPostsService {
         }
 
         if (typeof posts === "undefined") {
-            this.logger.warn(
-                `Failed getting community posts for ${channel.platformId}`,
-            );
+            this.logger.warn(`Failed getting community posts for ${channel.platformId}`);
             for (const error of errors) {
                 this.logger.error(error);
             }
@@ -79,12 +75,8 @@ export class YouTubeCommunityPostsService {
             where: { id: In(ids) },
         });
 
-        for (const post of posts.filter(
-            post => !knownPosts.some(({ id }) => post.id == id),
-        )) {
-            this.logger.debug(
-                `Found new community post for ${channel.platformId}: ${post.id}`,
-            );
+        for (const post of posts.filter(post => !knownPosts.some(({ id }) => post.id == id))) {
+            this.logger.debug(`Found new community post for ${channel.platformId}: ${post.id}`);
 
             await this.communityPostRepo.insert({
                 id: post.id,

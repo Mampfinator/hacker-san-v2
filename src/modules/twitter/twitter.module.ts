@@ -9,11 +9,6 @@ import { TwitterApiService } from "./twitter-api.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([TwitterSpace]), CqrsModule],
-    providers: [
-        TwitterApiService,
-        TwitterSpacesService,
-        GetSpacesHandler,
-        EnsureTwitterChannelHandler,
-    ],
+    providers: [TwitterApiService, TwitterSpacesService, GetSpacesHandler, EnsureTwitterChannelHandler],
 })
 export class TwitterModule {}

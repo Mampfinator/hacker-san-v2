@@ -7,10 +7,7 @@ import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger
 import { Event } from "../../../modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
-import {
-    TwitterSpace,
-    TwitterSpaceStatus,
-} from "../models/twitter-space.entity";
+import { TwitterSpace, TwitterSpaceStatus } from "../models/twitter-space.entity";
 import { TwitterApiService } from "../twitter-api.service";
 import { ChannelQuery } from "../../platforms/queries";
 
@@ -28,9 +25,9 @@ export class TwitterSpacesService {
 
     @Interval(5000)
     public async syncTwitterSpaces() {
-        const ids = await this.queryBus.execute(
-            ChannelQuery.forPlatform("twitter")
-        ).then(channels => channels.map(c => c.platformId))
+        const ids = await this.queryBus
+            .execute(ChannelQuery.forPlatform("twitter"))
+            .then(channels => channels.map(c => c.platformId));
 
         if (ids.length == 0) return;
 

@@ -47,16 +47,12 @@ export class MultipageMessage {
     private pages: BaseMessageOptions[] = [];
     private message: Message | InteractionResponse;
 
-    private readonly sendTarget:
-        | TextBasedChannel
-        | Message
-        | CommandInteraction;
+    private readonly sendTarget: TextBasedChannel | Message | CommandInteraction;
     private collectorOptions: MessageComponentCollectorOptions<any>;
 
     constructor(options: MultipageMessageOptions) {
         this.collectorOptions = options.collectorOptions ?? {};
-        this.sendTarget =
-            options.channel ?? options.message ?? options.interaction;
+        this.sendTarget = options.channel ?? options.message ?? options.interaction;
     }
 
     public get index() {
@@ -96,9 +92,7 @@ export class MultipageMessage {
         );
 
         const components: ActionRowBuilder<any>[] = [
-            ...((page.components as APIActionRowComponent<any>[])?.map(
-                ActionRowBuilder.from,
-            ) ?? []),
+            ...((page.components as APIActionRowComponent<any>[])?.map(ActionRowBuilder.from) ?? []),
             navigationRow,
         ];
         components.push(navigationRow);
@@ -107,25 +101,17 @@ export class MultipageMessage {
     }
 
     public async send(options?: SendOptions) {
-        if (this.pages.length == 0)
-            throw new Error("Can not send a multipage message with 0 pages.");
-        if (this.pages.length == 1)
-            throw new Error(
-                "Can not send a multipage message with only 1 page.",
-            );
+        if (this.pages.length == 0) throw new Error("Can not send a multipage message with 0 pages.");
+        if (this.pages.length == 1) throw new Error("Can not send a multipage message with only 1 page.");
 
         const page = this.addNavigation(this.pages[0]);
 
         switch (true) {
             case this.sendTarget instanceof BaseChannel:
-                this.message = await (this.sendTarget as TextBasedChannel).send(
-                    page,
-                );
+                this.message = await (this.sendTarget as TextBasedChannel).send(page);
                 break;
             case this.sendTarget instanceof CommandInteraction:
-                this.message = await (
-                    this.sendTarget as CommandInteraction
-                ).reply({
+                this.message = await (this.sendTarget as CommandInteraction).reply({
                     ...page,
                     ephemeral: options?.ephemeral ?? false,
                 });
@@ -139,9 +125,7 @@ export class MultipageMessage {
                 });
                 break;
             default:
-                throw new Error(
-                    "Could not send multipage embed: unknown send target type!",
-                );
+                throw new Error("Could not send multipage embed: unknown send target type!");
         }
 
         // TODO: find a way of doing this without @ts-ignore.
@@ -156,11 +140,7 @@ export class MultipageMessage {
                 embeds: [
                     new EmbedBuilder()
                         .setColor("Green")
-                        .setDescription(
-                            `Now showing page ${this.index + 1}/${
-                                this.pages.length
-                            }`,
-                        ),
+                        .setDescription(`Now showing page ${this.index + 1}/${this.pages.length}`),
                 ],
                 ephemeral: true,
             });
@@ -200,16 +180,12 @@ export class MultipageMessage {
                 break;
             case this.message instanceof InteractionResponse:
                 {
-                    const interaction = this.message
-                        .interaction as ChatInputCommandInteraction;
+                    const interaction = this.message.interaction as ChatInputCommandInteraction;
                     await interaction.editReply(page);
                 }
                 break;
             default:
-                throw new Error(
-                    "Invalid internal message value: " +
-                        JSON.stringify(this.message),
-                );
+                throw new Error("Invalid internal message value: " + JSON.stringify(this.message));
         }
     }
 }

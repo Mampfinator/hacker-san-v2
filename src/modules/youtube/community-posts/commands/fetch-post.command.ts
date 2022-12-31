@@ -23,9 +23,7 @@ export class FetchPostCommand implements ICommand, FetchPostCommandOptions {
 
     constructor(options: FetchPostCommandOptions) {
         if (typeof options.postId !== "string")
-            throw new TypeError(
-                `Expected options.postId to be of type string, received ${typeof options.postId}.`,
-            );
+            throw new TypeError(`Expected options.postId to be of type string, received ${typeof options.postId}.`);
         Util.assignIfDefined(this, options);
     }
 }

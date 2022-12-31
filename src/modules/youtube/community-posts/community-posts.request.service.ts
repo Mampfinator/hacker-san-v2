@@ -6,11 +6,7 @@ import {
     extractCommunityPosts,
     extractPost,
 } from "yt-scraping-utilities";
-import {
-    findActiveTab,
-    findValuesByKeys,
-    parseRawData,
-} from "yt-scraping-utilities/dist/util";
+import { findActiveTab, findValuesByKeys, parseRawData } from "yt-scraping-utilities/dist/util";
 import { YouTubeService } from "../youtube.service";
 
 export interface FetchPostsOptions<C extends boolean> {
@@ -26,11 +22,7 @@ export class YouTubeCommunityPostsRequestService {
     public async fetchSinglePost<C extends boolean>(
         postId: string,
         includeChannel?: C,
-    ): Promise<
-        C extends true
-            ? { channel: ChannelInfo; post: CommunityPost }
-            : CommunityPost
-    >;
+    ): Promise<C extends true ? { channel: ChannelInfo; post: CommunityPost } : CommunityPost>;
     public async fetchSinglePost(
         postId: string,
         includeChannel?: boolean,
@@ -59,18 +51,12 @@ export class YouTubeCommunityPostsRequestService {
 
     public async fetchPosts<C extends boolean>(
         options: FetchPostsOptions<C>,
-    ): Promise<
-        C extends true
-            ? { channel: ChannelInfo; posts: CommunityPost[] }
-            : CommunityPost[]
-    >;
+    ): Promise<C extends true ? { channel: ChannelInfo; posts: CommunityPost[] } : CommunityPost[]>;
     public async fetchPosts({
         fetchAll,
         includeChannel,
         channelId,
-    }: FetchPostsOptions<any>): Promise<
-        CommunityPost[] | { channel: ChannelInfo; posts: CommunityPost[] }
-    > {
+    }: FetchPostsOptions<any>): Promise<CommunityPost[] | { channel: ChannelInfo; posts: CommunityPost[] }> {
         const initialPage = (await this.youtubeService.fetchRaw(
             `https://youtube.com/channel/${channelId}/community`,
             {
@@ -89,19 +75,12 @@ export class YouTubeCommunityPostsRequestService {
 
         const communityTab = findActiveTab(ytInitialData);
 
-        let { trackingParams } = communityTab.tabRenderer.content
-            .sectionListRenderer as { trackingParams: string };
-        const { visitorData } =
-            ytInitialData.responseContext.webResponseContextExtensionData
-                .ytConfigData;
+        let { trackingParams } = communityTab.tabRenderer.content.sectionListRenderer as { trackingParams: string };
+        const { visitorData } = ytInitialData.responseContext.webResponseContextExtensionData.ytConfigData;
         let continuationToken = this.getContinuationToken(ytInitialData);
 
         while (continuationToken && !fetchAll) {
-            const data = await this.youtubeService.doContinuationRequest<
-                any,
-                "",
-                true
-            >({
+            const data = await this.youtubeService.doContinuationRequest<any, "", true>({
                 visitorData,
                 token: continuationToken,
                 clickTrackingParams: trackingParams,
@@ -122,24 +101,17 @@ export class YouTubeCommunityPostsRequestService {
      *
      */
     private getPosts(data: Record<string, any>): CommunityPost[] {
-        const posts: CommunityPost[] = findValuesByKeys(data, [
-            "sharedPostRenderer",
-            "backstagePostRenderer",
-        ]).map(extractPost);
+        const posts: CommunityPost[] = findValuesByKeys(data, ["sharedPostRenderer", "backstagePostRenderer"]).map(
+            extractPost,
+        );
 
         return posts;
     }
 
-    private getContinuationToken(
-        data: Record<string, any>,
-    ): string | undefined {
-        const [continuationRenderer] = findValuesByKeys(data, [
-            "continuationItemRenderer",
-        ]);
+    private getContinuationToken(data: Record<string, any>): string | undefined {
+        const [continuationRenderer] = findValuesByKeys(data, ["continuationItemRenderer"]);
 
-        const token: string =
-            continuationRenderer?.continuationEndpoint?.continuationCommand
-                ?.token;
+        const token: string = continuationRenderer?.continuationEndpoint?.continuationCommand?.token;
 
         return token;
     }

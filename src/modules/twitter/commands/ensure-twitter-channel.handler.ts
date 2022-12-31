@@ -7,9 +7,7 @@ import { EnsureTwitterChannelCommand } from "./ensure-twitter-channel.command";
 import { ChannelEntity } from "../../platforms/models/channel.entity";
 
 @CommandHandler(EnsureTwitterChannelCommand)
-export class EnsureTwitterChannelHandler
-    implements IInferredCommandHandler<EnsureTwitterChannelCommand>
-{
+export class EnsureTwitterChannelHandler implements IInferredCommandHandler<EnsureTwitterChannelCommand> {
     private readonly logger = new Logger(EnsureTwitterChannelHandler.name);
 
     constructor(
@@ -17,9 +15,7 @@ export class EnsureTwitterChannelHandler
         private readonly apiService: TwitterApiService,
     ) {}
 
-    async execute({
-        channelId,
-    }: EnsureTwitterChannelCommand): Promise<ValidateChannelResult> {
+    async execute({ channelId }: EnsureTwitterChannelCommand): Promise<ValidateChannelResult> {
         channelId = channelId.trim();
 
         // TODO: check if channel exists via channel query.
@@ -30,9 +26,7 @@ export class EnsureTwitterChannelHandler
                 user = await this.apiService.fetchUserById(channelId).catch();
                 break;
             case channelId.startsWith("@"):
-                user = await this.apiService
-                    .fetchUserByName(channelId.replace("@", ""))
-                    .catch();
+                user = await this.apiService.fetchUserByName(channelId.replace("@", "")).catch();
                 break;
             default:
                 this.logger.debug(`Got invalid channelId: ${channelId}.`);
@@ -40,12 +34,7 @@ export class EnsureTwitterChannelHandler
 
         if (!user) return { success: false };
 
-        const {
-            id: platformId,
-            username: userName,
-            name,
-            profile_image_url: avatarUrl,
-        } = user;
+        const { id: platformId, username: userName, name, profile_image_url: avatarUrl } = user;
 
         const channel: Omit<ChannelEntity, "id"> = {
             platform: "twitter",

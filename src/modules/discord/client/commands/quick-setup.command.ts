@@ -147,9 +147,7 @@ export class QuickSetupCommand implements ISlashCommand {
         const {
             success,
             channel: { name: channelName, platformId: guaranteedChannelId },
-        } = await this.commandBus.execute(
-            new EnsureChannelCommand(channelId, platform),
-        );
+        } = await this.commandBus.execute(new EnsureChannelCommand(channelId, platform));
         if (!success) {
             return interaction.reply({
                 content: "Channel not found.",
@@ -220,9 +218,7 @@ export class QuickSetupCommand implements ISlashCommand {
         const {
             success,
             channel: { name },
-        } = await this.commandBus.execute(
-            new EnsureChannelCommand(channelId, platform),
-        );
+        } = await this.commandBus.execute(new EnsureChannelCommand(channelId, platform));
         if (!success)
             await interaction.reply({
                 embeds: [new EmbedBuilder({ description: "Invalid id." }).setColor("Red")],

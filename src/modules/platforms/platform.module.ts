@@ -8,10 +8,7 @@ import { StreamEntity } from "./models/stream.entity";
 import { QueryHandlers } from "./queries";
 
 @Module({
-    imports: [
-        CqrsModule,
-        TypeOrmModule.forFeature([ChannelEntity, StreamEntity, PostEntity]),
-    ],
+    imports: [CqrsModule, TypeOrmModule.forFeature([ChannelEntity, StreamEntity, PostEntity])],
     providers: [EnsureChannelHander, ...QueryHandlers],
 })
 export class PlatformModule {}

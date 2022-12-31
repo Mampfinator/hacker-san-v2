@@ -7,17 +7,7 @@ import { GuildSettings } from "../../models/settings.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ChannelQuery } from "../../../platforms/queries";
-import {
-    distinct,
-    from,
-    groupBy,
-    lastValueFrom,
-    mergeMap,
-    of,
-    pipe,
-    toArray,
-    zip,
-} from "rxjs";
+import { distinct, from, groupBy, lastValueFrom, mergeMap, of, pipe, toArray, zip } from "rxjs";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -42,9 +32,7 @@ export class OverviewCommand implements ISlashCommand {
             where: { id: interaction.guildId },
         });
 
-        const channels = await this.queryBus.execute(
-            new ChannelQuery({ query: {}, one: false }),
-        );
+        const channels = await this.queryBus.execute(new ChannelQuery({ query: {}, one: false }));
 
         const reply = new MultipageMessage({ interaction });
 

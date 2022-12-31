@@ -5,9 +5,7 @@ import { CacheChannelInfoCommand } from "./cache-channel-info.command";
 
 // TODO: fix
 @CommandHandler(CacheChannelInfoCommand)
-export class CacheChannelInfoHandler
-    implements ICommandHandler<CacheChannelInfoCommand>
-{
+export class CacheChannelInfoHandler implements ICommandHandler<CacheChannelInfoCommand> {
     constructor() {}
 
     async execute({ channelInfo }: CacheChannelInfoCommand): Promise<any> {

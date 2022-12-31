@@ -214,9 +214,7 @@ export class SettingsCommand implements ISlashCommand {
                     ephemeral: true,
                 });
 
-            const { success } = await this.commandBus.execute(
-                new EnsureChannelCommand(id, platform),
-            );
+            const { success } = await this.commandBus.execute(new EnsureChannelCommand(id, platform));
             if (!success)
                 return await interaction.reply({
                     embeds: [new EmbedBuilder().setColor("Blue").setDescription("Invalid ID.")],

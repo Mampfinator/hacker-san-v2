@@ -209,9 +209,7 @@ export class ActionCommand implements ISlashCommand {
             success,
             error,
             channel: { platformId: newChannelId },
-        } = await this.commandBus.execute(
-            new EnsureChannelCommand(channelId, platform),
-        );
+        } = await this.commandBus.execute(new EnsureChannelCommand(channelId, platform));
 
         channelId = newChannelId ?? channelId; // make things like passing Twitter users by @handle possible.
 

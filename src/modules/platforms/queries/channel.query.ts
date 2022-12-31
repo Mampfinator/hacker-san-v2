@@ -5,9 +5,7 @@ import { Query } from "@nestjs-architects/typed-cqrs";
 
 export interface ChannelQueryOptions<T extends boolean> {
     one?: T;
-    query: T extends true
-        ? FindOneOptions<ChannelEntity>
-        : FindManyOptions<ChannelEntity>;
+    query: T extends true ? FindOneOptions<ChannelEntity> : FindManyOptions<ChannelEntity>;
 }
 
 export class ChannelQuery<T extends boolean = false>
@@ -15,9 +13,7 @@ export class ChannelQuery<T extends boolean = false>
     implements ChannelQueryOptions<T>
 {
     public readonly one: T;
-    public readonly query: T extends true
-        ? FindOneOptions<ChannelEntity>
-        : FindManyOptions<ChannelEntity>;
+    public readonly query: T extends true ? FindOneOptions<ChannelEntity> : FindManyOptions<ChannelEntity>;
 
     constructor(options: ChannelQueryOptions<T>) {
         super();
@@ -35,10 +31,7 @@ export class ChannelQuery<T extends boolean = false>
         });
     }
 
-    public static where<T extends boolean>(
-        where: FindOptionsWhere<ChannelEntity>,
-        one?: T,
-    ): ChannelQuery<T> {
+    public static where<T extends boolean>(where: FindOptionsWhere<ChannelEntity>, one?: T): ChannelQuery<T> {
         return new ChannelQuery({
             one: one,
             query: { where },

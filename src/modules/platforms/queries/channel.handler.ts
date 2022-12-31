@@ -5,9 +5,7 @@ import { ChannelEntity } from "../models/channel.entity";
 import { ChannelQuery } from "./channel.query";
 
 @QueryHandler(ChannelQuery)
-export class ChannelHandler
-    implements IInferredQueryHandler<ChannelQuery>
-{
+export class ChannelHandler implements IInferredQueryHandler<ChannelQuery> {
     constructor(
         @InjectRepository(ChannelEntity)
         private readonly channelRepository: Repository<ChannelEntity>,
@@ -16,9 +14,7 @@ export class ChannelHandler
     async execute<T extends boolean>({
         one,
         query,
-    }: ChannelQuery<T>): Promise<
-        T extends true ? ChannelEntity : ChannelEntity[]
-    > {
+    }: ChannelQuery<T>): Promise<T extends true ? ChannelEntity : ChannelEntity[]> {
         // workaround because
         if (one) {
             return this.channelRepository.findOne(query) as any;
