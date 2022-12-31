@@ -144,8 +144,6 @@ export class YouTubeService implements OnModuleInit {
     public client: AxiosInstance;
 
     constructor(
-        //@InjectRepository(YouTubeChannel)
-        //private readonly channels: Repository<YouTubeChannel>,
         private readonly queryBus: QueryBus,
         private readonly schedulerRegistry: SchedulerRegistry,
         private readonly commandBus: CommandBus,

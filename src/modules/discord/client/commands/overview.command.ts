@@ -5,13 +5,23 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { SUPPORTED_PLATFORMS, Platform } from "../../../../constants";
-import { ChannelsQueryResult } from "../../../platforms/queries/channels.handler";
-import { ChannelsQuery } from "../../../platforms/queries/channels.query";
 import { MultipageMessage } from "../../../../shared/util/multipage-message";
 import { Repository } from "typeorm";
 import { GuildSettings } from "../../models/settings.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ChannelQuery } from "../../../platforms/queries";
+import {
+    distinct,
+    from,
+    groupBy,
+    lastValueFrom,
+    mergeMap,
+    of,
+    pipe,
+    toArray,
+    zip,
+} from "rxjs";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -32,35 +42,26 @@ export class OverviewCommand implements ISlashCommand {
             return;
         }
 
-        const channelsPromises: Promise<
-            ChannelsQueryResult & { platform: Platform }
-        >[] = [];
-
         const settings = await this.settingsRepo.findOne({
             where: { id: interaction.guildId },
         });
 
-        for (const platform of SUPPORTED_PLATFORMS) {
-            channelsPromises.push(
-                this.queryBus
-                    .execute<ChannelsQuery, ChannelsQueryResult>(
-                        new ChannelsQuery(platform),
-                    )
-                    .then(result => ({ ...result, platform })),
-            );
-        }
-
-        const queryResults = await Promise.all(channelsPromises);
+        const channels = await this.queryBus.execute(
+            new ChannelQuery({ query: {}, one: false }),
+        );
 
         const reply = new MultipageMessage({ interaction });
 
-        for (let { channels, platform } of queryResults) {
-            const channelIds = new Set(settings.primaryChannels[platform]);
+        const channelsByPlatform = await lastValueFrom(
+            from(channels).pipe(
+                groupBy(channel => channel.platform),
+                mergeMap(group => zip(of(group.key), group.pipe(toArray()))),
+                toArray(),
+            ),
+        );
 
-            // TODO: finish this.
-            // The plan: map streams (that I'll need to fetch somehow...) to pages in the message. For each platform, have (a) `live` page(s) followed by (an) `upcoming` page(s).
-            // :GuraPain:
-            channels = channels.filter(channel => channelIds.has(channel.id));
+        for (const [platform, channels] of channelsByPlatform) {
+            const channelIds = new Set(settings.primaryChannels[platform]);
 
             const content = channels
                 .map(channel => JSON.stringify(channel, null, 4))

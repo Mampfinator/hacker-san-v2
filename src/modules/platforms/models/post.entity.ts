@@ -10,6 +10,4 @@ export class PostEntity {
 
     @Column()
     platform: Platform;
-
-    
 }

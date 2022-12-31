@@ -18,18 +18,18 @@ export class ChannelEntity {
     @Column()
     platformId: string;
 
+    /**
+     * A channel's display name.
+     */
     @Column()
     name: string;
 
+    /**
+     * An ID-lite username, like Twitter handles, YouTube @tags, ...
+     */
     @Column({ nullable: true })
     userName?: string;
 
     @Column({ nullable: true })
     avatarUrl?: string;
-
-    /**
-     * Indicates whether to fetch posts, listen to events, etc
-     */
-    @Column()
-    isPrimaryChannel: boolean;
 }

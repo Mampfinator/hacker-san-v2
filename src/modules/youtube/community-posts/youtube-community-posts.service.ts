@@ -1,14 +1,15 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { CommunityPost as CommunityPostEntitiy } from "./model/community-post.entity";
 import { Repository } from "typeorm";
-import { YouTubeChannel } from "../model/youtube-channel.entity";
 import { In } from "typeorm";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger-actions.command";
 import { DiscordUtil } from "../../../modules/discord/util";
 import { CacheChannelInfoCommand } from "../commands/cache-channel-info.command";
 import { FetchPostsCommand } from "./commands/fetch-posts.command";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ChannelEntity } from "../../platforms/models/channel.entity";
+import { ChannelQuery } from "../../platforms/queries";
 
 @Injectable()
 export class YouTubeCommunityPostsService {
@@ -18,16 +19,15 @@ export class YouTubeCommunityPostsService {
     private started = false;
 
     constructor(
-        @InjectRepository(YouTubeChannel)
-        private readonly channelRepo: Repository<YouTubeChannel>,
         @InjectRepository(CommunityPostEntitiy)
         private readonly communityPostRepo: Repository<CommunityPostEntitiy>,
         private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
     ) {}
 
     public async checkPosts() {
-        // very naive implementation. Gotta do for now.
-        const channels = await this.channelRepo.find();
+        // TODO: fix
+        const channels = await this.queryBus.execute(ChannelQuery.forPlatform("youtube"));
 
         const channel = channels[this.pointer++];
         if (this.pointer >= channels.length) this.pointer = 0;
@@ -42,24 +42,17 @@ export class YouTubeCommunityPostsService {
             errors,
         } = await this.commandBus.execute(
             new FetchPostsCommand({
-                channelId: channel.channelId,
+                channelId: channel.platformId,
                 includeChannelInfo: true,
             }),
         );
 
         if (!fullChannelInfo) {
             this.logger.debug(
-                `Failed getting channel info from ${channel.channelId}.`,
+                `Failed getting channel info from ${channel.platformId}.`,
             );
-            const cachedChannel = await this.channelRepo.findOne({
-                where: { channelId: channel.channelId },
-            });
 
-            channelInfo = {
-                id: cachedChannel.channelId,
-                name: cachedChannel.channelName,
-                avatarUrl: cachedChannel.avatarUrl,
-            };
+            // TODO: fix
         } else {
             channelInfo = {
                 id: fullChannelInfo.id,
@@ -74,7 +67,7 @@ export class YouTubeCommunityPostsService {
 
         if (typeof posts === "undefined") {
             this.logger.warn(
-                `Failed getting community posts for ${channel.channelId}`,
+                `Failed getting community posts for ${channel.platformId}`,
             );
             for (const error of errors) {
                 this.logger.error(error);
@@ -92,7 +85,7 @@ export class YouTubeCommunityPostsService {
             post => !knownPosts.some(({ id }) => post.id == id),
         )) {
             this.logger.debug(
-                `Found new community post for ${channel.channelId}: ${post.id}`,
+                `Found new community post for ${channel.platformId}: ${post.id}`,
             );
 
             await this.communityPostRepo.insert({
@@ -103,7 +96,7 @@ export class YouTubeCommunityPostsService {
 
             const event = new TriggerActionsCommand({
                 embed,
-                channelId: channel.channelId,
+                channelId: channel.platformId,
                 platform: "youtube",
                 event: "post",
                 url: `https://www.youtube.com/post/${post.id}`,

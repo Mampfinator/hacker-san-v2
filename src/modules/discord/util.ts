@@ -33,7 +33,6 @@ import { Routes } from "discord-api-types/v10";
 import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
 import { ChannelQuery } from "../platforms/queries";
 import { ILike } from "typeorm";
-import { YouTubeChannel } from "../youtube/model/youtube-channel.entity";
 
 export namespace DiscordUtil {
     export function postsToEmbed(data?: ytInitialData): EmbedBuilder[] {
@@ -216,7 +215,7 @@ export namespace DiscordUtil {
 
         const input = (options.getFocused() as string).trim().toLowerCase();
 
-        const channels = await queryBus.execute<ChannelQuery, YouTubeChannel[]>(
+        const channels = await queryBus.execute(
             new ChannelQuery({
                 query: {
                     where: [
@@ -237,8 +236,8 @@ export namespace DiscordUtil {
         );
 
         return channels.map(channel => ({
-            name: channel.channelName,
-            value: channel.channelId,
+            name: channel.name,
+            value: channel.platformId,
         }));
     }
 }

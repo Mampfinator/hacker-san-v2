@@ -1,4 +1,4 @@
-import { ChannelQueryHandler } from "./channel.handler";
+import { ChannelHandler } from "./channel.handler";
 import { FindStreamQueryHandler } from "./find-stream.handler";
 import { InsertStreamHandler } from "./insert-stream.handler";
 
@@ -7,7 +7,7 @@ export { FindStreamQuery, StreamQueryOptions } from "./find-stream.query";
 export { InsertStreamQuery, InsertQueryItem } from "./insert-stream.query";
 
 export const QueryHandlers = [
-    ChannelQueryHandler,
+    ChannelHandler,
     FindStreamQueryHandler,
     InsertStreamHandler,
 ];

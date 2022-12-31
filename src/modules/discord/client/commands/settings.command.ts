@@ -14,7 +14,6 @@ import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "./autocomplete";
 import { GuildSettings } from "../../models/settings.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { EnsureChannelResult } from "../../../../modules/platforms/commands/ensure-channel.handler";
 import { EnsureChannelCommand } from "../../../../modules/platforms/commands/ensure-channel.command";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -261,10 +260,9 @@ export class SettingsCommand implements ISlashCommand {
                     ephemeral: true,
                 });
 
-            const { success } = await this.commandBus.execute<
-                EnsureChannelCommand,
-                EnsureChannelResult
-            >(new EnsureChannelCommand(id, platform));
+            const { success } = await this.commandBus.execute(
+                new EnsureChannelCommand(id, platform),
+            );
             if (!success)
                 return await interaction.reply({
                     embeds: [

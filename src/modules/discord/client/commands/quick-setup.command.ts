@@ -18,7 +18,6 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { EnsureChannelCommand } from "../../../../modules/platforms/commands/ensure-channel.command";
-import { EnsureChannelResult } from "../../../../modules/platforms/commands/ensure-channel.handler";
 import { Repository } from "typeorm";
 import { ActionDescriptor } from "../../models/action.entity";
 import { Platform } from "../../../../constants";
@@ -169,12 +168,10 @@ export class QuickSetupCommand implements ISlashCommand {
 
         const {
             success,
-            channelId: guaranteedChannelId,
-            name: channelName,
-        } = await this.commandBus.execute<
-            EnsureChannelCommand,
-            EnsureChannelResult
-        >(new EnsureChannelCommand(channelId, platform));
+            channel: { name: channelName, platformId: guaranteedChannelId },
+        } = await this.commandBus.execute(
+            new EnsureChannelCommand(channelId, platform),
+        );
         if (!success) {
             return interaction.reply({
                 content: "Channel not found.",
@@ -257,10 +254,12 @@ export class QuickSetupCommand implements ISlashCommand {
                 ],
             });
 
-        const { success, name } = await this.commandBus.execute<
-            EnsureChannelCommand,
-            EnsureChannelResult
-        >(new EnsureChannelCommand(channelId, platform));
+        const {
+            success,
+            channel: { name },
+        } = await this.commandBus.execute(
+            new EnsureChannelCommand(channelId, platform),
+        );
         if (!success)
             await interaction.reply({
                 embeds: [

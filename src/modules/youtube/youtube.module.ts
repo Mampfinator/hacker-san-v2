@@ -8,9 +8,7 @@ import { YouTubeCommunityPostsRequestService } from "./community-posts/community
 import { CommunityPost } from "./community-posts/model/community-post.entity";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { YouTubeListenHandler } from "./events/listen.handler";
-import { YouTubeChannel } from "./model/youtube-channel.entity";
 import { YouTubeVideo } from "./model/youtube-video.entity";
-import { YouTubeChannelsHandler } from "./queries/youtube-channels.handler";
 import { YouTubeVideoCommandHandlers } from "./videos/commands";
 import { SyncVideosHandler } from "./videos/commands/sync-videos.handler";
 import { YouTubeEventSubService } from "./videos/youtube-eventsub.service";
@@ -21,7 +19,7 @@ import { YouTubeService } from "./youtube.service";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([YouTubeChannel, CommunityPost, YouTubeVideo]),
+        TypeOrmModule.forFeature([CommunityPost, YouTubeVideo]),
         ScheduleModule,
         CqrsModule,
     ],
@@ -37,7 +35,6 @@ import { YouTubeService } from "./youtube.service";
         ...YouTubeVideoCommandHandlers,
         SyncVideosHandler,
         YouTubeListenHandler,
-        YouTubeChannelsHandler,
     ],
     controllers: [YouTubeVideosController],
     exports: [YouTubeService],

@@ -51,8 +51,6 @@ export class YouTubeVideosService {
         private readonly commandBus: CommandBus,
         @InjectRepository(YouTubeVideo)
         private readonly videoRepo: Repository<YouTubeVideo>,
-        //@InjectRepository(YouTubeChannel)
-        //private readonly channelRepo: Repository<YouTubeChannel>,
         private readonly queryBus: QueryBus,
         private readonly schedulerRegistry: SchedulerRegistry,
         config: ConfigService,

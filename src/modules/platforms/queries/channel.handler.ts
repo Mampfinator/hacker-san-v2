@@ -1,36 +1,29 @@
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { IInferredQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ChannelEntity } from "../models/channel.entity";
 import { ChannelQuery } from "./channel.query";
 
 @QueryHandler(ChannelQuery)
-export class ChannelQueryHandler implements IQueryHandler<ChannelQuery> {
+export class ChannelHandler
+    implements IInferredQueryHandler<ChannelQuery>
+{
     constructor(
         @InjectRepository(ChannelEntity)
         private readonly channelRepository: Repository<ChannelEntity>,
     ) {}
 
-    async execute({
-        options,
-    }: ChannelQuery): Promise<ChannelEntity | ChannelEntity[]> {
-        const { platform, platformId, query } = options;
-        let { one } = options;
-
-        let channelQuery: Record<string, any>;
-
-        if (platform && platformId) {
-            channelQuery = {
-                where: {
-                    platform,
-                    platformId,
-                },
-            };
-
-            one = true;
+    async execute<T extends boolean>({
+        one,
+        query,
+    }: ChannelQuery<T>): Promise<
+        T extends true ? ChannelEntity : ChannelEntity[]
+    > {
+        // workaround because
+        if (one) {
+            return this.channelRepository.findOne(query) as any;
         } else {
-            channelQuery = query;
+            return this.channelRepository.find(query) as any;
         }
-        return this.channelRepository[one ? "findOne" : "find"](channelQuery);
     }
 }

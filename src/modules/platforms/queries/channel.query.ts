@@ -1,39 +1,47 @@
-import { IQuery } from "@nestjs/cqrs";
 import { Platform } from "../../../constants";
-import { FindManyOptions, FindOneOptions } from "typeorm";
+import { FindManyOptions, FindOneOptions, FindOptionsWhere } from "typeorm";
 import { ChannelEntity } from "../models/channel.entity";
+import { Query } from "@nestjs-architects/typed-cqrs";
 
 export interface ChannelQueryOptions<T extends boolean> {
-    platform?: Platform;
-    platformId?: string;
-
-    /**
-     * Defaults to true.
-     */
     one?: T;
-    query?: T extends true
+    query: T extends true
         ? FindOneOptions<ChannelEntity>
         : FindManyOptions<ChannelEntity>;
 }
 
-export class ChannelQuery implements IQuery {
-    constructor(public readonly options: ChannelQueryOptions<boolean>) {
-        if (options.platform && !options.platformId) {
-            throw new Error(
-                "platformId is required when platform is specified",
-            );
-        }
+export class ChannelQuery<T extends boolean = false>
+    extends Query<T extends true ? ChannelEntity : ChannelEntity[]>
+    implements ChannelQueryOptions<T>
+{
+    public readonly one: T;
+    public readonly query: T extends true
+        ? FindOneOptions<ChannelEntity>
+        : FindManyOptions<ChannelEntity>;
 
-        if (options.platformId && !options.platform) {
-            throw new Error(
-                "platform is required when platformId is specified",
-            );
-        }
+    constructor(options: ChannelQueryOptions<T>) {
+        super();
+        Object.assign(this, options);
+    }
 
-        if (options.query && (options.platform || options.platformId)) {
-            throw new Error(
-                "query cannot be specified when platform or platformId is specified",
-            );
-        }
+    public static forPlatform(platform: Platform): ChannelQuery<false> {
+        return new ChannelQuery({
+            one: false,
+            query: {
+                where: {
+                    platform,
+                },
+            },
+        });
+    }
+
+    public static where<T extends boolean>(
+        where: FindOptionsWhere<ChannelEntity>,
+        one?: T,
+    ): ChannelQuery<T> {
+        return new ChannelQuery({
+            one: one,
+            query: { where },
+        });
     }
 }

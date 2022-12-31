@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmbedBuilder } from "discord.js";
@@ -11,31 +11,30 @@ import {
     TwitterSpace,
     TwitterSpaceStatus,
 } from "../models/twitter-space.entity";
-import { TwitterUser } from "../models/twitter-user.entity";
 import { TwitterApiService } from "../twitter-api.service";
+import { ChannelQuery } from "../../platforms/queries";
 
 @Injectable()
 export class TwitterSpacesService {
     private readonly logger = new Logger(TwitterSpacesService.name);
-    //private readonly apiClient: TwitterApi;
-    //private readonly token: string;
 
     constructor(
         private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
         private readonly apiClient: TwitterApiService,
-        @InjectRepository(TwitterUser)
-        private readonly usersRepo: Repository<TwitterUser>,
         @InjectRepository(TwitterSpace)
         private readonly spacesRepo: Repository<TwitterSpace>,
     ) {}
 
     @Interval(5000)
     public async syncTwitterSpaces() {
-        const users = await this.usersRepo.find();
-        if (users.length == 0) return;
+        const ids = await this.queryBus.execute(
+            ChannelQuery.forPlatform("twitter")
+        ).then(channels => channels.map(c => c.platformId))
+
+        if (ids.length == 0) return;
 
         try {
-            const ids = users.map(u => u.id);
             const response = await this.apiClient.v2.spacesByCreators(ids, {
                 "space.fields": [
                     "creator_id",

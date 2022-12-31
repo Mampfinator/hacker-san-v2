@@ -253,7 +253,7 @@ export class ActionCommand implements ISlashCommand {
         const {
             success,
             error,
-            channelId: newChannelId,
+            channel: { platformId: newChannelId },
         } = await this.commandBus.execute(
             new EnsureChannelCommand(channelId, platform),
         );
