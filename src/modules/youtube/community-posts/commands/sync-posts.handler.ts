@@ -21,7 +21,7 @@ export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand> {
             posts = await this.requestService.fetchPosts({
                 channelId,
                 fetchAll: true,
-                includeChannel: false,
+                includeChannelInfo: false,
             });
         }
 

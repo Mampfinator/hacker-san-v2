@@ -12,7 +12,7 @@ import { YouTubeService } from "../youtube.service";
 export interface FetchPostsOptions<C extends boolean> {
     channelId: string;
     fetchAll?: boolean;
-    includeChannel?: C;
+    includeChannelInfo?: C;
 }
 
 @Injectable()
@@ -54,7 +54,7 @@ export class YouTubeCommunityPostsRequestService {
     ): Promise<C extends true ? { channel: ChannelInfo; posts: CommunityPost[] } : CommunityPost[]>;
     public async fetchPosts({
         fetchAll,
-        includeChannel,
+        includeChannelInfo,
         channelId,
     }: FetchPostsOptions<any>): Promise<CommunityPost[] | { channel: ChannelInfo; posts: CommunityPost[] }> {
         const initialPage = (await this.youtubeService.fetchRaw(
@@ -90,7 +90,7 @@ export class YouTubeCommunityPostsRequestService {
             continuationToken = this.getContinuationToken(data);
         }
 
-        if (!includeChannel) return posts;
+        if (!includeChannelInfo) return posts;
         else {
             const channel = extractChannelInfo(ytInitialData);
             return { posts, channel };

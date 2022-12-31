@@ -36,11 +36,7 @@ export class YouTubeCommunityPostsService {
 
         let channelInfo: { id: string; name: string; avatarUrl: string };
 
-        const {
-            posts,
-            channel: fullChannelInfo,
-            errors,
-        } = await this.commandBus.execute(
+        const { posts, channel: fullChannelInfo } = await this.commandBus.execute(
             new FetchPostsCommand({
                 channelId: channel.platformId,
                 includeChannelInfo: true,
@@ -63,10 +59,6 @@ export class YouTubeCommunityPostsService {
 
         if (typeof posts === "undefined") {
             this.logger.warn(`Failed getting community posts for ${channel.platformId}`);
-            for (const error of errors) {
-                this.logger.error(error);
-            }
-            return;
         }
         if (posts.length == 0) return;
 
