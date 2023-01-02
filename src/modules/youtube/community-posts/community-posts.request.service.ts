@@ -79,7 +79,7 @@ export class YouTubeCommunityPostsRequestService {
         const { visitorData } = ytInitialData.responseContext.webResponseContextExtensionData.ytConfigData;
         let continuationToken = this.getContinuationToken(ytInitialData);
 
-        while (continuationToken && !fetchAll) {
+        while (continuationToken && fetchAll) {
             const data = await this.youtubeService.doContinuationRequest<any, "", true>({
                 visitorData,
                 token: continuationToken,
@@ -110,9 +110,7 @@ export class YouTubeCommunityPostsRequestService {
 
     private getContinuationToken(data: Record<string, any>): string | undefined {
         const [continuationRenderer] = findValuesByKeys(data, ["continuationItemRenderer"]);
-
         const token: string = continuationRenderer?.continuationEndpoint?.continuationCommand?.token;
-
         return token;
     }
 }
