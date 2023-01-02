@@ -1,16 +1,23 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
+import { UpdateChannelQuery } from "../../platforms/queries/update-channel.query";
 import { CacheChannelInfoCommand } from "./cache-channel-info.command";
 
 // TODO: fix
 @CommandHandler(CacheChannelInfoCommand)
 export class CacheChannelInfoHandler implements ICommandHandler<CacheChannelInfoCommand> {
-    constructor() {}
+    constructor(private readonly queryBus: QueryBus) {}
 
     async execute({ channelInfo }: CacheChannelInfoCommand): Promise<any> {
         const { id, name, avatarUrl } = channelInfo;
 
-        if (!id) throw new TypeError(`channelInfo.id is required.`);
+        await this.queryBus.execute(
+            new UpdateChannelQuery(
+                { platform: "youtube", platformId: id },
+                {
+                    name,
+                    avatarUrl,
+                },
+            ),
+        );
     }
 }
