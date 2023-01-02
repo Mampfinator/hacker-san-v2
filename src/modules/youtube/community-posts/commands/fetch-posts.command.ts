@@ -24,6 +24,6 @@ export class FetchPostsCommand<C extends boolean = false>
 
     constructor(options: FetchPostsCommandOptions<C>) {
         super();
-        Util.assignIfDefined(this, options );
+        Util.assignIfDefined(this, options);
     }
 }
