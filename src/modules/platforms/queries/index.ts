@@ -4,8 +4,8 @@ export { FindChannelQuery, InsertChannelQuery, UpdateChannelQuery } from "./chan
 import { FindPostsHandler, InsertPostsHandler } from "./post";
 export { FindPostsQuery, InsertPostsQuery } from "./post";
 
-import { FindStreamHandler, InsertStreamHandler } from "./stream";
-export { InsertQueryItem, InsertStreamQuery } from "./stream";
+import { FindStreamHandler, InsertStreamHandler, UpsertStreamHandler } from "./stream";
+export { InsertQueryItem, InsertStreamQuery, UpsertStreamQuery } from "./stream";
 
 export const QueryHandlers = [
     // Channel handlers
@@ -20,4 +20,5 @@ export const QueryHandlers = [
     // Stream handlers
     FindStreamHandler,
     InsertStreamHandler,
+    UpsertStreamHandler,
 ];

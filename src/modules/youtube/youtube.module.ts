@@ -9,6 +9,7 @@ import { YouTubeCommunityPostsService } from "./community-posts/youtube-communit
 import { YouTubeListenHandler } from "./events/listen.handler";
 import { YouTubeVideoCommandHandlers } from "./videos/commands";
 import { SyncVideosHandler } from "./videos/commands/sync-videos.handler";
+import { YouTubeFeedService } from "./videos/feed/youtube-feed.service";
 import { YouTubeEventSubService } from "./videos/youtube-eventsub.service";
 import { YouTubeVideosService } from "./videos/youtube-video.service";
 import { YouTubeVideosController } from "./videos/youtube-videos.controller";
@@ -29,6 +30,7 @@ import { YouTubeService } from "./youtube.service";
         ...YouTubeVideoCommandHandlers,
         SyncVideosHandler,
         YouTubeListenHandler,
+        YouTubeFeedService,
     ],
     controllers: [YouTubeVideosController],
     exports: [YouTubeService],
