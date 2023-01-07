@@ -31,13 +31,13 @@ export class PostEntity<T extends object = {}> implements IPlatformObject {
     /**
      * URLs to images that are directly part of this post.
      */
-    @Column({})
+    @Column("text", { array: true, nullable: true })
     images?: string[];
 
     /**
      * Poll choices.
      */
-    @Column({ nullable: true })
+    @Column("text", { array: true, nullable: true })
     poll?: string[];
 
     /**
