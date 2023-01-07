@@ -5,6 +5,7 @@ import { ChannelEntity } from "./modules/platforms/models/channel.entity";
 import { PostEntity } from "./modules/platforms/models/post.entity";
 import { StreamEntity } from "./modules/platforms/models/stream.entity";
 
+<<<<<<< HEAD
 export const Entities = [
     GuildSettings,
     ActionDescriptor,
@@ -13,3 +14,6 @@ export const Entities = [
     PostEntity,
     StreamDiscordChannelMap,
 ];
+=======
+export const Entities = [GuildSettings, ActionDescriptor, StreamEntity, ChannelEntity, PostEntity];
+>>>>>>> c4f6a92 (Removed YouTubeVideo entity)
