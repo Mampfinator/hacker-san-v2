@@ -11,7 +11,7 @@ import {
     PresenceStatusData,
 } from "discord.js";
 import { DiscordConfig } from "../../../modules/config/config";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
 import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
@@ -226,7 +226,8 @@ export class DiscordClientService extends Client {
         if (this.status === "dnd") {
             name = "starting...";
         } else {
-            const channels = (await this.queryBus.execute(new FindChannelQuery({}))).length;
+            // workaround to fix the QueryBuilder from having a stroke
+            const channels = (await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))).length;
 
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;

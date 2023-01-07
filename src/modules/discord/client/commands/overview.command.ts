@@ -2,7 +2,7 @@ import { QueryBus } from "@nestjs/cqrs";
 import { ChatInputCommandInteraction, CacheType, SlashCommandBuilder } from "discord.js";
 import { SUPPORTED_PLATFORMS, Platform } from "../../../../constants";
 import { MultipageMessage } from "../../../../shared/util/multipage-message";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { GuildSettings } from "../../models/settings.entity";
 import { ISlashCommand, SlashCommand } from "./slash-command";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -34,7 +34,7 @@ export class OverviewCommand implements ISlashCommand {
             where: { id: interaction.guildId },
         });
 
-        const channels = await this.queryBus.execute(new FindChannelQuery({ one: false }));
+        const channels = await this.queryBus.execute(new FindChannelQuery({ one: false }).forPlatform(In(["youtube", "twitter"])));
 
         const reply = new MultipageMessage({ interaction });
 
