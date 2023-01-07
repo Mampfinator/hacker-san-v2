@@ -21,13 +21,14 @@ export class SyncPostsHandler implements ICommandHandler<SyncPostsCommand> {
 
     async execute({ channelId, posts = [] }: SyncPostsCommand = {}) {
         if (channelId) {
-            const {posts: morePosts, channel} =  await this.requestService.fetchPosts({channelId, includeChannelInfo: true});
+            const { posts: morePosts, channel } = await this.requestService.fetchPosts({
+                channelId,
+                includeChannelInfo: true,
+            });
 
             await this.commandBus.execute(new CacheChannelInfoCommand(channel));
         }
 
-        await (this.queryBus.execute(new InsertPostsQuery(
-            posts.map(post => this.postsService.postToEntity(post))
-        )));
+        await this.queryBus.execute(new InsertPostsQuery(posts.map(post => this.postsService.postToEntity(post))));
     }
 }

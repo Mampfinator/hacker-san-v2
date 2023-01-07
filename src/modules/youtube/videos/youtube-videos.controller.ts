@@ -14,7 +14,6 @@ import { createHmac } from "crypto";
 import { YouTubeConfig } from "../../../modules/config/config";
 import { RawBody } from "../../../shared/decorators/raw-body.decorator";
 import { XML } from "../../../shared/decorators/xml.decorator";
-import { YouTubeLiveStatus } from "../model/youtube-video.entity";
 import { YouTubeEventSubService } from "./youtube-eventsub.service";
 import { YouTubeVideosService } from "./youtube-video.service";
 
@@ -46,8 +45,32 @@ export class YouTubeVideosController {
     constructor(
         private readonly configService: ConfigService,
         private readonly eventSub: YouTubeEventSubService,
-        private readonly videos: YouTubeVideosService,
+        private readonly videoService: YouTubeVideosService,
     ) {}
+
+    private verifyMessage(link: string, hubSignature: string, rawBody: string) {
+        if (!link) throw new BadRequestException();
+
+        const { secret } = this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
+        if (secret && !hubSignature) {
+            this.logger.log(`Expected hub signature, got none.`);
+            throw new ForbiddenException();
+        }
+
+        if (secret) {
+            const [algo, signature] = hubSignature.split("=");
+            const hmac = createHmac(algo, secret);
+            let computedSignature: string;
+
+            try {
+                computedSignature = hmac.update(Buffer.from(rawBody, "utf-8")).digest("hex");
+            } catch {
+                throw new ForbiddenException();
+            }
+
+            if (computedSignature !== signature) throw new HttpException("Invalid signature", 204); // as per PubSubHubbub spec
+        }
+    }
 
     @Get("eventsub")
     returnChallenge(
@@ -73,41 +96,14 @@ export class YouTubeVideosController {
         @Query("hub.topic") topic: string,
     ) {
         this.logger.debug(`Got YouTube EventSub POST: ${hubSignature} for ${topic}.`);
-        if (!link) throw new BadRequestException();
-
-        const { secret } = this.configService.getOrThrow<YouTubeConfig>("YOUTUBE");
-        if (secret && !hubSignature) {
-            this.logger.log(`Expected hub signature, got none.`);
-            throw new ForbiddenException();
-        }
-
-        if (secret) {
-            const [algo, signature] = hubSignature.split("=");
-            const hmac = createHmac(algo, secret);
-            let computedSignature: string;
-
-            try {
-                computedSignature = hmac.update(Buffer.from(rawBody, "utf-8")).digest("hex");
-            } catch {
-                throw new ForbiddenException();
-            }
-
-            if (computedSignature !== signature) throw new HttpException("Invalid signature", 204); // as per PubSubHubbub spec
-        }
+        this.verifyMessage(link, hubSignature, rawBody);
 
         const videoId = xmlBody.feed?.entry?.["yt:videoId"];
         if (!videoId) {
             return this.logger.log(`No videoId provided: ${xmlBody.feed.entry}`);
         }
 
-        const { inserted, video } = await this.videos.process(videoId);
-
-        if (inserted) {
-            const status = this.videos.getStatus(video);
-            this.logger.debug(
-                `Got notification for new YouTube video: ${videoId} (inserted? ${inserted}, status: ${status})`,
-            );
-            this.videos.generateNotif(video, status == YouTubeLiveStatus.Offline ? "upload" : status);
-        }
+        // let the batch checker handle the rest from here.
+        this.videoService.checkVideo(videoId);
     }
 }

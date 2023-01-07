@@ -7,7 +7,6 @@ import { YouTubeCommunityPostCommandHandlers } from "./community-posts/commands"
 import { YouTubeCommunityPostsRequestService } from "./community-posts/community-posts.request.service";
 import { YouTubeCommunityPostsService } from "./community-posts/youtube-community-posts.service";
 import { YouTubeListenHandler } from "./events/listen.handler";
-import { YouTubeVideo } from "./model/youtube-video.entity";
 import { YouTubeVideoCommandHandlers } from "./videos/commands";
 import { SyncVideosHandler } from "./videos/commands/sync-videos.handler";
 import { YouTubeEventSubService } from "./videos/youtube-eventsub.service";
@@ -17,7 +16,7 @@ import { YouTubeApiService } from "./youtube-api.service";
 import { YouTubeService } from "./youtube.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([YouTubeVideo]), ScheduleModule, CqrsModule],
+    imports: [ScheduleModule, CqrsModule],
     providers: [
         YouTubeService,
         YouTubeApiService,

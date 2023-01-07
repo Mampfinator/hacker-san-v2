@@ -230,10 +230,7 @@ export class YouTubeService implements OnModuleInit {
         this.logger.log("Verifying YouTube channel IDs.");
 
         const channelIds = await this.queryBus
-            .execute(
-                new FindChannelQuery()
-                    .forPlatform("youtube"),
-            )
+            .execute(new FindChannelQuery().forPlatform("youtube"))
             .then(channels => channels.map(channel => channel.platformId));
 
         let invalidIds: string[] = [];
@@ -259,9 +256,7 @@ export class YouTubeService implements OnModuleInit {
     }
 
     private async sync() {
-        const channels = await this.queryBus.execute(
-            new FindChannelQuery().forPlatform("youtube")
-        );
+        const channels = await this.queryBus.execute(new FindChannelQuery().forPlatform("youtube"));
 
         const channelLoggers = channels.map(({ platformId }) => new Logger(`YouTubeStartup:${platformId}`));
 

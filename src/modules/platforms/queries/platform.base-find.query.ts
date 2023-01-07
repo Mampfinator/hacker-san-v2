@@ -28,7 +28,7 @@ export class PlatformBaseFindQuery<
     public readonly query: Omit<One extends true ? FindOneOptions<TEntity> : FindManyOptions<TEntity>, "where"> & {
         where: FindOptionsWhere<TEntity>[];
     } = { where: [] } as any; // super hacky workaround; We want query.where to always be an array of find options rather than a single where.
-    private readonly internalWhere: FindOptionsWhere<TEntity>;
+    protected readonly internalWhere: FindOptionsWhere<TEntity>;
 
     constructor(options?: BaseQueryOptions<TEntity, One>) {
         super();

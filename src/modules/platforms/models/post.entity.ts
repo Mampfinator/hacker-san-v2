@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Platform } from "../../../constants";
 import { IPlatformObject } from "../platform.interfaces";
 
-@Entity({name: "post"})
+@Entity({ name: "post" })
 /**
  * Represents a platform-independent post, such as community posts or Tweets.
  */
