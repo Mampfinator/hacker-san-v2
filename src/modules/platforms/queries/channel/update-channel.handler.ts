@@ -1,7 +1,7 @@
 import { IInferredQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, UpdateResult } from "typeorm";
-import { ChannelEntity } from "../models/channel.entity";
+import { ChannelEntity } from "../../models/channel.entity";
 import { UpdateChannelQuery } from "./update-channel.query";
 
 /**

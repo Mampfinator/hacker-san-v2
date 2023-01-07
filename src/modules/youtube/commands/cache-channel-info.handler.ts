@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
-import { UpdateChannelQuery } from "../../platforms/queries/update-channel.query";
+import { UpdateChannelQuery } from "../../platforms/queries/channel/update-channel.query";
 import { CacheChannelInfoCommand } from "./cache-channel-info.command";
 
 // TODO: fix

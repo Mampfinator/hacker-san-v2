@@ -26,7 +26,7 @@ import { Logger } from "@nestjs/common";
 import { DiscordRESTService } from "./discord-rest.service";
 import { Routes } from "discord-api-types/v10";
 import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
-import { ChannelQuery } from "../platforms/queries";
+import { FindChannelQuery } from "../platforms/queries";
 import { ILike } from "typeorm";
 
 export namespace DiscordUtil {
@@ -178,23 +178,11 @@ export namespace DiscordUtil {
         const input = (options.getFocused() as string).trim().toLowerCase();
 
         const channels = await queryBus.execute(
-            new ChannelQuery({
-                query: {
-                    where: [
-                        {
-                            name: ILike(input),
-                        },
-                        {
-                            userName: ILike(input),
-                        },
-                        {
-                            id: ILike(input),
-                        },
-                    ],
-                    take: 25,
-                },
-                one: false,
-            }),
+            new FindChannelQuery({ one: false })
+                .where({ name: ILike(input) })
+                .where({ userName: ILike(input) })
+                .where({ id: ILike(input) })
+                .take(25),
         );
 
         return channels.map(channel => ({

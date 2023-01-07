@@ -1,7 +1,7 @@
 import { Query } from "@nestjs-architects/typed-cqrs";
 import { FindOptionsWhere, UpdateResult } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { ChannelEntity } from "../models/channel.entity";
+import { ChannelEntity } from "../../models/channel.entity";
 
 export class UpdateChannelQuery extends Query<UpdateResult> {
     constructor(
@@ -16,9 +16,9 @@ export class UpdateChannelQuery extends Query<UpdateResult> {
             | number[]
             | Date[]
             | FindOptionsWhere<ChannelEntity>,
-            /**
-             * Which updates to apply to those rows.
-             */
+        /**
+         * Which updates to apply to those rows.
+         */
         public readonly update: QueryDeepPartialEntity<ChannelEntity>,
     ) {
         super();

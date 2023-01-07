@@ -9,7 +9,7 @@ import { XMLParser } from "fast-xml-parser";
 import { youtube_v3 } from "googleapis";
 import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger-actions.command";
 import { ChannelEntity } from "../../../modules/platforms/models/channel.entity";
-import { ChannelQuery } from "../../../modules/platforms/queries";
+import { FindChannelQuery } from "../../../modules/platforms/queries";
 import { Util } from "../../../util";
 import { In, Repository } from "typeorm";
 import { YouTubeLiveStatus, YouTubeVideo } from "../model/youtube-video.entity";
@@ -241,12 +241,7 @@ export class YouTubeVideosService {
 
     private async rescanVideos() {
         if (this.channelList.length == 0) {
-            const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
-                new ChannelQuery({
-                    query: { where: { platform: "youtube" } },
-                    one: false,
-                }),
-            );
+            const channels = await this.queryBus.execute(new FindChannelQuery().forPlatform("youtube"));
             this.channelList = channels.map(channel => channel.platformId);
         }
 

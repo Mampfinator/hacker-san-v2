@@ -27,7 +27,7 @@ import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectCommands } from "./commands/slash-commands.provider";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { ChannelQuery } from "../../../modules/platforms/queries";
+import { FindChannelQuery } from "../../../modules/platforms/queries";
 import { ChannelEntity } from "../../../modules/platforms/models/channel.entity";
 import { FetchPostCommand } from "../../youtube/community-posts/commands/fetch-post.command";
 
@@ -226,9 +226,7 @@ export class DiscordClientService extends Client {
         if (this.status === "dnd") {
             name = "starting...";
         } else {
-            const channels = (
-                await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({ query: {} }))
-            ).length;
+            const channels = (await this.queryBus.execute(new FindChannelQuery({}))).length;
 
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;

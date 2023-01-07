@@ -2,7 +2,7 @@ import { Logger } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { StreamEntity } from "../models/stream.entity";
+import { StreamEntity } from "../../models/stream.entity";
 import { InsertStreamQuery } from "./insert-stream.query";
 
 @QueryHandler(InsertStreamQuery)

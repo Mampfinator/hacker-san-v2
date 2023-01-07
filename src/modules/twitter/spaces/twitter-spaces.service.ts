@@ -9,7 +9,7 @@ import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
 import { TwitterSpace, TwitterSpaceStatus } from "../models/twitter-space.entity";
 import { TwitterApiService } from "../twitter-api.service";
-import { ChannelQuery } from "../../platforms/queries";
+import { FindChannelQuery } from "../../platforms/queries";
 
 @Injectable()
 export class TwitterSpacesService {
@@ -26,7 +26,7 @@ export class TwitterSpacesService {
     @Interval(5000)
     public async syncTwitterSpaces() {
         const ids = await this.queryBus
-            .execute(ChannelQuery.forPlatform("twitter"))
+            .execute(new FindChannelQuery().forPlatform("twitter"))
             .then(channels => channels.map(c => c.platformId));
 
         if (ids.length == 0) return;

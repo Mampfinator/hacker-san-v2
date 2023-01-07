@@ -24,3 +24,8 @@ export const EVENT_NAME_LOOKUP: { [Property in Event]: string } = {
 };
 
 export type RestrainedClassDecorator<T extends object> = (constructor: Class<T>) => any;
+
+export type MethodsOnly<T extends object> = { [P in keyof T as T[P] extends Function ? P : never]: T[P] };
+export type MethodName<T extends object> = keyof MethodsOnly<T>;
+export type PropertyName<T extends object> = Exclude<keyof T, MethodName<T>>;
+export type PropertiesOnly<T extends object> = Omit<T, MethodName<T>>;
