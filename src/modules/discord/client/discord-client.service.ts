@@ -226,9 +226,13 @@ export class DiscordClientService extends Client {
             name = "starting...";
         } else {
             // workaround to fix the QueryBuilder from having a stroke
+<<<<<<< HEAD
             const channels = (
                 await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))
             ).length;
+=======
+            const channels = (await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))).length;
+>>>>>>> 231276d (Temporary fix for QueryFailedError on empty where)
 
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;
