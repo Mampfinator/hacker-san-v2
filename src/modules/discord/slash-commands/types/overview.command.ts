@@ -31,14 +31,9 @@ export class OverviewCommand implements ISlashCommand {
             where: { id: interaction.guildId },
         });
 
-<<<<<<< HEAD:src/modules/discord/slash-commands/types/overview.command.ts
         const channels = await this.queryBus.execute(
             new FindChannelQuery({ one: false }).forPlatform(In(["youtube", "twitter"])),
         );
-=======
-        const channels = await this.queryBus.execute(new FindChannelQuery({ one: false }).forPlatform(In(["youtube", "twitter"])));
->>>>>>> 231276d (Temporary fix for QueryFailedError on empty where):src/modules/discord/client/commands/overview.command.ts
-
         const reply = new MultipageMessage({ interaction });
 
         const channelsByPlatform = await lastValueFrom(
