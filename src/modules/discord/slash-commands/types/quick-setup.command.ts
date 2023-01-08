@@ -22,8 +22,8 @@ import { Repository } from "typeorm";
 import { ActionDescriptor } from "../../models/action.entity";
 import { Platform } from "../../../../constants";
 import { DiscordUtil } from "../../util";
-import { Autocomplete, AutocompleteReturn } from "./autocomplete";
-import { ISlashCommand, SlashCommand } from "./slash-command";
+import { Autocomplete, AutocompleteReturn } from "../autocomplete";
+import { ISlashCommand, SlashCommand } from "../slash-command";
 import { InjectRepository } from "@nestjs/typeorm";
 
 @SlashCommand({

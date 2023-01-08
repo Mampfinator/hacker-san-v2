@@ -3,7 +3,7 @@
 // Might run into side effect prevention issues tho.
 
 import "./info.command";
-import "./action.command";
+import "./types/action.command";
 import "./help.command";
 import "./settings.command";
 import "./overview.command";

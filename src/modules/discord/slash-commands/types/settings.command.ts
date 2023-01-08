@@ -7,11 +7,11 @@ import {
 } from "discord.js";
 import { FindOperator, IsNull, Repository } from "typeorm";
 import { ActionDescriptor, Platform } from "../../models/action.entity";
-import { ISlashCommand, SlashCommand } from "./slash-command";
+import { ISlashCommand, SlashCommand } from "../slash-command";
 import { Util } from "../../../../util";
 import { MultipageMessage } from "../../../../shared/util/multipage-message";
 import { DiscordUtil } from "../../util";
-import { Autocomplete, AutocompleteReturn } from "./autocomplete";
+import { Autocomplete, AutocompleteReturn } from "../autocomplete";
 import { GuildSettings } from "../../models/settings.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { EnsureChannelCommand } from "../../../../modules/platforms/commands/ensure-channel.command";

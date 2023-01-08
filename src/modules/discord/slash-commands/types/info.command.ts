@@ -1,7 +1,7 @@
 import { ConfigService } from "@nestjs/config";
 import { ChatInputCommandInteraction, CacheType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { TwitterConfig, YouTubeConfig } from "../../../../modules/config/config";
-import { ISlashCommand, SlashCommand } from "./slash-command";
+import { ISlashCommand, SlashCommand } from "../slash-command";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()

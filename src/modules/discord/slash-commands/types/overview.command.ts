@@ -1,15 +1,12 @@
 import { QueryBus } from "@nestjs/cqrs";
 import { ChatInputCommandInteraction, CacheType, SlashCommandBuilder } from "discord.js";
-import { SUPPORTED_PLATFORMS, Platform } from "../../../../constants";
 import { MultipageMessage } from "../../../../shared/util/multipage-message";
 import { In, Repository } from "typeorm";
 import { GuildSettings } from "../../models/settings.entity";
-import { ISlashCommand, SlashCommand } from "./slash-command";
+import { ISlashCommand, SlashCommand } from "../slash-command";
 import { InjectRepository } from "@nestjs/typeorm";
 import { FindChannelQuery } from "../../../platforms/queries";
 import { from, groupBy, lastValueFrom, mergeMap, of, pipe, toArray, zip } from "rxjs";
-import { PlatformBaseFindQuery } from "../../../platforms/queries/platform.base-find.query";
-import { ChannelEntity } from "../../../platforms/models/channel.entity";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
