@@ -1,7 +1,8 @@
 import { ChannelType } from "discord.js";
 import { DiscordClientService } from "../../client/discord-client.service";
+import { ActionExecuteOptions } from "../action.interfaces";
 import { interpolate } from "../action.util";
-import { ActionExecuteOptions, Action, IActionType } from "../decorators/action";
+import { Action, IActionType } from "../decorators/action";
 
 @Action({ type: "lock" })
 export class LockAction implements IActionType {

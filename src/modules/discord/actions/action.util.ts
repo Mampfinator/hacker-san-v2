@@ -4,7 +4,6 @@ import { Platform } from "../../../constants";
 import { Util } from "../../../util";
 import { ActionDescriptor } from "../models/action.entity";
 import { IActionPayload } from "./action.interfaces";
-import { ActionExecuteOptions } from "./decorators/action";
 
 interface ActionOptions {
     payload: IActionPayload<any>;

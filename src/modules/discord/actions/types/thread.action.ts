@@ -4,8 +4,9 @@ import { Repository } from "typeorm";
 import { DiscordClientService } from "../../client/discord-client.service";
 import { ActionDescriptor } from "../../models/action.entity";
 import { interpolate } from "../action.util";
-import { Action, ActionExecuteOptions, IActionType } from "../decorators/action";
+import { Action, IActionType } from "../decorators/action";
 import { StreamDiscordChannelMap } from "../model/stream-thread-map.entity";
+import { ActionExecuteOptions } from "../action.interfaces";
 
 const ORDER = {
     delete: 1,

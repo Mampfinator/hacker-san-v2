@@ -1,7 +1,8 @@
 import { ChannelType, EmbedBuilder } from "discord.js";
 import { DiscordClientService } from "../../client/discord-client.service";
-import { Action, ActionExecuteOptions, IActionType } from "../decorators/action";
+import { Action, IActionType } from "../decorators/action";
 import { generateEmbed, interpolate, needsEmbed } from "../action.util";
+import { ActionExecuteOptions } from "../action.interfaces";
 
 @Action({ type: "notify" })
 export class NotifyAction implements IActionType {

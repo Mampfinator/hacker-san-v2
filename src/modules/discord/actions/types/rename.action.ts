@@ -1,6 +1,7 @@
 import { ChannelType } from "discord.js";
 import { DiscordClientService } from "../../client/discord-client.service";
-import { Action, ActionExecuteOptions , IActionType } from "../decorators/action";
+import { Action, IActionType } from "../decorators/action";
+import { ActionExecuteOptions } from "../action.interfaces";
 
 @Action({ type: "rename" })
 export class RenameAction implements IActionType {

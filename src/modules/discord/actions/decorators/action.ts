@@ -1,15 +1,8 @@
 import { applyDecorators, Injectable, SetMetadata } from "@nestjs/common";
-import { Channel } from "discord.js";
 import { Class, RestrainedClassDecorator } from "../../../../constants";
-import { Primitive } from "../../../../util";
 import { ActionDescriptor } from "../../models/action.entity";
 import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "../action.constants";
-import { IActionPayload } from "../action.interfaces";
-
-export interface ActionExecuteOptions {
-    descriptor: ActionDescriptor;
-    payload: IActionPayload<any>;
-}
+import { ActionExecuteOptions } from "../action.interfaces";
 
 export interface IActionType {
     execute(payload: ActionExecuteOptions): any;
@@ -36,18 +29,12 @@ function defaultGroup() {
     return 0;
 }
 
-function SimpleSetMetadata(key: string | symbol | number, value: any): ClassDecorator {
-    return target => {
-        Reflect.metadata(key, value)(target);
-    }
-}
-
 export function Action(options: ActionOptions): RestrainedClassDecorator<IActionType> {
     return applyDecorators(
         Injectable(),
         AddAction,
-        SimpleSetMetadata(ACTION_TYPE_KEY, options.type),
-        SimpleSetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
+        SetMetadata(ACTION_TYPE_KEY, options.type),
+        SetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
     );
 }
 

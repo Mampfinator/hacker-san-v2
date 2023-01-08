@@ -1,7 +1,8 @@
 import { ChannelType } from "discord.js";
 import { DiscordClientService } from "../../client/discord-client.service";
-import { ActionExecuteOptions, Action, IActionType } from "../decorators/action";
+import { Action, IActionType } from "../decorators/action";
 import { interpolate } from "../action.util";
+import { ActionExecuteOptions } from "../action.interfaces";
 
 @Action({ type: "echo" })
 export class EchoAction implements IActionType {
