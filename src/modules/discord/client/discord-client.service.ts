@@ -22,7 +22,7 @@ import { handleAutocomplete } from "./commands/autocomplete";
 import { Platform, SUPPORTED_PLATFORMS } from "../../../constants";
 import { Util } from "../../../util";
 import { MultipageMessage } from "../../../shared/util/multipage-message";
-import { getActions } from "../actions/action";
+import { getActions } from "../actions/decorators/action";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { InjectCommands } from "./commands/slash-commands.provider";
@@ -227,7 +227,9 @@ export class DiscordClientService extends Client {
             name = "starting...";
         } else {
             // workaround to fix the QueryBuilder from having a stroke
-            const channels = (await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))).length;
+            const channels = (
+                await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))
+            ).length;
 
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;

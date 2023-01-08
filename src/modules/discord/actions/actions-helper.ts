@@ -1,5 +1,5 @@
 import { FactoryProvider, Inject } from "@nestjs/common";
-import { getActions, IActionType } from "./action";
+import { getActions, IActionType } from "./decorators/action";
 import { ACTION_TYPE_KEY } from "./action.constants";
 
 const ACTION_TYPES = Symbol("ACTION_TYPES");

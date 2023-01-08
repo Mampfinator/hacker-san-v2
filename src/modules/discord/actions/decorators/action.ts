@@ -1,18 +1,17 @@
 import { applyDecorators, Injectable, SetMetadata } from "@nestjs/common";
 import { Channel } from "discord.js";
-import { Class, RestrainedClassDecorator } from "../../../constants";
-import { TriggerActionsCommand } from "../commands/trigger-actions.command";
-import { ActionDescriptor } from "../models/action.entity";
-import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "./action.constants";
+import { Class, RestrainedClassDecorator } from "../../../../constants";
+import { ActionDescriptor } from "../../models/action.entity";
+import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "../action.constants";
+import { IActionPayload } from "../action.interfaces";
 
-export interface ActionPayload {
-    action: ActionDescriptor;
-    channel: Channel;
-    command: TriggerActionsCommand;
+export interface ActionExecuteOptions {
+    descriptor: ActionDescriptor;
+    payload: IActionPayload<any>;
 }
 
 export interface IActionType {
-    execute(payload: ActionPayload): any;
+    execute(payload: ActionExecuteOptions): any;
 }
 
 export interface ActionOptions {

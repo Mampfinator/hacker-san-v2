@@ -20,7 +20,7 @@ import {
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./client/discord-client.service";
 import { QueryBus } from "@nestjs/cqrs";
-import { getActions, getActionType } from "./actions/action";
+import { getActions, getActionType } from "./actions/decorators/action";
 import { Util } from "../../util";
 import { Logger } from "@nestjs/common";
 import { DiscordRESTService } from "./discord-rest.service";

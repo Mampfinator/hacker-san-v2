@@ -34,7 +34,9 @@ export class OverviewCommand implements ISlashCommand {
             where: { id: interaction.guildId },
         });
 
-        const channels = await this.queryBus.execute(new FindChannelQuery({ one: false }).forPlatform(In(["youtube", "twitter"])));
+        const channels = await this.queryBus.execute(
+            new FindChannelQuery({ one: false }).forPlatform(In(["youtube", "twitter"])),
+        );
 
         const reply = new MultipageMessage({ interaction });
 

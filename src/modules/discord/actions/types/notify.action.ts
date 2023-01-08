@@ -1,18 +1,25 @@
 import { ChannelType, EmbedBuilder } from "discord.js";
-import { Action, ActionPayload, IActionType } from "../action";
-import { ActionUtil } from "../util";
+import { DiscordClientService } from "../../client/discord-client.service";
+import { Action, ActionExecuteOptions, IActionType } from "../decorators/action";
+import { generateEmbed, interpolate, needsEmbed } from "../action.util";
 
 @Action({ type: "notify" })
 export class NotifyAction implements IActionType {
-    async execute({ action, command, channel }: ActionPayload) {
+    constructor(
+        private readonly client: DiscordClientService
+    ) {}
+
+    async execute({ descriptor, payload }: ActionExecuteOptions) {
+        const channel = await this.client.channels.fetch(descriptor.channelId);
+        
         if (channel.type !== ChannelType.GuildText) return;
 
-        const { message } = action.data as { message: string };
+        const { message } = descriptor.data as { message: string };
 
         const notification: { content: string; embeds?: EmbedBuilder[] } = {
-            content: ActionUtil.interpolate(message, command),
+            content: interpolate(message, {descriptor, payload}),
         };
-        if (command.options.embed) notification.embeds = [command.options.embed];
+        if (needsEmbed(payload)) notification.embeds = [generateEmbed(payload)];
         await channel.send(notification);
     }
 }

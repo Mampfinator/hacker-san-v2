@@ -3,7 +3,6 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmbedBuilder } from "discord.js";
-import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger-actions.command";
 import { Event } from "../../../modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
@@ -145,7 +144,7 @@ export class TwitterSpacesService {
             });
         }
 
-        this.commandBus.execute(
+        /*this.commandBus.execute(
             new TriggerActionsCommand({
                 platform: "twitter",
                 event: this.stateToStatus(space?.state),
@@ -153,7 +152,7 @@ export class TwitterSpacesService {
                 url,
                 embed,
             }),
-        );
+        );*/
     }
 
     private stateToStatus(state?: TSpaceV2State): Event {

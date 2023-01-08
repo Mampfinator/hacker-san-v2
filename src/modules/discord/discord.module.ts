@@ -8,7 +8,6 @@ import { ActionTypes } from "./actions/types";
 import { getCommands } from "./client/commands/slash-command";
 import { slashcommandFactory } from "./client/commands/slash-commands.provider";
 import { DiscordClientService } from "./client/discord-client.service";
-import { DiscordCommandHandlers } from "./commands";
 import { DiscordRESTService } from "./discord-rest.service";
 import { DiscordService } from "./discord.service";
 import { ActionDescriptor } from "./models/action.entity";
@@ -25,7 +24,6 @@ import { GuildSettings } from "./models/settings.entity";
         ...getCommands(),
         ...ActionTypes,
         actionTypeFactory,
-        ...DiscordCommandHandlers,
     ],
     exports: [DiscordClientService],
 })
