@@ -2,12 +2,12 @@ import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { DiscordClientService } from "../client/discord-client.service";
-import { ActionDescriptor, Event } from "../models/action.entity";
+import { ActionDescriptor } from "../models/action.entity";
+import { Event } from "../../../constants";
 import { getActionGrouper, IActionType } from "./decorators/action";
 import { IActionPayload } from "./action.interfaces";
 import { InjectActions } from "./actions-helper";
 import { from, groupBy, lastValueFrom, mergeMap, of, toArray, zip } from "rxjs";
-import { Class } from "../../../constants";
 
 @Injectable()
 export class ActionOrchestrator implements OnModuleInit {
@@ -28,7 +28,7 @@ export class ActionOrchestrator implements OnModuleInit {
         }
     }
 
-    public async execute(payload: IActionPayload<Event>): Promise<void> {
+    public async execute<TEvent extends Event = Event>(payload: IActionPayload<TEvent>): Promise<void> {
         const {
             channel: { platform, platformId: channelId },
             event: onEvent,

@@ -11,12 +11,12 @@ interface IPlatformEvent {
 }
 
 export class PostEvent implements IPlatformEvent {
-    public readonly event: "post";
+    public readonly event: "post" = "post";
     public readonly channel: ChannelEntity;
     public readonly post: PostEntity<any>;
 
     constructor(options: Omit<PostEvent, "event">) {
-        Object.assign(this, { ...options, event: "post" });
+        Object.assign(this, { ...options});
     }
 }
 
