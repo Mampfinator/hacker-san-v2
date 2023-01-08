@@ -23,6 +23,7 @@ export namespace Util {
         const [first, ...rest] = Array.from(value);
         return `${first.toUpperCase()}${rest.join("")}`;
     }
+    
 
     /**
      * @param error The exception that was thrown.

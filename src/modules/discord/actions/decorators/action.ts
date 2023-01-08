@@ -1,5 +1,6 @@
 import { applyDecorators, Injectable, SetMetadata } from "@nestjs/common";
 import { Class, RestrainedClassDecorator } from "../../../../constants";
+import { Primitive } from "../../../../util";
 import { ActionDescriptor } from "../../models/action.entity";
 import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "../action.constants";
 import { ActionExecuteOptions } from "../action.interfaces";
@@ -29,12 +30,18 @@ function defaultGroup() {
     return 0;
 }
 
+function SimpleSetMetadata(key: string | symbol | number, value: any): ClassDecorator {
+    return target => {
+        Reflect.metadata(key, value)(target);
+    }
+}
+
 export function Action(options: ActionOptions): RestrainedClassDecorator<IActionType> {
     return applyDecorators(
         Injectable(),
         AddAction,
-        SetMetadata(ACTION_TYPE_KEY, options.type),
-        SetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
+        SimpleSetMetadata(ACTION_TYPE_KEY, options.type),
+        SimpleSetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
     );
 }
 
