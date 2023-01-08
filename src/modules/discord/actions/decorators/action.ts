@@ -1,6 +1,7 @@
 import { applyDecorators, Injectable, SetMetadata } from "@nestjs/common";
 import { Channel } from "discord.js";
 import { Class, RestrainedClassDecorator } from "../../../../constants";
+import { Primitive } from "../../../../util";
 import { ActionDescriptor } from "../../models/action.entity";
 import { ACTION_GROUP_KEY, ACTION_TYPE_KEY } from "../action.constants";
 import { IActionPayload } from "../action.interfaces";
@@ -14,12 +15,14 @@ export interface IActionType {
     execute(payload: ActionExecuteOptions): any;
 }
 
+type ActionGrouper = (descriptor: ActionDescriptor) => number;
+
 export interface ActionOptions {
     type: string;
     /**
-     * Used for sorting & batching actions. If no group is specified, the group is considered to be 0.
+     * Used for sorting & batching actions. If no group is specified, the group is considered to be 0. Groups can also be negative.
      */
-    getGroup?: (action: ActionDescriptor) => number;
+    getGroup?: ActionGrouper;
 }
 
 const actions: Class<IActionType>[] = [];
@@ -33,19 +36,26 @@ function defaultGroup() {
     return 0;
 }
 
+function SimpleSetMetadata(key: string | symbol | number, value: any): ClassDecorator {
+    return target => {
+        Reflect.metadata(key, value)(target);
+    }
+}
+
 export function Action(options: ActionOptions): RestrainedClassDecorator<IActionType> {
     return applyDecorators(
         Injectable(),
         AddAction,
-        SetMetadata(ACTION_TYPE_KEY, options.type),
-        SetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
+        SimpleSetMetadata(ACTION_TYPE_KEY, options.type),
+        SimpleSetMetadata(ACTION_GROUP_KEY, options.getGroup ?? defaultGroup),
     );
 }
 
-export function getActionType(action: Class<IActionType>) {
-    return Reflect.getMetadata(ACTION_TYPE_KEY, action);
+// Decorators and metadata confuse me.
+export function getActionType(action: any): string {
+    return Reflect.getMetadata(ACTION_TYPE_KEY, action) ?? Reflect.getMetadata(ACTION_TYPE_KEY, Object.getPrototypeOf(action));
 }
 
-export function getActionGrouper(action: Class<IActionType>) {
-    return Reflect.getMetadata(ACTION_GROUP_KEY, action);
+export function getActionGrouper(action: any): ActionGrouper {
+    return Reflect.getMetadata(ACTION_GROUP_KEY, action) ?? Reflect.getMetadata(ACTION_GROUP_KEY, Object.getPrototypeOf(action));
 }

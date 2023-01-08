@@ -1,5 +1,5 @@
 import { FactoryProvider, Inject } from "@nestjs/common";
-import { getActions, IActionType } from "./decorators/action";
+import { getActions, getActionType, IActionType } from "./decorators/action";
 import { ACTION_TYPE_KEY } from "./action.constants";
 
 const ACTION_TYPES = Symbol("ACTION_TYPES");
@@ -9,7 +9,9 @@ export const actionTypeFactory: FactoryProvider = {
     useFactory: (...args: (IActionType & { prototype: any })[]) => {
         const map = new Map();
         for (const type of args) {
-            map.set(Reflect.getMetadata(ACTION_TYPE_KEY, type.prototype ?? type), type);
+            const key = getActionType(type);
+
+            map.set(key, type);
         }
 
         return map;

@@ -4,6 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ActionOrchestrator } from "./actions/action.orchestrator";
 import { actionTypeFactory } from "./actions/actions-helper";
+import { StreamDiscordChannelMap } from "./actions/model/stream-thread-map.entity";
 import { ActionTypes } from "./actions/types";
 import { getCommands } from "./client/commands/slash-command";
 import { slashcommandFactory } from "./client/commands/slash-commands.provider";
@@ -14,7 +15,7 @@ import { ActionDescriptor } from "./models/action.entity";
 import { GuildSettings } from "./models/settings.entity";
 
 @Module({
-    imports: [ConfigModule, TypeOrmModule.forFeature([GuildSettings, ActionDescriptor]), CqrsModule],
+    imports: [ConfigModule, TypeOrmModule.forFeature([GuildSettings, ActionDescriptor, StreamDiscordChannelMap]), CqrsModule],
     providers: [
         DiscordService,
         DiscordRESTService,

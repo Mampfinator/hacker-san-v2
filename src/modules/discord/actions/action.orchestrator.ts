@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { DiscordClientService } from "../client/discord-client.service";
@@ -10,18 +10,20 @@ import { from, groupBy, lastValueFrom, mergeMap, of, toArray, zip } from "rxjs";
 import { Class } from "../../../constants";
 
 @Injectable()
-export class ActionOrchestrator {
+export class ActionOrchestrator implements OnModuleInit {
     private readonly groupers = new Map<string, (action: ActionDescriptor) => number>();
 
     constructor(
         @InjectActions() private readonly actions: Map<string, IActionType>,
         @InjectRepository(ActionDescriptor) private readonly actionRepository: Repository<ActionDescriptor>,
         private readonly client: DiscordClientService,
-    ) {
-        for (const [type, action] of actions) {
+    ) {}
+
+    onModuleInit() {
+        for (const [type, action] of this.actions) {
             this.groupers.set(
                 type,
-                getActionGrouper((action as unknown as { prototype: Class<IActionType> }).prototype),
+                getActionGrouper(action),
             );
         }
     }
