@@ -1,15 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmbedBuilder } from "discord.js";
-import { TriggerActionsCommand } from "../../../modules/discord/commands/trigger-actions.command";
-import { Event } from "../../../modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
 import { TwitterSpace, TwitterSpaceStatus } from "../models/twitter-space.entity";
-import { TwitterUser } from "../models/twitter-user.entity";
 import { TwitterApiService } from "../twitter-api.service";
+import { FindChannelQuery } from "../../platforms/queries";
+import { Event } from "../../../constants";
 
 @Injectable()
 export class TwitterSpacesService {
@@ -17,20 +16,21 @@ export class TwitterSpacesService {
 
     constructor(
         private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
         private readonly apiClient: TwitterApiService,
-        @InjectRepository(TwitterUser)
-        private readonly usersRepo: Repository<TwitterUser>,
         @InjectRepository(TwitterSpace)
         private readonly spacesRepo: Repository<TwitterSpace>,
     ) {}
 
     @Interval(5000)
     public async syncTwitterSpaces() {
-        const users = await this.usersRepo.find();
-        if (users.length == 0) return;
+        const ids = await this.queryBus
+            .execute(new FindChannelQuery().forPlatform("twitter"))
+            .then(channels => channels.map(c => c.platformId));
+
+        if (ids.length == 0) return;
 
         try {
-            const ids = users.map(u => u.id);
             const response = await this.apiClient.v2.spacesByCreators(ids, {
                 "space.fields": ["creator_id", "scheduled_start", "started_at", "title"],
             });
@@ -144,7 +144,7 @@ export class TwitterSpacesService {
             });
         }
 
-        this.commandBus.execute(
+        /*this.commandBus.execute(
             new TriggerActionsCommand({
                 platform: "twitter",
                 event: this.stateToStatus(space?.state),
@@ -152,7 +152,7 @@ export class TwitterSpacesService {
                 url,
                 embed,
             }),
-        );
+        );*/
     }
 
     private stateToStatus(state?: TSpaceV2State): Event {

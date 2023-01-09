@@ -79,3 +79,5 @@ export type LastArrayElement<ValueType extends readonly unknown[]> = ValueType e
     : ValueType extends ReadonlyArray<infer ElementType>
     ? ElementType
     : never;
+
+export type ConditionalMultiple<One extends boolean, T> = One extends true ? T : T[];

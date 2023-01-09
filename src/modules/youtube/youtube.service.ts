@@ -21,7 +21,7 @@ import { wrapper } from "axios-cookiejar-support";
 import { Primitive } from "../../util";
 import { FullChannelCrawlCommand } from "./commands/full-channel-crawl.command";
 import { VideoRenderer } from "yt-scraping-utilities";
-import { ChannelQuery } from "../platforms/queries";
+import { FindChannelQuery } from "../platforms/queries";
 import { ChannelEntity } from "../platforms/models/channel.entity";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { YouTubeApiService } from "./youtube-api.service";
@@ -230,12 +230,7 @@ export class YouTubeService implements OnModuleInit {
         this.logger.log("Verifying YouTube channel IDs.");
 
         const channelIds = await this.queryBus
-            .execute<ChannelQuery, ChannelEntity[]>(
-                new ChannelQuery({
-                    one: false,
-                    query: { where: { platform: "youtube" } },
-                }),
-            )
+            .execute(new FindChannelQuery().forPlatform("youtube"))
             .then(channels => channels.map(channel => channel.platformId));
 
         let invalidIds: string[] = [];
@@ -261,12 +256,7 @@ export class YouTubeService implements OnModuleInit {
     }
 
     private async sync() {
-        const channels = await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(
-            new ChannelQuery({
-                one: false,
-                query: { where: { platform: "youtube" } },
-            }),
-        );
+        const channels = await this.queryBus.execute(new FindChannelQuery().forPlatform("youtube"));
 
         const channelLoggers = channels.map(({ platformId }) => new Logger(`YouTubeStartup:${platformId}`));
 

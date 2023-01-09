@@ -2,8 +2,5 @@
 export { YouTubeModule } from "./youtube.module";
 
 // commands
-export { EnsureYouTubeChannelCommand } from "./commands";
+export { ValidateYouTubeChannelCommand } from "./commands";
 export { FetchPostsCommand } from "./community-posts/commands/fetch-posts.command";
-
-// queries
-export { YouTubeChannelsQuery } from "./queries/youtube-channels.query";

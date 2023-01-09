@@ -1,9 +1,24 @@
-import { ChannelQueryHandler } from "./channel.handler";
-import { FindStreamQueryHandler } from "./find-stream.handler";
-import { InsertStreamHandler } from "./insert-stream.handler";
+import { FindChannelHandler, InsertChannelHandler, UpdateChannelHandler } from "./channel";
+export { FindChannelQuery, InsertChannelQuery, UpdateChannelQuery } from "./channel";
 
-export { ChannelQuery, ChannelQueryOptions } from "./channel.query";
-export { FindStreamQuery, StreamQueryOptions } from "./find-stream.query";
-export { InsertStreamQuery, InsertQueryItem } from "./insert-stream.query";
+import { FindPostsHandler, InsertPostsHandler } from "./post";
+export { FindPostsQuery, InsertPostsQuery } from "./post";
 
-export const QueryHandlers = [ChannelQueryHandler, FindStreamQueryHandler, InsertStreamHandler];
+import { FindStreamHandler, InsertStreamHandler, UpsertStreamHandler } from "./stream";
+export { InsertQueryItem, InsertStreamQuery, UpsertStreamQuery } from "./stream";
+
+export const QueryHandlers = [
+    // Channel handlers
+    FindChannelHandler,
+    InsertChannelHandler,
+    UpdateChannelHandler,
+
+    // Post handlers
+    FindPostsHandler,
+    InsertPostsHandler,
+
+    // Stream handlers
+    FindStreamHandler,
+    InsertStreamHandler,
+    UpsertStreamHandler,
+];

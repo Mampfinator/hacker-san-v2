@@ -11,24 +11,23 @@ import {
     PresenceStatusData,
 } from "discord.js";
 import { DiscordConfig } from "../../../modules/config/config";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { GuildSettings } from "../models/settings.entity";
-import { getCommandMetadata, SlashCommand } from "./commands/slash-command";
+import { getCommandMetadata, SlashCommand } from "../slash-commands/slash-command";
 import { getEvents, handleEvent, On } from "./on-event";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "../util";
-import { handleAutocomplete } from "./commands/autocomplete";
+import { handleAutocomplete } from "../slash-commands/autocomplete";
 import { Platform, SUPPORTED_PLATFORMS } from "../../../constants";
 import { Util } from "../../../util";
 import { MultipageMessage } from "../../../shared/util/multipage-message";
-import { getActions } from "../actions/action";
+import { getActions } from "../actions/decorators/action";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
-import { InjectCommands } from "./commands/slash-commands.provider";
+import { InjectCommands } from "../slash-commands/slash-commands.provider";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { ChannelQuery } from "../../../modules/platforms/queries";
-import { ChannelEntity } from "../../../modules/platforms/models/channel.entity";
+import { FindChannelQuery } from "../../../modules/platforms/queries";
 import { FetchPostCommand } from "../../youtube/community-posts/commands/fetch-post.command";
 
 @Injectable()
@@ -226,8 +225,9 @@ export class DiscordClientService extends Client {
         if (this.status === "dnd") {
             name = "starting...";
         } else {
+            // workaround to fix the QueryBuilder from having a stroke
             const channels = (
-                await this.queryBus.execute<ChannelQuery, ChannelEntity[]>(new ChannelQuery({ query: {} }))
+                await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))
             ).length;
 
             await this.guilds.fetch();

@@ -1,5 +1,8 @@
-import { IValidateChannelCommand } from "../../../modules/platforms/commands/alt-ensure-channel.handler";
+import { Command } from "@nestjs-architects/typed-cqrs";
+import { IValidateChannelCommand, ValidateChannelResult } from "../../platforms/commands/ensure-channel.handler";
 
-export class ValidateYouTubeChannelCommand implements IValidateChannelCommand {
-    constructor(public readonly channelId: string) {}
+export class ValidateYouTubeChannelCommand extends Command<ValidateChannelResult> implements IValidateChannelCommand {
+    constructor(public readonly channelId: string) {
+        super();
+    }
 }
