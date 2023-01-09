@@ -51,7 +51,6 @@ export function makeDict(options: ActionOptions): ActionDictionary {
     return PLATFORM_DICT_MAKERS[platform](options);
 }
 
-<<<<<<< HEAD
 export function needsEmbed({ event, channel }: IActionPayload): boolean {
     return event == "post" && channel.platform == "youtube";
 }
@@ -99,13 +98,4 @@ export function generateEmbed({channel, post, video, event}: IActionPayload): Em
 
         return embed;
     }
-=======
-export function needsEmbed({ event, channel }: IActionPayload<any>): boolean {
-    return event == "post" && channel.platform == "youtube";
-}
-
-export function generateEmbed(payload: IActionPayload<any>): EmbedBuilder {
-    // TODO implement
-    return new EmbedBuilder().setTitle("Work in Progress!").setColor(Colors.Red);
->>>>>>> 8179ca5 (Some major fixes)
 }
