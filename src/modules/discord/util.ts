@@ -59,9 +59,7 @@ export namespace DiscordUtil {
             .setURL(`https://youtube.com/post/${postId}`)
             .setColor("#ff0000")
             .setFooter({
-                text: `ID: ${postId} | ${
-                    attachmentType == AttachmentType.None ? "text" : attachmentType.toLowerCase()
-                }-post`,
+                text: `ID: ${postId}`
             });
 
         switch (attachmentType) {

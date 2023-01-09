@@ -51,7 +51,7 @@ export function makeDict(options: ActionOptions): ActionDictionary {
     return PLATFORM_DICT_MAKERS[platform](options);
 }
 
-export function needsEmbed({ event, channel }: IActionPayload<any>): boolean {
+export function needsEmbed({ event, channel }: IActionPayload): boolean {
     return event == "post" && channel.platform == "youtube";
 }
 
@@ -89,6 +89,12 @@ export function generateEmbed({channel, post, video, event}: IActionPayload): Em
                 value: post.poll.map(choice => `\u2022 \u200b ${choice}`).join("\n"),
             });
         }
+
+        if (description) embed.setDescription(description);
+
+        embed.setFooter(
+            {text: footerText + `ID: ${post.platformId}`}
+        )
 
         return embed;
     }
