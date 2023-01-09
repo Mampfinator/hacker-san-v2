@@ -49,10 +49,14 @@ export class YouTubeVideosService {
         if (this.channelList.length === 0) {
             const channels = await this.queryBus.execute(new FindChannelQuery().forPlatform("youtube"));
 <<<<<<< HEAD
+<<<<<<< HEAD
             this.channelList.push(...channels.map(channel => channel.platformId));
 =======
             this.channelList.push(...channels.map(channel => channel.id));
 >>>>>>> c4f6a92 (Removed YouTubeVideo entity)
+=======
+            this.channelList.push(...channels.map(channel => channel.platformId));
+>>>>>>> 8179ca5 (Some major fixes)
         }
 
         const channelId = this.channelList.shift();

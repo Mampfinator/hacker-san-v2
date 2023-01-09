@@ -12,4 +12,8 @@ export const Entities = [
     ChannelEntity,
     PostEntity,
     StreamDiscordChannelMap,
+<<<<<<< HEAD
 ];
+=======
+];
+>>>>>>> 8179ca5 (Some major fixes)

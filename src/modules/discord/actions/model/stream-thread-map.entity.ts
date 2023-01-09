@@ -10,6 +10,10 @@ export class StreamDiscordChannelMap {
 
     @Column()
     platform: Platform;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8179ca5 (Some major fixes)
     @Column()
     platformId: string;
 

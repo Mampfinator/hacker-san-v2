@@ -15,10 +15,14 @@ export class UpsertStreamHandler implements IInferredQueryHandler<UpsertStreamQu
             .into(StreamEntity)
             .values(stream)
 <<<<<<< HEAD
+<<<<<<< HEAD
             .orUpdate(["status"], "PLATFORM_ID_UNIQUE")
 =======
             .orUpdate(["platformId", "id"], ["status"])
 >>>>>>> c4f6a92 (Removed YouTubeVideo entity)
+=======
+            .orUpdate(["status"], "PLATFORM_ID_UNIQUE")
+>>>>>>> 8179ca5 (Some major fixes)
             .execute();
     }
 }
