@@ -2,6 +2,7 @@ import { EmbedBuilder } from "@discordjs/builders";
 import { Colors } from "discord.js";
 import { Platform } from "../../../constants";
 import { Util } from "../../../util";
+import { CommunityPostEntity } from "../../platforms/models/post.entity";
 import { ActionDescriptor } from "../models/action.entity";
 import { IActionPayload } from "./action.interfaces";
 
@@ -54,7 +55,41 @@ export function needsEmbed({ event, channel }: IActionPayload<any>): boolean {
     return event == "post" && channel.platform == "youtube";
 }
 
-export function generateEmbed(payload: IActionPayload<any>): EmbedBuilder {
-    // TODO implement
-    return new EmbedBuilder().setTitle("Work in Progress!").setColor(Colors.Red);
+export function generateEmbed({channel, post, video, event}: IActionPayload): EmbedBuilder {
+    if (channel.platform === "youtube" && event === "post") {
+        // TODO needs fixing for video & playlist posts.
+        post = post as CommunityPostEntity;
+
+        const embed = new EmbedBuilder()
+            .setColor([255, 0, 0])
+            .setAuthor({name: channel.name, url: `https://youtube.com/channel/${channel.platformId}`, iconURL: channel.avatarUrl});
+        
+        let description: string = "";
+        if (post.content) {
+            description +=
+                post.content.map(({text, url}) => {
+                    if (url) return `[${text}](${url})`;
+                    return text;
+                }).join(" ");
+        }
+        let footerText = "";
+
+        if (post.images && post.images.length > 0) {
+            embed.setImage(post.images[0])
+            if (post.images.length > 1) {
+                footerText += "Has additional images!"
+            }
+        }
+
+        if (post.poll) {
+            if (description.length > 0) description += "\n\u200b\n\u200b"; // put some space between main content and the poll
+
+            embed.addFields({
+                name: "Poll",
+                value: post.poll.map(choice => `\u2022 \u200b ${choice}`).join("\n"),
+            });
+        }
+
+        return embed;
+    }
 }
