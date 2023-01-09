@@ -48,7 +48,7 @@ export class YouTubeVideosService {
     private async rescanVideos() {
         if (this.channelList.length === 0) {
             const channels = await this.queryBus.execute(new FindChannelQuery().forPlatform("youtube"));
-            this.channelList.push(...channels.map(channel => channel.id));
+            this.channelList.push(...channels.map(channel => channel.platformId));
         }
 
         const channelId = this.channelList.shift();

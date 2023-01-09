@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { Platform } from "../../../../constants";
 /**
- * Maps temporary Discord channels to a unique stream identifier. 
+ * Maps temporary Discord channels to a unique stream identifier.
  */
 @Entity()
 export class StreamDiscordChannelMap {
@@ -10,7 +10,7 @@ export class StreamDiscordChannelMap {
 
     @Column()
     platform: Platform;
-    
+
     @Column()
     platformId: string;
 

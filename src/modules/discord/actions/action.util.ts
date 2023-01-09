@@ -16,16 +16,18 @@ export function interpolate(base: string, options: ActionOptions): string {
 }
 
 const PLATFORM_DICT_MAKERS: Record<Exclude<Platform, "twitter">, (options: ActionOptions) => ActionDictionary> = {
-    youtube: ({payload: {channel, post, video}, descriptor}) => {
+    youtube: ({ payload: { channel, post, video }, descriptor }) => {
         const channelLink = `https://youtube.com/channel/${channel.platformId}`;
-        const link = post ? `https://youtube.com/community/${post.platformId}` : `https://youtube.com/watch?v=${video.platformId}`;
-        
+        const link = post
+            ? `https://youtube.com/community/${post.platformId}`
+            : `https://youtube.com/watch?v=${video.platformId}`;
+
         return {
-            link, 
+            link,
             channelLink,
-        }
-    }
-}
+        };
+    },
+};
 
 interface ActionDictionary extends Record<string, string> {
     /**
@@ -39,20 +41,20 @@ interface ActionDictionary extends Record<string, string> {
 }
 
 export function makeDict(options: ActionOptions): ActionDictionary {
-    const {payload: {channel: {platform}}} = options;
+    const {
+        payload: {
+            channel: { platform },
+        },
+    } = options;
 
     return PLATFORM_DICT_MAKERS[platform](options);
 }
 
-
-export function needsEmbed({event, channel}: IActionPayload<any>): boolean {
+export function needsEmbed({ event, channel }: IActionPayload<any>): boolean {
     return event == "post" && channel.platform == "youtube";
 }
 
-
 export function generateEmbed(payload: IActionPayload<any>): EmbedBuilder {
     // TODO implement
-    return new EmbedBuilder()
-        .setTitle("Work in Progress!")
-        .setColor(Colors.Red);
+    return new EmbedBuilder().setTitle("Work in Progress!").setColor(Colors.Red);
 }

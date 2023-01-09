@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import { Repository } from "typeorm";
 import { ActionDescriptor } from "../../models/action.entity";
-import { PLATFORM_NAME_LOOKUP, Platform } from "../../../../constants";
+import { PLATFORM_NAME_LOOKUP, Platform, Event } from "../../../../constants";
 import { DiscordUtil } from "../../util";
 import { Autocomplete, AutocompleteReturn } from "../autocomplete";
 import { ISlashCommand, SlashCommand } from "../slash-command";
@@ -228,7 +228,7 @@ export class ActionCommand implements ISlashCommand {
             guildId,
             discordChannelId,
             discordThreadId,
-            onEvent: options.getString("event"),
+            onEvent: options.getString("event") as Event,
             platform,
             channelId,
         };

@@ -8,7 +8,7 @@ export class migrations1672455145161 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "action" DROP COLUMN "type"`);
+        await queryRunner.query(`ALTER TABLE "channel" ADD "isPrimaryChannel" boolean NOT NULL`);
     }
 
 }

@@ -31,5 +31,5 @@ const EVENT_MAP: Record<StreamStatus | "undefined", Record<StreamStatus | "undef
 };
 
 export function getStatusChangeEvent(old: StreamStatus | undefined, now: StreamStatus | undefined): StatusChange {
-    return EVENT_MAP[old][old];
+    return EVENT_MAP[String(old)][String(now)];
 }

@@ -5,12 +5,10 @@ import { ActionExecuteOptions } from "../action.interfaces";
 
 @Action({ type: "rename" })
 export class RenameAction implements IActionType {
-    constructor(
-        private readonly client: DiscordClientService
-    ) {}
+    constructor(private readonly client: DiscordClientService) {}
 
-    async execute({payload, descriptor}:  ActionExecuteOptions) {
-        const channel = await this.client.channels.fetch(descriptor.channelId);
+    async execute({ payload, descriptor }: ActionExecuteOptions) {
+        const channel = await this.client.channels.fetch(descriptor.discordChannelId);
         if (channel.type == ChannelType.DM || channel.type == ChannelType.GroupDM) return;
 
         const { name } = descriptor.data as { name: string };

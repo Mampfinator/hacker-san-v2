@@ -1,13 +1,10 @@
 import { EmbedField } from "discord.js";
-import { PLATFORM_NAME_LOOKUP } from "../../../constants";
+import { Platform, PLATFORM_NAME_LOOKUP, Event } from "../../../constants";
 import { Util } from "../../../util";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
-import { getActions } from "../actions/decorators/action";
+import { getActions, getActionType } from "../actions/decorators/action";
 
-export type Platform = "youtube" | "twitter";
-export type Event = "live" | "upload" | "offline" | "upcoming";
-
-const actionEnum: string[] = getActions().map(action => action.prototype.type);
+const actionEnum: string[] = getActions().map(getActionType);
 
 const descriptify = (input: Record<string, string>, joiner = "\n"): string => {
     let output = "";
@@ -73,7 +70,7 @@ export class ActionDescriptor {
         type: "enum",
         enum: ["live", "upload", "offline", "upcoming", "post"],
     })
-    onEvent: string;
+    onEvent: Event;
 
     /**
      * Contains additional things like custom text, a channel, ...

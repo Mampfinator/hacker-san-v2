@@ -17,5 +17,4 @@ interface FullActionPayload<TEvent extends Event> {
     channel: ChannelEntity;
 }
 
-
 export type IActionPayload<TEvent extends Event = Event> = RequireOnlyOne<FullActionPayload<TEvent>, "post" | "video">;

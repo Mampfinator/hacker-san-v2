@@ -4,9 +4,7 @@ import { ActionOrchestrator } from "../action.orchestrator";
 
 @EventsHandler(PostEvent)
 export class ExecuteActionsPostHandler implements IEventHandler<PostEvent> {
-    constructor(
-        private readonly orchestrator: ActionOrchestrator
-    ) {}
+    constructor(private readonly orchestrator: ActionOrchestrator) {}
 
     async handle(event: PostEvent) {
         this.orchestrator.execute(event);

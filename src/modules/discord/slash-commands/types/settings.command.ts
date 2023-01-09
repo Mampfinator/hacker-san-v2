@@ -6,7 +6,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { FindOperator, IsNull, Repository } from "typeorm";
-import { ActionDescriptor, Platform } from "../../models/action.entity";
+import { ActionDescriptor } from "../../models/action.entity";
 import { ISlashCommand, SlashCommand } from "../slash-command";
 import { Util } from "../../../../util";
 import { MultipageMessage } from "../../../../shared/util/multipage-message";
@@ -16,6 +16,7 @@ import { GuildSettings } from "../../models/settings.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { EnsureChannelCommand } from "../../../../modules/platforms/commands/ensure-channel.command";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Event, Platform } from "../../../../constants";
 
 @SlashCommand({
     commandData: new SlashCommandBuilder()
@@ -133,7 +134,7 @@ export class SettingsCommand implements ISlashCommand {
             discordChannel = options.getChannel("for-channel", false) as GuildBasedChannel,
             platform = options.getString("platform", false) as Platform,
             type = options.getString("type", false),
-            event = options.getString("event", false);
+            event = options.getString("event", false) as Event;
 
         let channels = {};
         if (discordChannel) {

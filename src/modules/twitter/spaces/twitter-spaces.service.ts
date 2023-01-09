@@ -3,12 +3,12 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EmbedBuilder } from "discord.js";
-import { Event } from "../../../modules/discord/models/action.entity";
 import { SpaceV2, TSpaceV2State } from "twitter-api-v2";
 import { In, Repository } from "typeorm";
 import { TwitterSpace, TwitterSpaceStatus } from "../models/twitter-space.entity";
 import { TwitterApiService } from "../twitter-api.service";
 import { FindChannelQuery } from "../../platforms/queries";
+import { Event } from "../../../constants";
 
 @Injectable()
 export class TwitterSpacesService {

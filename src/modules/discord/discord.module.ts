@@ -13,14 +13,20 @@ import { DiscordRESTService } from "./discord-rest.service";
 import { DiscordService } from "./discord.service";
 import { ActionDescriptor } from "./models/action.entity";
 import { GuildSettings } from "./models/settings.entity";
+import { EventHandlers } from "./actions/events";
 
 @Module({
-    imports: [ConfigModule, TypeOrmModule.forFeature([GuildSettings, ActionDescriptor, StreamDiscordChannelMap]), CqrsModule],
+    imports: [
+        ConfigModule,
+        TypeOrmModule.forFeature([GuildSettings, ActionDescriptor, StreamDiscordChannelMap]),
+        CqrsModule,
+    ],
     providers: [
         DiscordService,
         DiscordRESTService,
         DiscordClientService,
         ActionOrchestrator,
+        ...EventHandlers,
         slashcommandFactory,
         ...getCommands(),
         ...ActionTypes,

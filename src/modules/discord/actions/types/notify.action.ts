@@ -6,19 +6,17 @@ import { ActionExecuteOptions } from "../action.interfaces";
 
 @Action({ type: "notify" })
 export class NotifyAction implements IActionType {
-    constructor(
-        private readonly client: DiscordClientService
-    ) {}
+    constructor(private readonly client: DiscordClientService) {}
 
     async execute({ descriptor, payload }: ActionExecuteOptions) {
-        const channel = await this.client.channels.fetch(descriptor.channelId);
-        
+        const channel = await this.client.channels.fetch(descriptor.discordChannelId);
+
         if (channel.type !== ChannelType.GuildText) return;
 
         const { message } = descriptor.data as { message: string };
 
         const notification: { content: string; embeds?: EmbedBuilder[] } = {
-            content: interpolate(message, {descriptor, payload}),
+            content: interpolate(message, { descriptor, payload }),
         };
         if (needsEmbed(payload)) notification.embeds = [generateEmbed(payload)];
         await channel.send(notification);

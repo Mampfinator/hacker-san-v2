@@ -5,4 +5,11 @@ import { ChannelEntity } from "./modules/platforms/models/channel.entity";
 import { PostEntity } from "./modules/platforms/models/post.entity";
 import { StreamEntity } from "./modules/platforms/models/stream.entity";
 
-export const Entities = [GuildSettings, ActionDescriptor, StreamEntity, ChannelEntity, PostEntity, StreamDiscordChannelMap];
+export const Entities = [
+    GuildSettings,
+    ActionDescriptor,
+    StreamEntity,
+    ChannelEntity,
+    PostEntity,
+    StreamDiscordChannelMap,
+];

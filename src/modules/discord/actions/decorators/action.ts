@@ -40,9 +40,17 @@ export function Action(options: ActionOptions): RestrainedClassDecorator<IAction
 
 // Decorators and metadata confuse me.
 export function getActionType(action: any): string {
-    return Reflect.getMetadata(ACTION_TYPE_KEY, action) ?? Reflect.getMetadata(ACTION_TYPE_KEY, Object.getPrototypeOf(action));
+    return (
+        Reflect.getMetadata(ACTION_TYPE_KEY, action) ??
+        Reflect.getMetadata(ACTION_TYPE_KEY, Object.getPrototypeOf(action)) ??
+        Reflect.getMetadata(ACTION_TYPE_KEY, Object.getPrototypeOf(action).constructor)
+    );
 }
 
 export function getActionGrouper(action: any): ActionGrouper {
-    return Reflect.getMetadata(ACTION_GROUP_KEY, action) ?? Reflect.getMetadata(ACTION_GROUP_KEY, Object.getPrototypeOf(action));
+    return (
+        Reflect.getMetadata(ACTION_GROUP_KEY, action) ??
+        Reflect.getMetadata(ACTION_GROUP_KEY, Object.getPrototypeOf(action)) ??
+        Reflect.getMetadata(ACTION_GROUP_KEY, Object.getPrototypeOf(action).constructor)
+    );
 }

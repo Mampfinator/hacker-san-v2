@@ -16,7 +16,7 @@ export class PostEvent implements IPlatformEvent {
     public readonly post: PostEntity<any>;
 
     constructor(options: Omit<PostEvent, "event">) {
-        Object.assign(this, { ...options});
+        Object.assign(this, { ...options });
     }
 }
 

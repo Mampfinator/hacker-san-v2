@@ -53,7 +53,7 @@ export class YouTubeCommunityPostsService {
                 await this.queryBus.execute(
                     new FindPostsQuery().where({ platformId: In(rawPosts.map(post => post.id)) }),
                 )
-            ).map(post => post.id),
+            ).map(post => post.platformId),
         );
 
         const posts = rawPosts.filter(post => !knownPosts.has(post.id)).map(post => this.postToEntity(post));

@@ -2,9 +2,9 @@
 // Maybe find a way to dynamically import commands?
 // Might run into side effect prevention issues tho.
 
-import "./info.command";
+import "./types/info.command";
 import "./types/action.command";
-import "./help.command";
-import "./settings.command";
-import "./overview.command";
-import "./quick-setup.command";
+import "./types/help.command";
+import "./types/settings.command";
+import "./types/overview.command";
+import "./types/quick-setup.command";

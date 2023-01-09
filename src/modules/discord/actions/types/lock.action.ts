@@ -11,13 +11,11 @@ export class LockAction implements IActionType {
         unlock: "🔓",
     };
 
-    constructor(
-        private readonly client: DiscordClientService
-    ) {}
+    constructor(private readonly client: DiscordClientService) {}
 
     async execute({ descriptor, payload }: ActionExecuteOptions) {
-        const channel = await this.client.channels.fetch(descriptor.channelId);
-        
+        const channel = await this.client.channels.fetch(descriptor.discordChannelId);
+
         if (channel.type !== ChannelType.GuildText) return;
 
         const { mode, message: rawMessage } = descriptor.data as {
@@ -25,7 +23,7 @@ export class LockAction implements IActionType {
             message?: string;
         };
 
-        const message = interpolate(rawMessage, {descriptor, payload});
+        const message = interpolate(rawMessage, { descriptor, payload });
 
         const permission = mode === "lock" ? false : null;
         if (mode === "lock" && message) await channel.send(this.makeMessage(mode, message));
