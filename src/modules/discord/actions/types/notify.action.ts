@@ -17,8 +17,9 @@ export class NotifyAction implements IActionType {
 
         const notification: { content: string; embeds?: EmbedBuilder[] } = {
             content: interpolate(message, { descriptor, payload }),
+            embeds: needsEmbed(payload) ? [generateEmbed(payload)] : undefined,
         };
-        if (needsEmbed(payload)) notification.embeds = [generateEmbed(payload)];
+        
         await channel.send(notification);
     }
 }
