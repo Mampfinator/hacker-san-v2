@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { BaseExceptionFilter } from "@nestjs/core";
 import { EmbedBuilder, codeBlock } from "discord.js";
 import { DiscordConfig } from "./modules/config/config";
-import { DiscordClientService } from "./modules/discord/client/discord-client.service";
+import { DiscordClientService } from "./modules/discord/discord-client.service";
 
 @Catch()
 export class GlobalExceptionFilter extends BaseExceptionFilter implements ExceptionFilter {

@@ -1,39 +1,32 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
-    AutocompleteInteraction,
     Client,
-    ChatInputCommandInteraction,
     Message,
     EmbedBuilder,
-    InteractionType,
     ActivityType,
     PresenceStatusData,
 } from "discord.js";
-import { DiscordConfig } from "../../../modules/config/config";
+import { DiscordConfig } from "../config/config";
 import { In, Repository } from "typeorm";
-import { GuildSettings } from "../models/settings.entity";
-import { getCommandMetadata, SlashCommand } from "../slash-commands/slash-command";
-import { getEvents, handleEvent, On } from "./on-event";
+import { GuildSettings } from "./models/settings.entity";
+import { getEvents, handleEvent, On } from "../../shared/decorators/on-event";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
-import { DiscordUtil } from "../util";
-import { handleAutocomplete } from "../slash-commands/autocomplete";
-import { Platform, SUPPORTED_PLATFORMS } from "../../../constants";
-import { Util } from "../../../util";
-import { MultipageMessage } from "../../../shared/util/multipage-message";
-import { getActions } from "../actions/decorators/action";
+import { DiscordUtil } from "./util";
+import { Platform, SUPPORTED_PLATFORMS } from "../../constants";
+import { Util } from "../../util";
+import { MultipageMessage } from "../../shared/util/multipage-message";
+import { getActions } from "./actions/decorators/action";
 import { Interval } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
-import { InjectCommands } from "../slash-commands/slash-commands.provider";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { FindChannelQuery } from "../../../modules/platforms/queries";
-import { FetchPostCommand } from "../../youtube/community-posts/commands/fetch-post.command";
+import { FindChannelQuery } from "../platforms/queries";
+import { FetchPostCommand } from "../youtube/community-posts/commands/fetch-post.command";
 
 @Injectable()
 export class DiscordClientService extends Client {
     private readonly logger = new Logger(DiscordClientService.name);
-    private readonly commands: Map<string, SlashCommand> = new Map();
     private readonly statusReady: Map<Platform, boolean> = new Map();
     private status: PresenceStatusData = "dnd";
 
@@ -43,17 +36,11 @@ export class DiscordClientService extends Client {
         private readonly queryBus: QueryBus,
         @InjectRepository(GuildSettings)
         private readonly settingsRepository: Repository<GuildSettings>,
-        @InjectCommands() slashCommands: SlashCommand[],
         private readonly eventEmitter: EventEmitter2,
     ) {
         super({
             intents: ["Guilds", "GuildMessages", "MessageContent"],
         });
-
-        for (const command of slashCommands) {
-            const { commandData } = getCommandMetadata(command);
-            this.commands.set(commandData.name, command);
-        }
 
         for (const platform of SUPPORTED_PLATFORMS) {
             this.statusReady.set(platform, !configService.getOrThrow<boolean>(`${platform.toUpperCase()}.active`));
@@ -67,8 +54,6 @@ export class DiscordClientService extends Client {
         for (const event of events) {
             this.on(event, (...args) => this.handleEvent(event, ...args));
         }
-
-        this.logger.debug(`Found ${this.commands.size} commands: ${[...this.commands.keys()].join(", ")}.`);
 
         this.logger.debug(
             `Found ${getActions().length} action types: ${getActions()
@@ -127,52 +112,11 @@ export class DiscordClientService extends Client {
         const { deployGlobalCommands, testGuildId } = this.configService.get<DiscordConfig>("DISCORD");
         this.logger.debug(`Deploying slash commands ${deployGlobalCommands ? "globally" : `to ${testGuildId}`}.`);
 
-        for (const command of this.commands.values()) {
-            const { commandData, forGuild } = getCommandMetadata(command);
-
-            await this.application.commands.create(
-                commandData,
-                deployGlobalCommands
-                    ? forGuild(this.configService.get<DiscordConfig>("DISCORD").ownerGuild)
-                    : this.configService.get<DiscordConfig>("DISCORD").testGuildId,
-            );
-            this.logger.debug(`Created command for ${commandData.name}`);
-        }
-
         this.logger.log(`Signed in as ${this.user.tag} (${this.user.id}).`);
 
         this.eventEmitter.emit("discord.ready", "discord");
     }
-
-    @On("interactionCreate")
-    async handleSlashCommand(interaction: ChatInputCommandInteraction) {
-        if (interaction.type != InteractionType.ApplicationCommand) return;
-
-        const { commandName } = interaction;
-        this.logger.debug(`Received slash command for ${commandName}.`);
-        const handler = this.commands.get(commandName);
-
-        if (!handler) return interaction.reply("Command not found!");
-        await handler.execute(interaction);
-
-        if (!interaction.replied) {
-            this.logger.warn(`${commandName} (${interaction.id}) never got a reply!`);
-        }
-    }
-
-    @On("interactionCreate")
-    handleAutocomplete(interaction: AutocompleteInteraction) {
-        if (!interaction.isAutocomplete()) return;
-
-        const { commandName, options } = interaction;
-        const { name } = options.getFocused(true);
-        const command = this.commands.get(commandName);
-
-        if (!command)
-            return this.logger.warn(`Could not handle autocomplete for ${commandName} - ${name}: Command not found.`);
-        handleAutocomplete(interaction, command);
-    }
-
+    
     @On("messageCreate")
     async detectCommunityPostLink(message: Message) {
         if (message.author.id == this.user.id) return;

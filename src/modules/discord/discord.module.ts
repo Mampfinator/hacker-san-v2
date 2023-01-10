@@ -6,9 +6,7 @@ import { ActionOrchestrator } from "./actions/action.orchestrator";
 import { actionTypeFactory } from "./actions/actions-helper";
 import { StreamDiscordChannelMap } from "./actions/model/stream-thread-map.entity";
 import { ActionTypes } from "./actions/types";
-import { getCommands } from "./slash-commands/slash-command";
-import { slashcommandFactory } from "./slash-commands/slash-commands.provider";
-import { DiscordClientService } from "./client/discord-client.service";
+import { DiscordClientService } from "./discord-client.service";
 import { DiscordRESTService } from "./discord-rest.service";
 import { DiscordService } from "./discord.service";
 import { ActionDescriptor } from "./models/action.entity";
@@ -27,8 +25,6 @@ import { EventHandlers } from "./actions/events";
         DiscordClientService,
         ActionOrchestrator,
         ...EventHandlers,
-        slashcommandFactory,
-        ...getCommands(),
         ...ActionTypes,
         actionTypeFactory,
     ],

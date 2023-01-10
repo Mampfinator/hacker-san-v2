@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { DiscordClientService } from "../client/discord-client.service";
+import { DiscordClientService } from "../discord-client.service";
 import { ActionDescriptor } from "../models/action.entity";
 import { Event } from "../../../constants";
 import { getActionGrouper, IActionType } from "./decorators/action";
