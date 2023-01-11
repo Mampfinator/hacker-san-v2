@@ -50,7 +50,7 @@ describe("SlashCommand tests", () => {
                 return tested;
             }
 
-            @Command({ identifier: "other_subcommand", description: "I'm a different test!"})
+            @Command({ identifier: "other_subcommand", description: "I'm a different test!" })
             otherTestMethod(@Interaction() interaction: ChatInputCommandInteraction) {}
         }
 
@@ -91,9 +91,9 @@ describe("SlashCommand tests", () => {
                 {
                     type: OptionType.Subcommand,
                     name: "other_subcommand",
-                    description: "I'm a different test!", 
+                    description: "I'm a different test!",
                     options: [],
-                }
+                },
             ],
         });
     });

@@ -1,15 +1,11 @@
 export class OrchestratorItem<TKey, TValue> {
     public readonly step: TKey;
-    private readonly children = new Map<TKey, OrchestratorItem<TKey, TValue>>()
+    private readonly children = new Map<TKey, OrchestratorItem<TKey, TValue>>();
     public readonly value?: TValue;
     public readonly parent?: OrchestratorItem<TKey, TValue>;
 
-    constructor(
-        step: TKey, 
-        parent?: OrchestratorItem<TKey, TValue>,
-        value?: TValue
-    ) {
-        this.step = step; 
+    constructor(step: TKey, parent?: OrchestratorItem<TKey, TValue>, value?: TValue) {
+        this.step = step;
         this.parent = parent;
         this.value = value;
     }
@@ -31,13 +27,11 @@ export class OrchestratorItem<TKey, TValue> {
     }
 
     public *deepIterate(): Iterator<[TKey[], OrchestratorItem<TKey, TValue>]> {
-        const currentNodes: {path: TKey[], node: OrchestratorItem<TKey, TValue>}[] = [{path: [], node: this}];
+        const currentNodes: { path: TKey[]; node: OrchestratorItem<TKey, TValue> }[] = [{ path: [], node: this }];
 
         while (currentNodes.length > 0) {
-            const {path, node} = currentNodes.shift();
-            currentNodes.push(
-                ...[...node.children.values()].map(node => ({node, path: [...path, node.step]}))
-            );
+            const { path, node } = currentNodes.shift();
+            currentNodes.push(...[...node.children.values()].map(node => ({ node, path: [...path, node.step] })));
 
             yield [path, node];
         }
@@ -66,8 +60,5 @@ export class OrchestratorItem<TKey, TValue> {
             }
             currentNode = currentNode.shallowGet(step);
         }
-
-
     }
-
 }

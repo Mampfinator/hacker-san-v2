@@ -35,7 +35,7 @@ export const ensureData = (target: object): Partial<APIApplicationCommand> => {
 export const IDENTIFIER_METHOD_MAP = Symbol("Identifier Method Map");
 export const DEFAULT_HANDLER = Symbol("Default Handler");
 
-type HandlerMap =Map<any, any>;
+type HandlerMap = Map<any, any>;
 type Identifier = (string | symbol)[];
 
 export const getHandlers = (target: object): OrchestratorItem<string | symbol, string | symbol> => {
@@ -45,8 +45,6 @@ export const addHandler = (target: object, key: string | symbol, identifier?: Id
     if (!Reflect.hasMetadata(IDENTIFIER_METHOD_MAP, target))
         Reflect.defineMetadata(IDENTIFIER_METHOD_MAP, new Map(), target);
     const item = getHandlers(target);
-    
-
 };
 
 // TODO: adjust to HandlerOrchestrator
@@ -56,12 +54,13 @@ export const findHandler = (target: object, identifier: Identifier): string | sy
         if (typeof current === "symbol" || typeof current === "string") continue;
         current = current.get(step);
     }
-    if (typeof current === "object") throw new Error(`Failed resolving handler for ${identifier.map(String).join(".")}`); 
+    if (typeof current === "object")
+        throw new Error(`Failed resolving handler for ${identifier.map(String).join(".")}`);
     return current;
-}
+};
 
-
-export function *interateHandlers(target: object): Iterator<[Identifier, string | symbol]> {
+export function* interateHandlers(target: object): Iterator<[Identifier, string | symbol]> {
     const handlers = getHandlers(target);
-    const mapper = <K, V>(v: Map<K, V> | (string | symbol)) => typeof v === "object" ? (Array.isArray(v) ? v : [...v.values()]) : v;
+    const mapper = <K, V>(v: Map<K, V> | (string | symbol)) =>
+        typeof v === "object" ? (Array.isArray(v) ? v : [...v.values()]) : v;
 }
