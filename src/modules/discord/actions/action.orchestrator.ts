@@ -55,7 +55,7 @@ export class ActionOrchestrator implements OnModuleInit {
             for (const result of results) {
                 if (result.status === "fulfilled") return;
 
-                this.logger.warn(`Action failed to execute: ${result.reason}`);                
+                this.logger.warn(`Action failed to execute: ${result.reason}`);
             }
         }
     }

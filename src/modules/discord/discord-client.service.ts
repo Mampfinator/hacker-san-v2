@@ -1,12 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import {
-    Client,
-    Message,
-    EmbedBuilder,
-    ActivityType,
-    PresenceStatusData,
-} from "discord.js";
+import { Client, Message, EmbedBuilder, ActivityType, PresenceStatusData } from "discord.js";
 import { DiscordConfig } from "../config/config";
 import { In, Repository } from "typeorm";
 import { GuildSettings } from "./models/settings.entity";
@@ -116,7 +110,7 @@ export class DiscordClientService extends Client {
 
         this.eventEmitter.emit("discord.ready", "discord");
     }
-    
+
     @On("messageCreate")
     async detectCommunityPostLink(message: Message) {
         if (message.author.id == this.user.id) return;

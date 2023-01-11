@@ -12,12 +12,16 @@ import { DiscordService } from "./discord.service";
 import { ActionDescriptor } from "./models/action.entity";
 import { GuildSettings } from "./models/settings.entity";
 import { EventHandlers } from "./actions/events";
+import { DiscoveryModule } from "@nestjs-plus/discovery";
+import { SlashCommandDiscovery } from "./slash-command/slash-command.discovery";
+import { SlashCommandDispatcher } from "./slash-command/slash-command.dispatcher";
 
 @Module({
     imports: [
         ConfigModule,
         TypeOrmModule.forFeature([GuildSettings, ActionDescriptor, StreamDiscordChannelMap]),
         CqrsModule,
+        DiscoveryModule,
     ],
     providers: [
         DiscordService,
@@ -27,6 +31,8 @@ import { EventHandlers } from "./actions/events";
         ...EventHandlers,
         ...ActionTypes,
         actionTypeFactory,
+        SlashCommandDiscovery,
+        SlashCommandDispatcher,
     ],
     exports: [DiscordClientService],
 })

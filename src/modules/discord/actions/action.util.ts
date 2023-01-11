@@ -55,29 +55,32 @@ export function needsEmbed({ event, channel }: IActionPayload): boolean {
     return event == "post" && channel.platform == "youtube";
 }
 
-export function generateEmbed({channel, post, video, event}: IActionPayload): EmbedBuilder {
+export function generateEmbed({ channel, post, video, event }: IActionPayload): EmbedBuilder {
     if (channel.platform === "youtube" && event === "post") {
         // TODO needs fixing for video & playlist posts.
         post = post as CommunityPostEntity;
 
-        const embed = new EmbedBuilder()
-            .setColor([255, 0, 0])
-            .setAuthor({name: channel.name, url: `https://youtube.com/channel/${channel.platformId}`, iconURL: channel.avatarUrl});
-        
+        const embed = new EmbedBuilder().setColor([255, 0, 0]).setAuthor({
+            name: channel.name,
+            url: `https://youtube.com/channel/${channel.platformId}`,
+            iconURL: channel.avatarUrl,
+        });
+
         let description: string = "";
         if (post.content) {
-            description +=
-                post.content.map(({text, url}) => {
+            description += post.content
+                .map(({ text, url }) => {
                     if (url) return `[${text}](${url})`;
                     return text;
-                }).join(" ");
+                })
+                .join(" ");
         }
         let footerText = "";
 
         if (post.images && post.images.length > 0) {
-            embed.setImage(post.images[0])
+            embed.setImage(post.images[0]);
             if (post.images.length > 1) {
-                footerText += "Has additional images!"
+                footerText += "Has additional images!";
             }
         }
 
@@ -92,9 +95,7 @@ export function generateEmbed({channel, post, video, event}: IActionPayload): Em
 
         if (description) embed.setDescription(description);
 
-        embed.setFooter(
-            {text: footerText + `ID: ${post.platformId}`}
-        )
+        embed.setFooter({ text: footerText + `ID: ${post.platformId}` });
 
         return embed;
     }
