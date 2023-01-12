@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  hackersanv2:
+    image: hackersanv2
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000

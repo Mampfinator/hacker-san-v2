@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  hackersanv2:
+    image: hackersanv2
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+      - 9229:9229
+    command: ["npm", "run", "start:debug"]
