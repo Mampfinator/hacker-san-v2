@@ -15,6 +15,7 @@ import { EventHandlers } from "./actions/events";
 import { DiscoveryModule } from "@nestjs-plus/discovery";
 import { SlashCommandDiscovery } from "./slash-command/slash-command.discovery";
 import { SlashCommandDispatcher } from "./slash-command/slash-command.dispatcher";
+import { SlashCommands } from "./slash-command/types";
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { SlashCommandDispatcher } from "./slash-command/slash-command.dispatcher
         actionTypeFactory,
         SlashCommandDiscovery,
         SlashCommandDispatcher,
+        ...SlashCommands,
     ],
     exports: [DiscordClientService],
 })

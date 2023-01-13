@@ -200,3 +200,13 @@ export async function ignoreDiscordAPIErrors(error: any) {
     await Util.ignore(error, discordAPIError);
     ignoreLogger.warn(error);
 }
+
+export enum HammertimeFlag {
+    FullTime = "T",
+    Remaining = "R",
+}
+
+export function toHammertime(date: Date, flag?: HammertimeFlag): string {
+    const timestamp = Math.floor(Number(date)/1000);
+    return `<t:${timestamp}${flag? `:${flag}` : ""}>`;
+}
