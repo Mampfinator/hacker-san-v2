@@ -30,7 +30,7 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
     private readonly apiData: APIApplicationCommand[] = [];
     constructor(private readonly discoveryService: DiscoveryService) {}
 
-    public getHandler(identifier: CommandIdentifier): SlashCommandHandler | undefined {
+    public getHandler(identifier: Partial<CommandIdentifier>): SlashCommandHandler | undefined {
         const handler = this.findHandler(identifier);
 
         if (!handler)
@@ -39,7 +39,7 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
         return handler;
     }
 
-    private findHandler({ commandName, subcommandGroupName, subcommandName }: CommandIdentifier) {
+    private findHandler({ commandName, subcommandGroupName, subcommandName }: Partial<CommandIdentifier>) {
         return this.handlerMap
             .get(commandName)
             ?.get(subcommandGroupName ?? subcommandName ? NO_GROUP_HANDLER : DEFAULT_HANDLER)

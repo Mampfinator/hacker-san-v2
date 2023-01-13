@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, CacheType } from "discord.js";
-import { getParameters } from "./slash-command.constants";
+import { CommandIdentifier, getParameters } from "./slash-command.constants";
 import { SlashCommandDiscovery } from "./slash-command.discovery";
 import { ISlashCommandDispatcher } from "./slash-command.types";
 
@@ -32,7 +32,14 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
         await interaction.reply(reply);
     }
 
-    private makeIdentifier({ commandName, options }: ChatInputCommandInteraction): string {
-        return [commandName, options.getSubcommandGroup(false), options.getSubcommand(false)].filter(n => n).join(".");
+    private makeIdentifier({ commandName, options }: ChatInputCommandInteraction): Partial<CommandIdentifier> {
+        const   subcommandGroupName = options.getSubcommandGroup(false),
+                subcommandName = options.getSubcommand(false);
+
+        return {
+            commandName, 
+            subcommandGroupName, 
+            subcommandName,
+        }
     }
 }
