@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Client, Message, EmbedBuilder, ActivityType, PresenceStatusData } from "discord.js";
+import { Client, Message, EmbedBuilder, ActivityType, PresenceStatusData, CommandInteraction } from "discord.js";
 import { DiscordConfig } from "../config/config";
 import { In, Repository } from "typeorm";
 import { GuildSettings } from "./models/settings.entity";
@@ -17,6 +17,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { FindChannelQuery } from "../platforms/queries";
 import { FetchPostCommand } from "../youtube/community-posts/commands/fetch-post.command";
+import { SlashCommandDispatcher } from "./slash-command/slash-command.dispatcher";
+import { SlashCommandDiscovery } from "./slash-command/slash-command.discovery";
 
 @Injectable()
 export class DiscordClientService extends Client {
@@ -31,6 +33,8 @@ export class DiscordClientService extends Client {
         @InjectRepository(GuildSettings)
         private readonly settingsRepository: Repository<GuildSettings>,
         private readonly eventEmitter: EventEmitter2,
+        private readonly commandDiscovery: SlashCommandDiscovery,
+        private readonly commandDispatcher: SlashCommandDispatcher,
     ) {
         super({
             intents: ["Guilds", "GuildMessages", "MessageContent"],
@@ -47,6 +51,12 @@ export class DiscordClientService extends Client {
 
         for (const event of events) {
             this.on(event, (...args) => this.handleEvent(event, ...args));
+        }
+
+
+        for (const apiCommand of this.commandDiscovery.getApiData()) {
+            await this.application.commands.create(apiCommand, this.configService.get<string>("DISCORD.testGuildId"));
+            this.logger.debug(`Created command ${apiCommand.name}.`);
         }
 
         this.logger.debug(
@@ -154,6 +164,13 @@ export class DiscordClientService extends Client {
                 replyPing: false,
             });
         }
+    }
+
+    @On("interactionCreate")
+    handleSlashCommand(interaction: CommandInteraction) {
+        if (!interaction.isChatInputCommand()) return;
+
+        this.commandDispatcher.dispatch(interaction);
     }
 
     @Interval(60000)
