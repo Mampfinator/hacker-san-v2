@@ -2,37 +2,37 @@ import { ChannelType } from "discord.js";
 import { ApplicationCommandOptionType as OptionType } from "discord.js";
 export { OptionType };
 
-interface BaseOption<T extends OptionType> {
+export interface BaseOption<T extends OptionType> {
     type: OptionType;
     name: string;
     description: string;
     required?: boolean;
 }
 
-interface Choice<T extends OptionType.String | OptionType.Integer | OptionType.Number> {
+export interface Choice<T extends OptionType.String | OptionType.Integer | OptionType.Number> {
     name: string;
     value: T extends OptionType.String ? string : number;
 }
 
-interface HasChoices<T extends OptionType.String | OptionType.Integer | OptionType.Number> {
+export interface HasChoices<T extends OptionType.String | OptionType.Integer | OptionType.Number> {
     choices?: Choice<T>[];
 }
 
-interface IsAutocompletable {
+export interface IsAutocompletable {
     autocomplete?: boolean;
 }
 
-interface HasLength {
+export interface HasLength {
     min_length?: string;
     max_length?: string;
 }
 
-interface HasMinMax {
+export interface HasMinMax {
     min_value?: number;
     max_value?: number;
 }
 
-interface HasChannelTypes {
+export interface HasChannelTypes {
     channel_types?: Exclude<ChannelType, ChannelType.DM | ChannelType.GroupDM>[];
 }
 

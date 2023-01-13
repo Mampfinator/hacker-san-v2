@@ -1,5 +1,6 @@
 import { Type } from "@nestjs/common";
 import { APIApplicationCommand, ChatInputCommandInteraction } from "discord.js";
+import { CommandIdentifier } from "./slash-command.constants";
 
 export interface ISlashCommandDispatcher {
     dispatch(interaction: ChatInputCommandInteraction): Promise<void>;
@@ -15,7 +16,7 @@ export interface ISlashCommandDiscovery {
     /**
      * Returns a handler for a command interaction identifier.
      */
-    getHandler(identifier: string): SlashCommandHandler;
+    getHandler(identifier: CommandIdentifier): SlashCommandHandler | undefined;
     /**
      * Returns compiled slash command API data for every command registered.
      */

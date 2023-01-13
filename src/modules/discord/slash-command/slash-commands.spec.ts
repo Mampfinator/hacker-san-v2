@@ -22,6 +22,8 @@ describe("SlashCommand tests", () => {
         }).compile();
 
         const discovery = moduleRef.get(SlashCommandDiscovery);
+        await discovery.discover();
+
         const [testData] = discovery.getApiData();
 
         expect(testData).toMatchObject({
@@ -36,21 +38,21 @@ describe("SlashCommand tests", () => {
             ],
         });
 
-        const testHandler = discovery.getHandler("test");
+        const testHandler = discovery.getHandler({ commandName: "test" });
         expect(testHandler.methodName).toBe("handle");
     });
 
     it("finds commands with different subcommands and their handlers, and also builds API object correctly", async () => {
         @SlashCommand({ name: "test", description: ":)" })
         class TestCommand {
-            @Command({ identifier: "subcommand", description: "I'm a test!" })
+            @Command({ subcommandName: "subcommand", description: "I'm a test!" })
             testMethod(
                 @Option({ type: OptionType.String, description: "Test option", name: "tested" }) tested: string,
             ) {
                 return tested;
             }
 
-            @Command({ identifier: "other_subcommand", description: "I'm a different test!" })
+            @Command({ subcommandName: "other_subcommand", description: "I'm a different test!" })
             otherTestMethod(@Interaction() interaction: ChatInputCommandInteraction) {}
         }
 
@@ -66,7 +68,7 @@ describe("SlashCommand tests", () => {
 
         expect(discovery.getApiData().length).toBe(1);
 
-        const handler = discovery.getHandler("test.subcommand");
+        const handler = discovery.getHandler({ commandName: "test", subcommandName: "subcommand" });
         expect(typeof handler.constructor).toBe("function");
         expect(handler.constructor.name).toBe("TestCommand");
         expect(typeof handler.methodName).toBe("string");

@@ -1,8 +1,7 @@
 import { APIApplicationCommand } from "discord.js";
 import { Options } from "./decorators/option.decorator.types";
-import { OrchestratorItem } from "./handler-orchestrator";
 
-interface SlashCommandParameter<T extends "options" | "interaction" = "options" | "interaction"> {
+export interface SlashCommandParameter<T extends "options" | "interaction" = "options" | "interaction"> {
     type: T;
     value: T extends "options" ? Options : null;
 }
@@ -10,7 +9,7 @@ interface SlashCommandParameter<T extends "options" | "interaction" = "options" 
 export const METHOD_PARAMETER_MAP = Symbol("Method Parameter Map");
 export const addParameter = (target: object, key: string | symbol, index: number, parameter: SlashCommandParameter) => {
     if (!Reflect.hasMetadata(METHOD_PARAMETER_MAP, target))
-        Reflect.defineMetadata(METHOD_PARAMETER_MAP, new Map(), target);
+        Reflect.defineMetadata(METHOD_PARAMETER_MAP, new Map(), target); // ensure parameter map is present
     const map = getParameterMap(target);
 
     if (!map.has(key)) map.set(key, []);
@@ -32,35 +31,56 @@ export const ensureData = (target: object): Partial<APIApplicationCommand> => {
     return Reflect.getMetadata(SLASHCOMMAND_DATA, target);
 };
 
-export const IDENTIFIER_METHOD_MAP = Symbol("Identifier Method Map");
+export const IDENTIFIER_METHODS = Symbol("Identifier Method Map");
 export const DEFAULT_HANDLER = Symbol("Default Handler");
+export const NO_GROUP_HANDLER = Symbol("No Group Handler");
 
-type HandlerMap = Map<any, any>;
-type Identifier = (string | symbol)[];
-
-export const getHandlers = (target: object): OrchestratorItem<string | symbol, string | symbol> => {
-    return Reflect.getMetadata(IDENTIFIER_METHOD_MAP, target);
-};
-export const addHandler = (target: object, key: string | symbol, identifier?: Identifier) => {
-    if (!Reflect.hasMetadata(IDENTIFIER_METHOD_MAP, target))
-        Reflect.defineMetadata(IDENTIFIER_METHOD_MAP, new Map(), target);
-    const item = getHandlers(target);
-};
-
-// TODO: adjust to HandlerOrchestrator
-export const findHandler = (target: object, identifier: Identifier): string | symbol => {
-    let current: HandlerMap | (string | symbol) = getHandlers(target);
-    for (const step of identifier) {
-        if (typeof current === "symbol" || typeof current === "string") continue;
-        current = current.get(step);
-    }
-    if (typeof current === "object")
-        throw new Error(`Failed resolving handler for ${identifier.map(String).join(".")}`);
-    return current;
-};
-
-export function* interateHandlers(target: object): Iterator<[Identifier, string | symbol]> {
-    const handlers = getHandlers(target);
-    const mapper = <K, V>(v: Map<K, V> | (string | symbol)) =>
-        typeof v === "object" ? (Array.isArray(v) ? v : [...v.values()]) : v;
+interface HandlerItem {
+    /**
+     * Always present.
+     */
+    commandName: string;
+    /**
+     * If missing, handler is default.
+     */
+    subcommandName?: string | symbol;
+    subcommandGroupName?: string | symbol;
+    methodKey: string | symbol;
 }
+interface SubCommandIdentifier {
+    subcommandName?: string;
+    subcommandGroupName?: string;
+}
+
+export const getHandlers = (target: object): HandlerItem[] => {
+    return Reflect.getMetadata(IDENTIFIER_METHODS, target);
+};
+export const addHandler = (
+    target: object,
+    key: string | symbol,
+    { subcommandName, subcommandGroupName }: SubCommandIdentifier,
+) => {
+    if (!Reflect.hasMetadata(IDENTIFIER_METHODS, target)) Reflect.defineMetadata(IDENTIFIER_METHODS, [], target);
+
+    const handlers = getHandlers(target);
+
+    handlers.push({
+        commandName: "",
+        subcommandName: subcommandName ?? DEFAULT_HANDLER,
+        subcommandGroupName: subcommandGroupName ?? subcommandName ? NO_GROUP_HANDLER : DEFAULT_HANDLER,
+        methodKey: key,
+    });
+};
+
+export type CommandIdentifier = SubCommandIdentifier & { commandName: string };
+const Predicates: Record<string, (identifier: CommandIdentifier, item: HandlerItem) => boolean> = {
+    isGeneralHandler(identifier: CommandIdentifier, item: HandlerItem) {
+        return !item.subcommandName;
+    },
+    isCorrectSubcommandHandler(identifier, item) {
+        return (
+            item.subcommandGroupName === identifier.subcommandGroupName &&
+            item.subcommandName === identifier.subcommandName
+        );
+    },
+};

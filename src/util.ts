@@ -71,6 +71,9 @@ export namespace Util {
     }
 }
 
+// I can do this, because I'm the package author and I'll know which updates will break it. :)
+export { RequireAtLeastOne, RequireOnlyOne } from "yt-scraping-utilities/dist/util";
+
 export type Primitive = string | number | boolean;
 export type LastArrayElement<ValueType extends readonly unknown[]> = ValueType extends readonly [infer ElementType]
     ? ElementType

@@ -1,4 +1,4 @@
-import { RequireOnlyOne } from "yt-scraping-utilities/dist/util";
+import { RequireOnlyOne } from "../../../util";
 import { Event } from "../../../constants";
 import { ChannelEntity } from "../../platforms/models/channel.entity";
 import { PostEntity } from "../../platforms/models/post.entity";
