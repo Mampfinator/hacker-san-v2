@@ -1,5 +1,6 @@
 import { ensureData } from "../slash-command.constants";
 
+// TODO: add subcommandGroups option for descriptions and stuff.
 export interface SlashCommandOptions {
     name: string;
     description: string;

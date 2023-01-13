@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Client, Message, EmbedBuilder, ActivityType, PresenceStatusData, CommandInteraction } from "discord.js";
 import { DiscordConfig } from "../config/config";
@@ -21,7 +21,7 @@ import { SlashCommandDispatcher } from "./slash-command/slash-command.dispatcher
 import { SlashCommandDiscovery } from "./slash-command/slash-command.discovery";
 
 @Injectable()
-export class DiscordClientService extends Client {
+export class DiscordClientService extends Client implements OnModuleInit {
     private readonly logger = new Logger(DiscordClientService.name);
     private readonly statusReady: Map<Platform, boolean> = new Map();
     private status: PresenceStatusData = "dnd";
@@ -45,18 +45,25 @@ export class DiscordClientService extends Client {
         }
     }
 
-    public async login(token?: string): Promise<string> {
+    async onModuleInit() {
+        if (!this.configService.get<boolean>("DISCORD.doLogin")) return;
+        await this.login();
+
+        if (!this.application.owner) await this.application.fetch();
+        
+        const testGuildId = this.configService.get<string | undefined>("DISCORD.testGuildId");
+
+        for (const command of this.commandDiscovery.getApiData()) {
+            await this.application.commands.create(command, testGuildId);
+        }
+    }
+
+    public override async login(): Promise<string> {
         const events = [...getEvents(this).keys()];
         this.logger.debug(`Registering event handler for @On marked events: ${events.join(", ")}`);
 
         for (const event of events) {
             this.on(event, (...args) => this.handleEvent(event, ...args));
-        }
-
-
-        for (const apiCommand of this.commandDiscovery.getApiData()) {
-            await this.application.commands.create(apiCommand, this.configService.get<string>("DISCORD.testGuildId"));
-            this.logger.debug(`Created command ${apiCommand.name}.`);
         }
 
         this.logger.debug(
@@ -65,7 +72,7 @@ export class DiscordClientService extends Client {
                 .join(", ")}.`,
         );
 
-        const ret = await super.login(token);
+        const ret = await super.login(this.configService.getOrThrow<string>("DISCORD.token"));
         await this.refreshPresence();
         return ret;
     }
@@ -167,10 +174,15 @@ export class DiscordClientService extends Client {
     }
 
     @On("interactionCreate")
-    handleSlashCommand(interaction: CommandInteraction) {
+    async handleSlashCommand(interaction: CommandInteraction) {
         if (!interaction.isChatInputCommand()) return;
 
-        this.commandDispatcher.dispatch(interaction);
+        this.logger.debug(`Received command interaction ${interaction.commandName} (${interaction.id})`);
+        await this.commandDispatcher.dispatch(interaction);
+
+        if (!interaction.replied) {
+            this.logger.warn(`Dispatcher did not manage to find and execute handler for ${interaction.commandName} (${interaction.id})`);
+        }
     }
 
     @Interval(60000)
