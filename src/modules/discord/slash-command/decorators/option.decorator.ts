@@ -39,7 +39,7 @@ export const Member = (options: Omit<UserOption, "type">): ParameterDecorator =>
     return Option({...options, type: OptionType.User })
 }
 
-export const Channel = (options: Omit<UserOption, "type">): ParameterDecorator => {
+export const Channel = (options: Omit<ChannelOption, "type">): ParameterDecorator => {
     return Option({...options, type: OptionType.Channel});
 }
 
