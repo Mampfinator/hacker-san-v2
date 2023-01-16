@@ -83,18 +83,14 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
                 const parameters = getParameters(injectType, methodKey)?.filter(
                     ({ type }) => type === "options",
                 ) as SlashCommandParameter<"options">[];
-                if (
-                    !parameters ||
-                    parameters?.length === 0
-                )
-                    continue;
+                if (!parameters || parameters?.length === 0) continue;
 
                 let options: any[];
                 // is global default handler
                 if (subcommandGroupName === DEFAULT_HANDLER && subcommandName === DEFAULT_HANDLER) {
                     options = apiCommand.options;
 
-                // is no-group subcommand handler
+                    // is no-group subcommand handler
                 } else if (subcommandGroupName === NO_GROUP_HANDLER && typeof subcommandName === "string") {
                     options = (
                         apiCommand.options.find(
@@ -102,7 +98,7 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
                         ) as any
                     ).options;
 
-                // is full group subcommand handler
+                    // is full group subcommand handler
                 } else if (typeof subcommandGroupName === "string" && typeof subcommandName === "string") {
                     options = (
                         apiCommand.options.find(

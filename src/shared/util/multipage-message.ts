@@ -13,7 +13,7 @@ import {
     ChatInputCommandInteraction,
     EmbedBuilder,
 } from "discord.js";
-import { RequireOnlyOne } from "../../util";
+import { RequireOnlyOne } from "./util";
 
 type ComponentId = "first" | "back" | "next" | "last";
 

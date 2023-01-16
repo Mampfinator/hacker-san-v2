@@ -9,7 +9,7 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
 import { DiscordUtil } from "./util";
 import { Platform, SUPPORTED_PLATFORMS } from "../../constants";
-import { Util } from "../../util";
+import { Util } from "../../shared/util/util";
 import { MultipageMessage } from "../../shared/util/multipage-message";
 import { getActions } from "./actions/decorators/action";
 import { Interval } from "@nestjs/schedule";
@@ -50,7 +50,7 @@ export class DiscordClientService extends Client implements OnModuleInit {
         await this.login();
 
         if (!this.application.owner) await this.application.fetch();
-        
+
         const testGuildId = this.configService.get<string | undefined>("DISCORD.testGuildId");
 
         for (const command of this.commandDiscovery.getApiData()) {
@@ -181,7 +181,9 @@ export class DiscordClientService extends Client implements OnModuleInit {
         await this.commandDispatcher.dispatch(interaction);
 
         if (!interaction.replied) {
-            this.logger.warn(`Dispatcher did not manage to find and execute handler for ${interaction.commandName} (${interaction.id})`);
+            this.logger.warn(
+                `Dispatcher did not manage to find and execute handler for ${interaction.commandName} (${interaction.id})`,
+            );
         }
     }
 

@@ -1,6 +1,6 @@
 import { Command } from "@nestjs-architects/typed-cqrs";
 import { ChannelInfo, CommunityPost } from "yt-scraping-utilities";
-import { Util } from "../../../../util";
+import { Util } from "../../../../shared/util/util";
 
 export interface FetchPostsCommandOptions<C extends boolean> {
     channelId: string;

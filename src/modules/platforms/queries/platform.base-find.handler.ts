@@ -1,6 +1,6 @@
 import { IQueryHandler } from "@nestjs/cqrs";
 import { Repository } from "typeorm";
-import { ConditionalMultiple } from "../../../util";
+import { ConditionalMultiple } from "../../../shared/util/util";
 import { IPlatformObject } from "../platform.interfaces";
 import { IPlatformFindQuery } from "./platform.base-find.query";
 

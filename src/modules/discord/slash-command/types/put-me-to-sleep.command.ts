@@ -5,15 +5,21 @@ import { Interaction } from "../decorators/interaction.decorator";
 import { Integer, Member } from "../decorators/option.decorator";
 import { SlashCommand } from "../decorators/slash-command.decorator";
 
-@SlashCommand({name: "put-me-to-sleep", description: "Put a user to sleep!"})
+@SlashCommand({ name: "put-me-to-sleep", description: "Put a user to sleep!" })
 export class PutMeToSleepCommand {
     @Command()
     async putToSleep(
-        @Member({name: "member", description: "The member to time out.", required: true}) member: GuildMember,
+        @Member({ name: "member", description: "The member to time out.", required: true }) member: GuildMember,
         @Interaction() interaction: ChatInputCommandInteraction,
-        @Integer({name: "time", description: "Amount of time (in hours) to put the user to sleep for.", min_value: 1, max_value: 8}) time?: number,
+        @Integer({
+            name: "time",
+            description: "Amount of time (in hours) to put the user to sleep for.",
+            min_value: 1,
+            max_value: 8,
+        })
+        time?: number,
     ) {
-        const {member: issuer} = interaction;
+        const { member: issuer } = interaction;
 
         await interaction.deferReply();
 
@@ -23,6 +29,11 @@ export class PutMeToSleepCommand {
 
         return new EmbedBuilder()
             .setColor(Colors.Green)
-            .setDescription(`Put ${member} to sleep until ${toHammertime(until, HammertimeFlag.FullTime)} (${toHammertime(until, HammertimeFlag.Remaining)})`);
+            .setDescription(
+                `Put ${member} to sleep until ${toHammertime(until, HammertimeFlag.FullTime)} (${toHammertime(
+                    until,
+                    HammertimeFlag.Remaining,
+                )})`,
+            );
     }
 }

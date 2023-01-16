@@ -45,14 +45,14 @@ describe("SlashCommand tests", () => {
     it("finds commands with different subcommands and their handlers, and also builds API object correctly", async () => {
         @SlashCommand({ name: "test", description: ":)" })
         class TestCommand {
-            @Command({ subcommandName: "subcommand", description: "I'm a test!" })
+            @Command({ name: "subcommand", description: "I'm a test!" })
             testMethod(
                 @Option({ type: OptionType.String, description: "Test option", name: "tested" }) tested: string,
             ) {
                 return tested;
             }
 
-            @Command({ subcommandName: "other_subcommand", description: "I'm a different test!" })
+            @Command({ name: "other_subcommand", description: "I'm a different test!" })
             otherTestMethod(@Interaction() interaction: ChatInputCommandInteraction) {}
         }
 

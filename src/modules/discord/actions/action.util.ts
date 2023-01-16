@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "@discordjs/builders";
 import { Colors } from "discord.js";
 import { Platform } from "../../../constants";
-import { Util } from "../../../util";
+import { Util } from "../../../shared/util/util";
 import { CommunityPostEntity } from "../../platforms/models/post.entity";
 import { ActionDescriptor } from "../models/action.entity";
 import { IActionPayload } from "./action.interfaces";

@@ -7,7 +7,7 @@ export namespace Util {
         return base;
     }
 
-    export function batch<T>(input: T[], batchSize = 10) {
+    export function batch<T>(input: T[], batchSize = 10): T[][] {
         const batches: T[][] = [];
         for (let i = 0; i < input.length; i += batchSize) {
             batches.push(input.slice(i, i + batchSize));
@@ -59,7 +59,7 @@ export namespace Util {
     }
 
     /**
-     * Assigns all enumerable properties from `source` to `target` if the property's value is not `undefined`.
+     * Assigns all enumerable properties from `source` to `target` if the property's value in source is not `undefined`.
      * @param target the object to assign to.
      * @param source the object to assign from.
      */
@@ -69,7 +69,30 @@ export namespace Util {
             target[key] = value;
         }
     }
+
+
+    /**
+     * Returns a **new** object that overwrites existing objects.
+     * Also merges sub-objects and concatenates arrays if from[key] & into[key] are the same type.
+     */
+    export function merge<T extends object, U extends object>(from: T, into: U): T & U {
+        const obj: Record<string, any> = {...into};
+
+        for (const [key, value] of Object.entries(from)) {
+            const intoValue = into[key];
+            if (Array.isArray(value) && Array.isArray(intoValue)) {
+                obj[key] = [...value, ...intoValue];
+            }
+            else if (Object.getPrototypeOf(value) === Object.prototype && Object.getPrototypeOf(intoValue) === Object.prototype) {
+                obj[key] = merge(value, intoValue);
+            }
+            else obj[key] = value;
+        }
+
+        return obj as T & U;
+    }
 }
+
 
 // I can do this, because I'm the package author and I'll know which updates will break it. :)
 export { RequireAtLeastOne, RequireOnlyOne } from "yt-scraping-utilities/dist/util";
@@ -84,3 +107,5 @@ export type LastArrayElement<ValueType extends readonly unknown[]> = ValueType e
     : never;
 
 export type ConditionalMultiple<One extends boolean, T> = One extends true ? T : T[];
+
+export type ElementType<TArray extends Array<unknown>> = TArray extends Array<infer TElement> ? TElement : never;

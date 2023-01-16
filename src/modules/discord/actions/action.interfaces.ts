@@ -1,4 +1,4 @@
-import { RequireOnlyOne } from "../../../util";
+import { RequireOnlyOne } from "../../../shared/util/util";
 import { Event } from "../../../constants";
 import { ChannelEntity } from "../../platforms/models/channel.entity";
 import { PostEntity } from "../../platforms/models/post.entity";

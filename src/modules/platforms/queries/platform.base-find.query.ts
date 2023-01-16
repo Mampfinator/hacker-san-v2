@@ -1,6 +1,6 @@
 import { Query } from "@nestjs-architects/typed-cqrs";
 import { FindManyOptions, FindOneOptions, FindOptionsWhere, FindOptionsWhereProperty } from "typeorm";
-import { ConditionalMultiple } from "../../../util";
+import { ConditionalMultiple } from "../../../shared/util/util";
 import { IPlatformObject } from "../platform.interfaces";
 
 export interface IPlatformFindQuery<TEntity extends IPlatformObject, One extends boolean = false> {

@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { Util } from "../../../util";
+import { Util } from "../../../shared/util/util";
 import {
     extractGridVideoRenderer,
     extractGridVideoRenderers,

@@ -21,8 +21,8 @@ import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
 import { DiscordClientService } from "./discord-client.service";
 import { QueryBus } from "@nestjs/cqrs";
 import { getActions, getActionType } from "./actions/decorators/action";
-import { Util } from "../../util";
-import { Logger } from "@nestjs/common";
+import { Util } from "../../shared/util/util";
+import { Body, Logger } from "@nestjs/common";
 import { DiscordRESTService } from "./discord-rest.service";
 import { Routes } from "discord-api-types/v10";
 import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
@@ -207,6 +207,11 @@ export enum HammertimeFlag {
 }
 
 export function toHammertime(date: Date, flag?: HammertimeFlag): string {
-    const timestamp = Math.floor(Number(date)/1000);
-    return `<t:${timestamp}${flag? `:${flag}` : ""}>`;
+    const timestamp = Math.floor(Number(date) / 1000);
+    return `<t:${timestamp}${flag ? `:${flag}` : ""}>`;
 }
+
+export const PLATFORM_CHOICES: { name: string; value: Platform }[] = [
+    { name: "YouTube", value: "youtube" },
+    { name: "Twitter", value: "twitter" },
+];

@@ -1,6 +1,6 @@
 import { EmbedField } from "discord.js";
 import { Platform, PLATFORM_NAME_LOOKUP, Event } from "../../../constants";
-import { Util } from "../../../util";
+import { Util } from "../../../shared/util/util";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { getActions, getActionType } from "../actions/decorators/action";
 

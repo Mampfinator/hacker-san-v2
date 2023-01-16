@@ -11,12 +11,11 @@ const METHOD_LOOKUP_TABLE = {
     [OptionType.Boolean]: "getBoolean",
     [OptionType.User]: "getMember",
     [OptionType.Channel]: "getChannel",
-    [OptionType.Role]: "getRole", 
+    [OptionType.Role]: "getRole",
     [OptionType.Mentionable]: "getMentionable",
     [OptionType.Number]: "getNumber",
-    [OptionType.Attachment]: "getAttachment"
-}
-
+    [OptionType.Attachment]: "getAttachment",
+};
 
 @Injectable()
 export class SlashCommandDispatcher implements ISlashCommandDispatcher {
@@ -44,11 +43,7 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
 
                 const methodName = METHOD_LOOKUP_TABLE[type];
 
-
-                args.push(
-                    options[methodName](value.name, value.required)
-                );
-
+                args.push(options[methodName](value.name, value.required));
             }
         }
 
@@ -59,13 +54,13 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
     }
 
     private makeIdentifier({ commandName, options }: ChatInputCommandInteraction): Partial<CommandIdentifier> {
-        const   subcommandGroupName = options.getSubcommandGroup(false),
-                subcommandName = options.getSubcommand(false);
+        const subcommandGroupName = options.getSubcommandGroup(false),
+            subcommandName = options.getSubcommand(false);
 
         return {
-            commandName, 
-            subcommandGroupName, 
+            commandName,
+            subcommandGroupName,
             subcommandName,
-        }
+        };
     }
 }
