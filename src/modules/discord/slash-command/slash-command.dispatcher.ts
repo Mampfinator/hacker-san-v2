@@ -49,7 +49,7 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
 
         const reply = await handler.instance[handler.methodName](...args);
         if (!reply) return;
-        
+
         await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"](reply);
     }
 

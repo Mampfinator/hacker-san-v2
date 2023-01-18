@@ -108,17 +108,20 @@ export class ActionCommand {
         interaction: ChatInputCommandInteraction,
     ): Promise<EmbedBuilder> {
         await interaction.deferReply();
-        
+
         const action = this.actions.create(options);
 
         this.commandBus.execute(new EnsureChannelCommand(options.channelId, options.platform)).then(async result => {
-            if (!result.success) return interaction.editReply({embeds: [
-                new EmbedBuilder()
-                    .setColor(Colors.Red)
-                    .setTitle("Action creation failed.")
-                    .setDescription("Failed adding this action! See the error below for more information")
-                    .addFields({name: `Error: ${result.error.name}`, value: `${result.error.message}`})
-            ]});
+            if (!result.success)
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor(Colors.Red)
+                            .setTitle("Action creation failed.")
+                            .setDescription("Failed adding this action! See the error below for more information")
+                            .addFields({ name: `Error: ${result.error.name}`, value: `${result.error.message}` }),
+                    ],
+                });
 
             await this.actions.insert(action);
 
@@ -128,16 +131,16 @@ export class ActionCommand {
                         .setColor(Colors.Green)
                         .setTitle("Action created.")
                         .setDescription(`Action successfully created.`)
-                        .addFields([action.toEmbedField()])
-                ]
+                        .addFields([action.toEmbedField()]),
+                ],
             });
-
-
         });
 
         return new EmbedBuilder()
             .setTitle("Action creation pending.")
-            .setDescription("It'll be activated and inserted once the channel in question has been synced to avoid notification spam.")
+            .setDescription(
+                "It'll be activated and inserted once the channel in question has been synced to avoid notification spam.",
+            )
             .setColor(Colors.Aqua)
             .addFields([action.toEmbedField()]);
     }
