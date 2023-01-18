@@ -70,29 +70,28 @@ export namespace Util {
         }
     }
 
-
     /**
      * Returns a **new** object that overwrites existing objects.
      * Also merges sub-objects and concatenates arrays if from[key] & into[key] are the same type.
      */
     export function merge<T extends object, U extends object>(from: T, into: U): T & U {
-        const obj: Record<string, any> = {...into};
+        const obj: Record<string, any> = { ...into };
 
         for (const [key, value] of Object.entries(from)) {
             const intoValue = into[key];
             if (Array.isArray(value) && Array.isArray(intoValue)) {
                 obj[key] = [...value, ...intoValue];
-            }
-            else if (Object.getPrototypeOf(value) === Object.prototype && Object.getPrototypeOf(intoValue) === Object.prototype) {
+            } else if (
+                Object.getPrototypeOf(value) === Object.prototype &&
+                Object.getPrototypeOf(intoValue) === Object.prototype
+            ) {
                 obj[key] = merge(value, intoValue);
-            }
-            else obj[key] = value;
+            } else obj[key] = value;
         }
 
         return obj as T & U;
     }
 }
-
 
 // I can do this, because I'm the package author and I'll know which updates will break it. :)
 export { RequireAtLeastOne, RequireOnlyOne } from "yt-scraping-utilities/dist/util";

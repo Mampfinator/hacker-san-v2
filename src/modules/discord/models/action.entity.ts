@@ -24,7 +24,7 @@ Function('return import("nanoid")')().then(({ customAlphabet }) => {
 });
 
 @Entity({ name: "action" })
-export class ActionDescriptor {
+export class ActionDescriptor<T extends Record<string, string> = Record<string, string>> {
     public toEmbedField(inline?: boolean): EmbedField {
         return {
             name: `${this.id} | On: ${Util.firstUpperCase(this.onEvent)} - ${Util.firstUpperCase(this.type)}`,
@@ -76,5 +76,5 @@ export class ActionDescriptor {
      * Contains additional things like custom text, a channel, ...
      */
     @Column("jsonb", { nullable: false, default: {} })
-    data: any;
+    data: T;
 }

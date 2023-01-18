@@ -92,19 +92,22 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
 
                     // is no-group subcommand handler
                 } else if (subcommandGroupName === NO_GROUP_HANDLER && typeof subcommandName === "string") {
-                    options = (
+                    try {
+                        options = (
                         apiCommand.options.find(
                             ({ name, type }) => name === subcommandName && type === OptionType.Subcommand,
                         ) as any
-                    ).options;
-
+                        ).options
+                    } catch {
+                        throw new Error(`No options for ${commandName}.${subcommandName} found.`);
+                    }
                     // is full group subcommand handler
                 } else if (typeof subcommandGroupName === "string" && typeof subcommandName === "string") {
                     options = (
                         apiCommand.options.find(
                             ({ type, name }) => name === subcommandGroupName && type === OptionType.SubcommandGroup,
                         ) as any
-                    ).options.find(({ type, name }) => name === subcommandName && type === OptionType.Subcommand);
+                    ).options.find(({ type, name }) => name === subcommandName && type === OptionType.Subcommand)?.options;
                 } else {
                     throw new Error(
                         `Could not determine how to apply options to ${commandName}.${String(

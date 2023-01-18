@@ -7,4 +7,4 @@ export const TEXT_CHANNEL_TYPES: Exclude<ChannelType, ChannelType.DM | ChannelTy
     ChannelType.AnnouncementThread,
     ChannelType.GuildAnnouncement,
     ChannelType.GuildVoice, // integrated voice text
-]
+];

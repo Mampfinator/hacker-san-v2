@@ -3,7 +3,7 @@ import { Util } from "./util";
 describe("Util tests", () => {
     describe("General utility functions", () => {
         test("interpolate", () => {
-            const test = Util.interpolate("{test}", {test: "123", invalid: "invalid!"});
+            const test = Util.interpolate("{test}", { test: "123", invalid: "invalid!" });
             expect(test).toBe("123");
         });
 
@@ -17,14 +17,13 @@ describe("Util tests", () => {
         });
 
         test("assignIfDefined", () => {
-            const target = {test: "hi!"}
-            
-            Util.assignIfDefined(target, {tested: "bye!", ignoreThis: undefined});
+            const target = { test: "hi!" };
 
-            expect(target).toEqual({test: "hi!", tested: "bye!"});
+            Util.assignIfDefined(target, { tested: "bye!", ignoreThis: undefined });
+
+            expect(target).toEqual({ test: "hi!", tested: "bye!" });
             expect("ignoreThis" in target).toBe(false);
         });
-
 
         test("merge", () => {
             const from = {
@@ -33,7 +32,7 @@ describe("Util tests", () => {
                 shouldBe1: 1,
                 array: [1, 2, 3],
                 heh: ["overwritten"],
-            }
+            };
 
             const into = {
                 test: "bye!",
@@ -41,20 +40,18 @@ describe("Util tests", () => {
                 shouldBe1: 2,
                 array: [4, 5],
                 heh: 1,
-            }
+            };
 
             const merged = Util.merge(from, into);
 
             expect(merged).toEqual({
                 test: "hi!",
                 fromFrom: "from!",
-                tested: ":)", 
+                tested: ":)",
                 shouldBe1: 1,
                 array: [1, 2, 3, 4, 5],
                 heh: ["overwritten"],
             });
-
         });
     });
-    
 });

@@ -32,7 +32,13 @@ export const ensureData = (target: object): Partial<APIApplicationCommand> => {
 };
 
 export const IDENTIFIER_METHODS = Symbol("Identifier Method Map");
+/**
+ * This handler is a default handler.
+ */
 export const DEFAULT_HANDLER = Symbol("Default Handler");
+/**
+ * This subcommand handler does not belong to any subcommand group.
+ */
 export const NO_GROUP_HANDLER = Symbol("No Group Handler");
 
 interface HandlerItem {
@@ -58,16 +64,19 @@ export const getHandlers = (target: object): HandlerItem[] => {
 export const addHandler = (
     target: object,
     key: string | symbol,
-    { subcommandName, subcommandGroupName }: SubCommandIdentifier,
+    { name, group }: {name?: string, group?: string} ,
 ) => {
     if (!Reflect.hasMetadata(IDENTIFIER_METHODS, target)) Reflect.defineMetadata(IDENTIFIER_METHODS, [], target);
 
     const handlers = getHandlers(target);
 
+    const subcommandName = name ?? DEFAULT_HANDLER;
+    const subcommandGroupName = group ?? (name ? NO_GROUP_HANDLER : DEFAULT_HANDLER);
+
     handlers.push({
         commandName: "",
-        subcommandName: subcommandName ?? DEFAULT_HANDLER,
-        subcommandGroupName: subcommandGroupName ?? subcommandName ? NO_GROUP_HANDLER : DEFAULT_HANDLER,
+        subcommandName,
+        subcommandGroupName,
         methodKey: key,
     });
 };

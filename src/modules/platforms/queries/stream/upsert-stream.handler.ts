@@ -15,6 +15,6 @@ export class UpsertStreamHandler implements IInferredQueryHandler<UpsertStreamQu
             .into(StreamEntity)
             .values(stream)
             .orUpdate(["status"], "PLATFORM_ID_UNIQUE")
-            .execute()
+            .execute();
     }
 }

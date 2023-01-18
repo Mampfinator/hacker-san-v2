@@ -11,14 +11,15 @@ export interface CommandOptions {
     description: string;
 }
 
-const toSubcommandIdentifier = ({name: subcommandName, group: subcommandGroupName}: CommandOptions): Omit<CommandIdentifier, "commandName"> => ({subcommandName, subcommandGroupName})
+const toSubcommandIdentifier = ({
+    name: subcommandName,
+    group: subcommandGroupName,
+}: CommandOptions): Omit<CommandIdentifier, "commandName"> => ({ subcommandName, subcommandGroupName });
 
 /**
  * SlashCommand handler decorator. Marks this method as a handler for a specific slash command.
  */
-export const Command = (
-    options?: RequireAtLeastOne<CommandOptions, "name" | "group">,
-): MethodDecorator => {
+export const Command = (options?: RequireAtLeastOne<CommandOptions, "name" | "group">): MethodDecorator => {
     return (target, key, _descriptor) => {
         const data = ensureData(target.constructor);
         if (options) {
@@ -57,6 +58,6 @@ export const Command = (
             }
         }
 
-        addHandler(target.constructor, key, options ? toSubcommandIdentifier(options) : {});
+        addHandler(target.constructor, key, options ?? {});
     };
 };

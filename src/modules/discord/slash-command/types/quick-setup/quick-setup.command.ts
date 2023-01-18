@@ -44,14 +44,14 @@ export class QuickSetupCommand {
 
     @Command({ name: "rename", description: "Set up live indicator emojis for a channel." })
     rename(
-        @Channel({ name: "channel", description: "The channel to set up", required: true, channel_types: []}) channel: DiscordChannel,
+        @Channel({ name: "channel", description: "The channel to set up", required: true, channel_types: [] })
+        channel: DiscordChannel,
         @String({
             name: "base-name",
             description: "Base name for the channel. If not set, defaults to provided channel's name.",
         })
         baseName?: string,
-    ) {
-    }
+    ) {}
 
     @Command({ name: "threads-migration", description: "Migrate setup for a stream to threads!" })
     migrateToThreads(

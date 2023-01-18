@@ -200,7 +200,6 @@ export class DiscordClientService extends Client implements OnModuleInit {
                 await this.queryBus.execute(new FindChannelQuery().forPlatform(In(["youtube", "twitter"])))
             ).length;
 
-
             await this.guilds.fetch();
             const guilds = this.guilds.cache.size;
 

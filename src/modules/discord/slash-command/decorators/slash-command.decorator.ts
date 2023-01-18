@@ -7,7 +7,7 @@ import { OptionType } from "./option.decorator.types";
 export interface SlashCommandOptions {
     name: string;
     description: string;
-    subcommandGroups?: Omit<APIApplicationCommandSubcommandGroupOption, "type" | "required" | "options">[]
+    subcommandGroups?: Omit<APIApplicationCommandSubcommandGroupOption, "type" | "required" | "options">[];
 }
 
 /**
@@ -18,14 +18,20 @@ export const SlashCommand = (options: SlashCommandOptions): ClassDecorator => {
         const data = ensureData(target);
         data.name = options.name;
         data.description = options.description;
-        
-        if (!options.subcommandGroups || options.subcommandGroups.length === 0) return;
-        const toFullOption = (option: ElementType<SlashCommandOptions["subcommandGroups"]>) => ({...option, type: OptionType.SubcommandGroup, required: false} as APIApplicationCommandSubcommandGroupOption)
 
+        if (!options.subcommandGroups || options.subcommandGroups.length === 0) return;
+        const toFullOption = (option: ElementType<SlashCommandOptions["subcommandGroups"]>) =>
+            ({
+                ...option,
+                type: OptionType.SubcommandGroup,
+                required: false,
+            } as APIApplicationCommandSubcommandGroupOption);
 
         if (data.options) {
             for (const group of options.subcommandGroups.map(toFullOption)) {
-                const existingOption = data.options.find(({type, name}) => type === OptionType.SubcommandGroup && name === group.name); 
+                const existingOption = data.options.find(
+                    ({ type, name }) => type === OptionType.SubcommandGroup && name === group.name,
+                );
                 if (!existingOption) {
                     data.options.push(group);
                 } else {
