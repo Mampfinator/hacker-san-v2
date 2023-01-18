@@ -48,9 +48,9 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
         }
 
         const reply = await handler.instance[handler.methodName](...args);
-
-        if (interaction.replied || !reply) return;
-        await interaction[interaction.deferred ? "editReply" : "reply"](reply);
+        if (!reply) return;
+        
+        await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"](reply);
     }
 
     private makeIdentifier({ commandName, options }: ChatInputCommandInteraction): Partial<CommandIdentifier> {
