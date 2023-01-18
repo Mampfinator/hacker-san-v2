@@ -107,13 +107,39 @@ export class ActionCommand {
         options: Omit<PropertiesOnly<ActionDescriptor>, "id">,
         interaction: ChatInputCommandInteraction,
     ): Promise<EmbedBuilder> {
-        await this.actions.insert(
-            this.actions.create(options)
-        );
+        await interaction.deferReply();
+        
+        const action = this.actions.create(options);
 
-        this.commandBus.execute(new EnsureChannelCommand(options.channelId, options.platform));
+        this.commandBus.execute(new EnsureChannelCommand(options.channelId, options.platform)).then(async result => {
+            if (!result.success) return interaction.editReply({embeds: [
+                new EmbedBuilder()
+                    .setColor(Colors.Red)
+                    .setTitle("Action creation failed.")
+                    .setDescription("Failed adding this action! See the error below for more information")
+                    .addFields({name: `Error: ${result.error.name}`, value: `${result.error.message}`})
+            ]});
 
-        return new EmbedBuilder();
+            await this.actions.insert(action);
+
+            await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(Colors.Green)
+                        .setTitle("Action created.")
+                        .setDescription(`Action successfully created.`)
+                        .addFields([action.toEmbedField()])
+                ]
+            });
+
+
+        });
+
+        return new EmbedBuilder()
+            .setTitle("Action creation pending.")
+            .setDescription("It'll be activated and inserted once the channel in question has been synced to avoid notification spam.")
+            .setColor(Colors.Aqua)
+            .addFields([action.toEmbedField()]);
     }
 
     @Command({ group: "create", name: "lock", description: "Locks or unlocks a channel." })
