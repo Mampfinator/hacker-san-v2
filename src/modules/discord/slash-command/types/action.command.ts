@@ -107,7 +107,9 @@ export class ActionCommand {
         options: Omit<PropertiesOnly<ActionDescriptor>, "id">,
         interaction: ChatInputCommandInteraction,
     ): Promise<EmbedBuilder> {
-        await this.actions.insert(options);
+        await this.actions.insert(
+            this.actions.create(options)
+        );
 
         this.commandBus.execute(new EnsureChannelCommand(options.channelId, options.platform));
 
