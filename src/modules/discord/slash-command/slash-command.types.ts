@@ -8,7 +8,7 @@ export interface ISlashCommandDispatcher {
 
 export interface SlashCommandHandler {
     methodName: string | symbol;
-    methodRef: (...args: any) => any;
+    instance: unknown;
     constructor: Type<unknown>;
 }
 

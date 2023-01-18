@@ -73,7 +73,8 @@ describe("SlashCommand tests", () => {
             expect(typeof handler.constructor).toBe("function");
             expect(handler.constructor.name).toBe("TestCommand");
             expect(typeof handler.methodName).toBe("string");
-            expect(typeof handler.methodRef).toBe("function");
+            expect(typeof handler.instance).toBe("object");
+            expect(handler.instance instanceof handler.constructor).toBe(true);
 
             expect(apiData[0]).toMatchObject({
                 name: "test",

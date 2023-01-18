@@ -42,7 +42,7 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
     private findHandler({ commandName, subcommandGroupName, subcommandName }: Partial<CommandIdentifier>) {
         return this.handlerMap
             .get(commandName)
-            ?.get(subcommandGroupName ?? subcommandName ? NO_GROUP_HANDLER : DEFAULT_HANDLER)
+            ?.get(subcommandGroupName ?? (subcommandName ? NO_GROUP_HANDLER : DEFAULT_HANDLER))
             ?.get(subcommandName ?? DEFAULT_HANDLER);
     }
 
@@ -75,7 +75,7 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
                     },
                     handler: {
                         methodName: methodKey,
-                        methodRef: instance[methodKey] as (...args: any[]) => any,
+                        instance,
                         constructor: injectType,
                     },
                 });
