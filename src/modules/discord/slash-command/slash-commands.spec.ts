@@ -16,22 +16,22 @@ describe("SlashCommand tests", () => {
                 imports: [DiscoveryModule],
                 providers: [SlashCommandDiscovery, ...(commands ?? [])],
             }).compile();
-    
+
             return moduleRef.get(SlashCommandDiscovery);
         }
-    
+
         test("if it finds and correctly assigns commands with a default handler", async () => {
             @SlashCommand({ name: "test", description: ":)" })
             class TestCommand {
                 @Command()
                 handle(@Option({ type: OptionType.String, description: "test", name: "tested" }) test: string) {}
             }
-    
+
             const discovery = await getDiscovery(TestCommand);
             await discovery.discover();
-    
+
             const [testData] = discovery.getApiData();
-    
+
             expect(testData).toMatchObject({
                 name: "test",
                 description: ":)",
@@ -43,11 +43,11 @@ describe("SlashCommand tests", () => {
                     },
                 ],
             });
-    
+
             const testHandler = discovery.getHandler({ commandName: "test" });
             expect(testHandler.methodName).toBe("handle");
         });
-    
+
         test("if it finds commands with different subcommands and their handlers, and also builds API object correctly", async () => {
             @SlashCommand({ name: "test", description: ":)" })
             class TestCommand {
@@ -57,25 +57,24 @@ describe("SlashCommand tests", () => {
                 ) {
                     return tested;
                 }
-    
+
                 @Command({ name: "other_subcommand", description: "I'm a different test!" })
                 otherTestMethod(@Interaction() interaction: ChatInputCommandInteraction) {}
             }
-    
-    
+
             const discovery = await getDiscovery(TestCommand);
             await discovery.discover();
-    
+
             const apiData = discovery.getApiData();
-    
+
             expect(discovery.getApiData().length).toBe(1);
-    
+
             const handler = discovery.getHandler({ commandName: "test", subcommandName: "subcommand" });
             expect(typeof handler.constructor).toBe("function");
             expect(handler.constructor.name).toBe("TestCommand");
             expect(typeof handler.methodName).toBe("string");
             expect(typeof handler.methodRef).toBe("function");
-    
+
             expect(apiData[0]).toMatchObject({
                 name: "test",
                 description: ":)",
@@ -101,31 +100,25 @@ describe("SlashCommand tests", () => {
                 ],
             });
         });
-    
+
         test("if it handles slashcommand subcommand groups with several subcommands accordingly", async () => {
-            @SlashCommand({name: "test", description: "", subcommandGroups: [
-                {name: "create", description: ""}
-            ]})
+            @SlashCommand({ name: "test", description: "", subcommandGroups: [{ name: "create", description: "" }] })
             class TestCommand {
-                @Command({name: "test1", group: "create", description: ""})
-                test1(
-                    @String({name: "hi", description: "", required: true}) hi: string,
-                ) {}
-    
-                @Command({name: "test2", group: "create", description: ""})
-                test2(
-                    @String({name: "hi", description: ""}) hi: string,
-                ) {}
-    
-                @Command({name: "remove", description: ""})
+                @Command({ name: "test1", group: "create", description: "" })
+                test1(@String({ name: "hi", description: "", required: true }) hi: string) {}
+
+                @Command({ name: "test2", group: "create", description: "" })
+                test2(@String({ name: "hi", description: "" }) hi: string) {}
+
+                @Command({ name: "remove", description: "" })
                 remove() {}
             }
-    
+
             const discovery = await getDiscovery(TestCommand);
             await discovery.discover();
-    
+
             const [apiData] = discovery.getApiData();
-    
+
             expect(apiData).toMatchObject({
                 name: "test",
                 description: "",
@@ -144,9 +137,9 @@ describe("SlashCommand tests", () => {
                                         name: "hi",
                                         description: "",
                                         type: OptionType.String,
-                                    }
-                                ]
-                            }, 
+                                    },
+                                ],
+                            },
                             {
                                 name: "test2",
                                 description: "",
@@ -154,22 +147,21 @@ describe("SlashCommand tests", () => {
                                 options: [
                                     {
                                         name: "hi",
-                                        description: "", 
-                                        type: OptionType.String, 
-                                    }
-                                ]
-                            }
-                        ]
+                                        description: "",
+                                        type: OptionType.String,
+                                    },
+                                ],
+                            },
+                        ],
                     },
                     {
                         name: "remove",
                         description: "",
                         type: OptionType.Subcommand,
-                        options: []
-                    }
-                ]
+                        options: [],
+                    },
+                ],
             });
-    
         });
-    })
+    });
 });

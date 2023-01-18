@@ -64,7 +64,7 @@ export const getHandlers = (target: object): HandlerItem[] => {
 export const addHandler = (
     target: object,
     key: string | symbol,
-    { name, group }: {name?: string, group?: string} ,
+    { name, group }: { name?: string; group?: string },
 ) => {
     if (!Reflect.hasMetadata(IDENTIFIER_METHODS, target)) Reflect.defineMetadata(IDENTIFIER_METHODS, [], target);
 
