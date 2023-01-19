@@ -204,7 +204,7 @@ export class ActionCommand {
         );
     }
 
-    @Command({ group: "create", name: "echo", description: "Sends a message" })
+    @Command({ group: "create", name: "echo", description: "Sends a message." })
     async createEcho(
         @String(PLATFORM_OPTIONS) platform: Platform,
         @String(CHANNELID_OPTIONS) channelId: string,
@@ -236,7 +236,7 @@ export class ActionCommand {
     @Command({
         group: "create",
         name: "notify",
-        description: "Sends a notification. Like Echo, but generated embeds for certain platforms.",
+        description: "Sends a notification. Like Echo, but generates embeds for certain platform & event combinations.",
     })
     async createNotify(
         @String(PLATFORM_OPTIONS) platform: Platform,
