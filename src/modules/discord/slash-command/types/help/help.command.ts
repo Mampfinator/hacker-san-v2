@@ -13,15 +13,13 @@ export class HelpCommand {
             name: "topic",
             description: "What exactly you need help on. Omit for an overview.",
             required: false,
-            choices: [
-                { name: "Platforms", value: "platforms"}
-            ],
+            choices: [{ name: "Platforms", value: "platforms" }],
         })
         topic?: "actions" | "interpolation" | "platforms",
     ) {
         return {
             embeds: [HELP_COMMAND_TOPIC_MAP.get(topic)],
-            ephemeral: true, 
+            ephemeral: true,
         };
     }
 }

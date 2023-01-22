@@ -1,34 +1,38 @@
 import { bold, Colors, EmbedBuilder, italic } from "discord.js";
 
 export const HELP_COMMAND_TOPIC_MAP = new Map<string | undefined, EmbedBuilder>()
-    .set(undefined, new EmbedBuilder()
-        .setColor(Colors.Aqua)
-        .setTitle("General Help")
-        .setDescription(`
+    .set(
+        undefined,
+        new EmbedBuilder()
+            .setColor(Colors.Aqua)
+            .setTitle("General Help")
+            .setDescription(
+                `
             Hi! Welcome to the Hacker-san general help! For help about specific topics, use \`/help topic:[...]\`.
             Hacker-san is yet another notification bot but with a focus on customisability & server automation.
             You can find details about what certain Actions do in their respective \`/action create\` entry.
-        `)
-        .addFields(
-            {
-                name: "Open Source",
-                value: "See https://github.com/Mampfinator/hacker-san-v2 for current (WIP) code. Contributions are welcome, especially if they're on the To-Do List!",
-                inline: true,
-            },
-            {
-                name: "Money",
-                value: "Hacker-san is entirely free to use! But if you'd like to support me, I (Sir Eatsalot#6644) have a [Throne](https://throne.me/sireatsalot) where you can buy me food & stuff.",
-                inline: true,
-            },
-            {
-                name: "Dashboard",
-                value: "A Dashboard is pretty high up on the list of To-Dos! But currently resources are focused elsewhere."
-            },
-            {
-                name: "Support",
-                value: "If you need help with anything regarding the bot, feel free to contact me directly via Discord or Twitter or wherever else you can find me. If you find what you assume to be a bug, you can [create an issue](https://github.com/Mampfinator/hacker-san-v2/issues/new) on Github."
-            }
-        )
+        `,
+            )
+            .addFields(
+                {
+                    name: "Open Source",
+                    value: "See https://github.com/Mampfinator/hacker-san-v2 for current (WIP) code. Contributions are welcome, especially if they're on the To-Do List!",
+                    inline: true,
+                },
+                {
+                    name: "Money",
+                    value: "Hacker-san is entirely free to use! But if you'd like to support me, I (Sir Eatsalot#6644) have a [Throne](https://throne.me/sireatsalot) where you can buy me food & stuff.",
+                    inline: true,
+                },
+                {
+                    name: "Dashboard",
+                    value: "A Dashboard is pretty high up on the list of To-Dos! But currently resources are focused elsewhere.",
+                },
+                {
+                    name: "Support",
+                    value: "If you need help with anything regarding the bot, feel free to contact me directly via Discord or Twitter or wherever else you can find me. If you find what you assume to be a bug, you can [create an issue](https://github.com/Mampfinator/hacker-san-v2/issues/new) on Github.",
+                },
+            ),
     )
     .set(
         "platforms",
