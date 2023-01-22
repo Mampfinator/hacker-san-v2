@@ -1,5 +1,5 @@
 import { ActionCommand } from "./action.command";
-import { HelpCommand } from "./help.command";
+import { HelpCommand } from "./help/help.command";
 import { PutMeToSleepCommand } from "./put-me-to-sleep.command";
 import { QuickSetupCommand } from "./quick-setup/quick-setup.command";
 
