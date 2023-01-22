@@ -37,13 +37,17 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
             if (parameter.type === "interaction") {
                 args.push(interaction);
             } else if (parameter.type === "options") {
-                const { value } = parameter;
+                const { value: { name, required } } = parameter;
                 const { options } = interaction;
-                const { type } = options.get(value.name, value.required) ?? {};
 
-                const methodName = METHOD_LOOKUP_TABLE[type];
+                const option = options.get(name, required);
+                if (!option) {
+                    args.push(undefined);
+                    continue;
+                }
 
-                args.push(options[methodName](value.name, value.required));
+                const methodName = METHOD_LOOKUP_TABLE[option.type]; 
+                args.push(options[methodName](name, required));
             }
         }
 
