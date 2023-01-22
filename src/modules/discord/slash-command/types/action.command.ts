@@ -12,32 +12,7 @@ import { Interaction } from "../decorators/interaction.decorator";
 import { Channel, String } from "../decorators/option.decorator";
 import { BooleanOption, ChannelOption, StringOption } from "../decorators/option.decorator.types";
 import { SlashCommand } from "../decorators/slash-command.decorator";
-
-const PLATFORM_OPTIONS: Omit<StringOption, "type"> = {
-    name: "platform",
-    description: "Platform to trigger events for.",
-    choices: PLATFORM_CHOICES,
-    required: true,
-};
-
-const CHANNELID_OPTIONS: Omit<StringOption, "type"> = {
-    name: "channel_id",
-    description: "The channel ID to watch. Can be an ID or an @Handle",
-    required: true,
-};
-
-const DEFAULT_EVENT_OPTIONS: Omit<StringOption, "type"> = {
-    name: "event",
-    description: "Which event to listen for.",
-    choices: [
-        { name: "Upload", value: "upload" },
-        { name: "Live", value: "live" },
-        { name: "Upcoming", value: "upcoming" },
-        { name: "Offline", value: "offline" },
-        { name: "Post", value: "post" },
-    ],
-    required: true,
-};
+import { CHANNELID_OPTIONS, DEFAULT_EVENT_OPTIONS, PLATFORM_OPTIONS } from "../slash-command.constants";
 
 const TEMP_THREAD_OPTION: Omit<BooleanOption, "type"> = {
     name: "use_temp_thread",

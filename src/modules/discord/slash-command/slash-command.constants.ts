@@ -1,5 +1,6 @@
 import { APIApplicationCommand } from "discord.js";
-import { Options } from "./decorators/option.decorator.types";
+import { PLATFORM_CHOICES } from "../util";
+import { Options, StringOption } from "./decorators/option.decorator.types";
 
 export interface SlashCommandParameter<T extends "options" | "interaction" = "options" | "interaction"> {
     type: T;
@@ -92,4 +93,31 @@ const Predicates: Record<string, (identifier: CommandIdentifier, item: HandlerIt
             item.subcommandName === identifier.subcommandName
         );
     },
+};
+
+
+export const PLATFORM_OPTIONS: Omit<StringOption, "type"> = {
+    name: "platform",
+    description: "Platform to trigger events for.",
+    choices: PLATFORM_CHOICES,
+    required: true,
+};
+
+export const CHANNELID_OPTIONS: Omit<StringOption, "type"> = {
+    name: "channel_id",
+    description: "The channel ID to watch. Can be an ID or an @Handle",
+    required: true,
+};
+
+export const DEFAULT_EVENT_OPTIONS: Omit<StringOption, "type"> = {
+    name: "event",
+    description: "Which event to listen for.",
+    choices: [
+        { name: "Upload", value: "upload" },
+        { name: "Live", value: "live" },
+        { name: "Upcoming", value: "upcoming" },
+        { name: "Offline", value: "offline" },
+        { name: "Post", value: "post" },
+    ],
+    required: true,
 };
