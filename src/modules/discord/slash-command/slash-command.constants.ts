@@ -95,7 +95,6 @@ const Predicates: Record<string, (identifier: CommandIdentifier, item: HandlerIt
     },
 };
 
-
 export const PLATFORM_OPTIONS: Omit<StringOption, "type"> = {
     name: "platform",
     description: "Platform to trigger events for.",

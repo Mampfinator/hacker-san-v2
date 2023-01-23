@@ -6,11 +6,10 @@ import { Event, Platform, PropertiesOnly } from "../../../../constants";
 import { EnsureChannelCommand } from "../../../platforms/commands/ensure-channel.command";
 import { TEXT_CHANNEL_TYPES } from "../../discord.constants";
 import { ActionDescriptor } from "../../models/action.entity";
-import { PLATFORM_CHOICES } from "../../util";
 import { Command } from "../decorators/command.decorator";
 import { Interaction } from "../decorators/interaction.decorator";
 import { Channel, String } from "../decorators/option.decorator";
-import { BooleanOption, ChannelOption, StringOption } from "../decorators/option.decorator.types";
+import { BooleanOption, ChannelOption } from "../decorators/option.decorator.types";
 import { SlashCommand } from "../decorators/slash-command.decorator";
 import { CHANNELID_OPTIONS, DEFAULT_EVENT_OPTIONS, PLATFORM_OPTIONS } from "../slash-command.constants";
 
