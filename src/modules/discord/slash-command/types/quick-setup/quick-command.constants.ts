@@ -135,7 +135,7 @@ export const makeGeneralActions = ({
                 type: "notify",
                 discordChannelId: notifChannelId,
                 data: {
-                    message: `${talentName ? talentName : "{channelname}"} is now live!\n{link}`,
+                    message: `${pingRoleId ? `<@&${pingRoleId}>\n` : ""}${talentName ? talentName : "{channelname}"} is now live!\n{link}`,
                 },
             },
             {
@@ -144,7 +144,7 @@ export const makeGeneralActions = ({
                 type: "notify",
                 discordChannelId: notifChannelId,
                 data: {
-                    message: `${talentName ? talentName : "{channelname}"} uploaded a new video!\n{link}`,
+                    message: `${pingRoleId ? `<@&${pingRoleId}>\n` : ""}${talentName ? talentName : "{channelname}"} uploaded a new video!\n{link}`,
                 },
             },
         );
