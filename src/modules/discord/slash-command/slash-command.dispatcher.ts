@@ -3,6 +3,7 @@ import { ChatInputCommandInteraction, CacheType, DiscordAPIError, EmbedBuilder, 
 import { OptionType } from "./decorators/option.decorator.types";
 import { CommandIdentifier, getParameters } from "./slash-command.constants";
 import { SlashCommandDiscovery } from "./slash-command.discovery";
+import { SlashCommandError } from "./slash-command.errors";
 import { ISlashCommandDispatcher } from "./slash-command.types";
 
 const METHOD_LOOKUP_TABLE = {
@@ -60,7 +61,11 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
             await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"](reply);
         } catch (error) {
             if (error instanceof DiscordAPIError) return;
-
+            if (error instanceof SlashCommandError) {
+                const embed = error.toEmbed();
+                await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"]({embeds: [embed]});
+                return;
+            }
             this.logger.error(error);
 
             await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"]({
