@@ -42,7 +42,11 @@ export class QuickSetupCommand {
         @InjectRepository(ActionDescriptor) private readonly actions: Repository<ActionDescriptor>,
     ) {}
 
-    @Command({ name: "default", group: "preset", description: "General setup for a channel. Does not include notifications for posts." })
+    @Command({
+        name: "default",
+        group: "preset",
+        description: "General setup for a channel. Does not include notifications for posts.",
+    })
     async general(
         @String({
             name: "platform",
@@ -54,8 +58,13 @@ export class QuickSetupCommand {
         @String({ name: "channel", description: "The channel's ID or handle.", required: true })
         channelId: string,
         @Interaction() interaction: ChatInputCommandInteraction<"cached">,
-        @Role({ name: "pingrole", description: "A role to ping for whatever you're setting up." }) pingRole?: DiscordRole,
-        @String({name: "talent-name", description: "Talent name to use for announcements. Required if notif-channel is set."}) talentName?: string,
+        @Role({ name: "pingrole", description: "A role to ping for whatever you're setting up." })
+        pingRole?: DiscordRole,
+        @String({
+            name: "talent-name",
+            description: "Talent name to use for announcements. Required if notif-channel is set.",
+        })
+        talentName?: string,
         @Channel({ name: "notif-channel", description: "Channel to send notifications in." })
         notifChannel?: TextChannel | NewsChannel,
         @Channel({
@@ -65,10 +74,14 @@ export class QuickSetupCommand {
         streamChannel?: TextChannel | PublicThreadChannel,
         @String({
             name: "stream-channel-name",
-            description: "Name to use as base for renaming Actions. Prefixed with 🔴/⚫."
+            description: "Name to use as base for renaming Actions. Prefixed with 🔴/⚫.",
         })
         streamChannelName?: string,
-        @Channel({ name: "tags-channel", description: "Channel to send tags in after a stream is over. If not set and temp-threads is enabled, sends in temp thread." })
+        @Channel({
+            name: "tags-channel",
+            description:
+                "Channel to send tags in after a stream is over. If not set and temp-threads is enabled, sends in temp thread.",
+        })
         tagsChannel?: TextChannel | PublicThreadChannel,
         @Boolean({
             name: "temp-threads",
@@ -76,14 +89,25 @@ export class QuickSetupCommand {
         })
         tempThreads?: boolean,
     ) {
-        if (!notifChannel && !streamChannel && !tagsChannel) throw new SlashCommandError()
-            .setName("What exactly do you want me to do?")
-            .setReason("At least one of \`notif-channel\`, \`stream-chanel\` or \`tags-channel\` need to be set.");
+        if (!notifChannel && !streamChannel && !tagsChannel)
+            throw new SlashCommandError()
+                .setName("What exactly do you want me to do?")
+                .setReason("At least one of `notif-channel`, `stream-chanel` or `tags-channel` need to be set.");
 
         await interaction.deferReply();
         const base = { guildId: interaction.guildId, platform, channelId };
 
-        const actions = this.actions.create(makeGeneralActions({...base, pingRoleId: pingRole.id, notifChannelId: notifChannel.id, streamChannelId: streamChannel.id, streamChannelName: streamChannelName ?? streamChannel.name, tagsChannelId: tagsChannel.id, tempThreads}));
+        const actions = this.actions.create(
+            makeGeneralActions({
+                ...base,
+                pingRoleId: pingRole.id,
+                notifChannelId: notifChannel.id,
+                streamChannelId: streamChannel.id,
+                streamChannelName: streamChannelName ?? streamChannel.name,
+                tagsChannelId: tagsChannel.id,
+                tempThreads,
+            }),
+        );
         await this.actions.insert(actions);
 
         return {
@@ -95,7 +119,6 @@ export class QuickSetupCommand {
                     .addFields(actions.map(action => action.toEmbedField())),
             ],
         };
-
     }
 
     @Command({ name: "rename", group: "preset", description: "Set up live indicator emojis for a channel." })
@@ -336,18 +359,20 @@ export class QuickSetupCommand {
 
         const base = { guildId, channelId, platform };
 
-        const actions = this.actions.create(makeThreadActions({
-            guildId, 
-            platform,
-            channelId,
+        const actions = this.actions.create(
+            makeThreadActions({
+                guildId,
+                platform,
+                channelId,
 
-            streamChannelId: streamChannel.id,
-            streamChannelName: streamChannel.name,
-            notifChannelId: notifChannel.id,
-            liveMessage,
-            uploadMessage,
-            postMessage,
-        }));
+                streamChannelId: streamChannel.id,
+                streamChannelName: streamChannel.name,
+                notifChannelId: notifChannel.id,
+                liveMessage,
+                uploadMessage,
+                postMessage,
+            }),
+        );
 
         await this.actions.save(actions);
 

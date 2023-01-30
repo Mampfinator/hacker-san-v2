@@ -18,12 +18,11 @@ export class SlashCommandError {
         return this;
     }
 
-
     public toEmbed(): EmbedBuilder {
-        if (!this.reason || !this.name) throw new TypeError(`Expected reason and name to be set, got ${typeof this.reason} and ${typeof this.name} respectively.`);
-        return new EmbedBuilder()
-            .setColor(Colors.Red)
-            .setDescription(this.reason)
-            .setTitle(this.name);
+        if (!this.reason || !this.name)
+            throw new TypeError(
+                `Expected reason and name to be set, got ${typeof this.reason} and ${typeof this.name} respectively.`,
+            );
+        return new EmbedBuilder().setColor(Colors.Red).setDescription(this.reason).setTitle(this.name);
     }
 }

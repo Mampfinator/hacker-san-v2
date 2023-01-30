@@ -2,7 +2,6 @@ import { DeepPartial } from "typeorm";
 import { Platform } from "../../../../../constants";
 import { ActionDescriptor } from "../../../models/action.entity";
 
-
 export interface ActionBase {
     guildId: string;
     platform: Platform;
@@ -18,10 +17,18 @@ export interface MakeThreadOptions extends ActionBase {
     postMessage: string;
 }
 
-
-export const makeThreadActions = ({guildId, platform, channelId, streamChannelId, streamChannelName, notifChannelId, liveMessage, uploadMessage, postMessage}: MakeThreadOptions): DeepPartial<ActionDescriptor>[] => {
+export const makeThreadActions = ({
+    guildId,
+    platform,
+    channelId,
+    streamChannelId,
+    streamChannelName,
+    notifChannelId,
+    liveMessage,
+    uploadMessage,
+    postMessage,
+}: MakeThreadOptions): DeepPartial<ActionDescriptor>[] => {
     const base = { guildId, platform, channelId };
-
 
     return [
         {
@@ -91,8 +98,8 @@ export const makeThreadActions = ({guildId, platform, channelId, streamChannelId
                 message: postMessage,
             },
         },
-    ]
-}
+    ];
+};
 
 export interface GeneralActionsOptions extends ActionBase {
     pingRoleId?: string;
@@ -104,33 +111,32 @@ export interface GeneralActionsOptions extends ActionBase {
     tempThreads?: boolean;
 }
 
-
 export const makeGeneralActions = ({
-    guildId, 
-    channelId, 
+    guildId,
+    channelId,
     platform,
-    pingRoleId, 
+    pingRoleId,
     talentName,
     notifChannelId,
     streamChannelId,
     streamChannelName,
-    tagsChannelId, 
-    tempThreads
+    tagsChannelId,
+    tempThreads,
 }: GeneralActionsOptions): DeepPartial<ActionDescriptor>[] => {
     const actions: DeepPartial<ActionDescriptor>[] = [];
-    const base: ActionBase = {guildId, channelId, platform};
+    const base: ActionBase = { guildId, channelId, platform };
 
     if (notifChannelId) {
         // notif options (posts not included)
         actions.push(
             {
-                ...base, 
-                onEvent: "live", 
+                ...base,
+                onEvent: "live",
                 type: "notify",
                 discordChannelId: notifChannelId,
                 data: {
-                    message: `${talentName ? talentName : "{channelname}"} is now live!\n{link}`
-                }
+                    message: `${talentName ? talentName : "{channelname}"} is now live!\n{link}`,
+                },
             },
             {
                 ...base,
@@ -138,17 +144,17 @@ export const makeGeneralActions = ({
                 type: "notify",
                 discordChannelId: notifChannelId,
                 data: {
-                    message: `${talentName ? talentName : "{channelname}"} uploaded a new video!\n{link}`
-                }
-            }
-        )
+                    message: `${talentName ? talentName : "{channelname}"} uploaded a new video!\n{link}`,
+                },
+            },
+        );
     }
 
     if (streamChannelId) {
         // rename actions
         actions.push(
             {
-                ...base, 
+                ...base,
                 onEvent: "live",
                 type: "rename",
                 discordChannelId: streamChannelId,
@@ -157,39 +163,37 @@ export const makeGeneralActions = ({
                 },
             },
             {
-                ...base, 
+                ...base,
                 onEvent: "offline",
                 type: "rename",
                 discordChannelId: streamChannelId,
                 data: {
                     name: `⚫ ${streamChannelName}`,
                 },
-            }
-        )
+            },
+        );
 
         // temp thread action
-        if (tempThreads) actions.push(
-            {
+        if (tempThreads)
+            actions.push({
                 ...base,
-                onEvent: "live", 
+                onEvent: "live",
                 type: "thread",
                 discordChannelId: streamChannelId,
                 data: {
-                    message: "!stream {link}"
+                    message: "!stream {link}",
                 },
-            }
-        );
-        else actions.push(
-            {
+            });
+        else
+            actions.push({
                 ...base,
                 onEvent: "live",
                 type: "echo",
                 discordChannelId: streamChannelId,
                 data: {
-                    message: "!stream {link}"
-                }
-            }
-        );
+                    message: "!stream {link}",
+                },
+            });
     }
 
     if (tagsChannelId || tempThreads) {
@@ -199,10 +203,10 @@ export const makeGeneralActions = ({
             type: "echo",
             discordChannelId: tempThreads ? "TEMP_THREAD" : tagsChannelId,
             data: {
-                message: "!tags {link}"
-            }
+                message: "!tags {link}",
+            },
         });
     }
 
     return actions;
-}
+};

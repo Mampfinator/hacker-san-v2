@@ -63,7 +63,9 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
             if (error instanceof DiscordAPIError) return;
             if (error instanceof SlashCommandError) {
                 const embed = error.toEmbed();
-                await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"]({embeds: [embed]});
+                await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"]({
+                    embeds: [embed],
+                });
                 return;
             }
             this.logger.error(error);
@@ -73,8 +75,10 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
                     new EmbedBuilder()
                         .setColor(Colors.Red)
                         .setTitle("Something went wrong!")
-                        .setDescription("This is an internal error and likely not your fault. If the error persists, please reach out the bot developer.")
-                ]
+                        .setDescription(
+                            "This is an internal error and likely not your fault. If the error persists, please reach out the bot developer.",
+                        ),
+                ],
             });
         }
     }
