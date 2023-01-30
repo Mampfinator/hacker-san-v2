@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { ChatInputCommandInteraction, CacheType } from "discord.js";
+import { Injectable, Logger } from "@nestjs/common";
+import { ChatInputCommandInteraction, CacheType, DiscordAPIError, EmbedBuilder, Colors } from "discord.js";
 import { OptionType } from "./decorators/option.decorator.types";
 import { CommandIdentifier, getParameters } from "./slash-command.constants";
 import { SlashCommandDiscovery } from "./slash-command.discovery";
@@ -19,6 +19,7 @@ const METHOD_LOOKUP_TABLE = {
 
 @Injectable()
 export class SlashCommandDispatcher implements ISlashCommandDispatcher {
+    private readonly logger = new Logger(SlashCommandDispatcher.name);
     constructor(private readonly discovery: SlashCommandDiscovery) {}
 
     async dispatch(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -53,10 +54,24 @@ export class SlashCommandDispatcher implements ISlashCommandDispatcher {
             }
         }
 
-        const reply = await handler.instance[handler.methodName](...args);
-        if (!reply) return;
+        try {
+            const reply = await handler.instance[handler.methodName](...args);
+            if (!reply) return;
+            await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"](reply);
+        } catch (error) {
+            if (error instanceof DiscordAPIError) return;
 
-        await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"](reply);
+            this.logger.error(error);
+
+            await interaction[interaction.deferred || interaction.replied ? "editReply" : "reply"]({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(Colors.Red)
+                        .setTitle("Something went wrong!")
+                        .setDescription("This is an internal error and likely not your fault. If the error persists, please reach out the bot developer.")
+                ]
+            });
+        }
     }
 
     private makeIdentifier({ commandName, options }: ChatInputCommandInteraction): Partial<CommandIdentifier> {
