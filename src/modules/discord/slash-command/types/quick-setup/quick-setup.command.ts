@@ -80,7 +80,7 @@ export class QuickSetupCommand {
         @Channel({
             name: "tags-channel",
             description:
-                "Channel to send tags in after a stream is over. If not set and temp-threads is enabled, sends in temp thread.",
+                "Channel to send tags in after a stream is over. Uses temp-threads if set.",
         })
         tagsChannel?: TextChannel | PublicThreadChannel,
         @Boolean({
