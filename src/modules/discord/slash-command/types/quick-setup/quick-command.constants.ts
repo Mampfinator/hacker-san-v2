@@ -2,10 +2,14 @@ import { DeepPartial } from "typeorm";
 import { Platform } from "../../../../../constants";
 import { ActionDescriptor } from "../../../models/action.entity";
 
-export interface MakeThreadOptions {
+
+export interface ActionBase {
     guildId: string;
     platform: Platform;
     channelId: string;
+}
+
+export interface MakeThreadOptions extends ActionBase {
     streamChannelId: string;
     streamChannelName: string;
     notifChannelId: string;
@@ -13,6 +17,7 @@ export interface MakeThreadOptions {
     uploadMessage: string;
     postMessage: string;
 }
+
 
 export const makeThreadActions = ({guildId, platform, channelId, streamChannelId, streamChannelName, notifChannelId, liveMessage, uploadMessage, postMessage}: MakeThreadOptions): DeepPartial<ActionDescriptor>[] => {
     const base = { guildId, platform, channelId };
@@ -87,4 +92,117 @@ export const makeThreadActions = ({guildId, platform, channelId, streamChannelId
             },
         },
     ]
+}
+
+export interface GeneralActionsOptions extends ActionBase {
+    pingRoleId?: string;
+    talentName?: string;
+    notifChannelId?: string;
+    streamChannelId?: string;
+    streamChannelName?: string;
+    tagsChannelId?: string;
+    tempThreads?: boolean;
+}
+
+
+export const makeGeneralActions = ({
+    guildId, 
+    channelId, 
+    platform,
+    pingRoleId, 
+    talentName,
+    notifChannelId,
+    streamChannelId,
+    streamChannelName,
+    tagsChannelId, 
+    tempThreads
+}: GeneralActionsOptions): DeepPartial<ActionDescriptor>[] => {
+    const actions: DeepPartial<ActionDescriptor>[] = [];
+    const base: ActionBase = {guildId, channelId, platform};
+
+    if (notifChannelId) {
+        // notif options (posts not included)
+        actions.push(
+            {
+                ...base, 
+                onEvent: "live", 
+                type: "notify",
+                discordChannelId: notifChannelId,
+                data: {
+                    message: `${talentName ? talentName : "{channelname}"} is now live!\n{link}`
+                }
+            },
+            {
+                ...base,
+                onEvent: "upload",
+                type: "notify",
+                discordChannelId: notifChannelId,
+                data: {
+                    message: `${talentName ? talentName : "{channelname}"} uploaded a new video!\n{link}`
+                }
+            }
+        )
+    }
+
+    if (streamChannelId) {
+        // rename actions
+        actions.push(
+            {
+                ...base, 
+                onEvent: "live",
+                type: "rename",
+                discordChannelId: streamChannelId,
+                data: {
+                    name: `🔴 ${streamChannelName}`,
+                },
+            },
+            {
+                ...base, 
+                onEvent: "offline",
+                type: "rename",
+                discordChannelId: streamChannelId,
+                data: {
+                    name: `⚫ ${streamChannelName}`,
+                },
+            }
+        )
+
+        // temp thread action
+        if (tempThreads) actions.push(
+            {
+                ...base,
+                onEvent: "live", 
+                type: "thread",
+                discordChannelId: streamChannelId,
+                data: {
+                    message: "!stream {link}"
+                },
+            }
+        );
+        else actions.push(
+            {
+                ...base,
+                onEvent: "live",
+                type: "echo",
+                discordChannelId: streamChannelId,
+                data: {
+                    message: "!stream {link}"
+                }
+            }
+        );
+    }
+
+    if (tagsChannelId || tempThreads) {
+        actions.push({
+            ...base,
+            onEvent: "offline",
+            type: "echo",
+            discordChannelId: tempThreads ? "TEMP_THREAD" : tagsChannelId,
+            data: {
+                message: "!tags {link}"
+            }
+        });
+    }
+
+    return actions;
 }

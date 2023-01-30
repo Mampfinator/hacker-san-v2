@@ -10,10 +10,11 @@ import {
     EmbedBuilder,
     GuildChannel,
     NewsChannel,
+    PublicThreadChannel,
     Role as DiscordRole,
     TextChannel,
 } from "discord.js";
-import { Repository } from "typeorm";
+import { DeepPartial, Repository } from "typeorm";
 import { Platform, PLATFORM_NAME_LOOKUP } from "../../../../../constants";
 import { EnsureChannelCommand } from "../../../../platforms/commands/ensure-channel.command";
 import { ActionDescriptor } from "../../../models/action.entity";
@@ -23,7 +24,8 @@ import { Interaction } from "../../decorators/interaction.decorator";
 import { Boolean, Channel, Role, String } from "../../decorators/option.decorator";
 import { SlashCommand } from "../../decorators/slash-command.decorator";
 import { CHANNELID_OPTIONS, PLATFORM_OPTIONS } from "../../slash-command.constants";
-import { makeThreadActions } from "./quick-command.constants";
+import { SlashCommandError } from "../../slash-command.errors";
+import { makeGeneralActions, makeThreadActions } from "./quick-command.constants";
 @SlashCommand({
     name: "quick-setup",
     description: "Quickly set up actions for channels",
@@ -40,8 +42,8 @@ export class QuickSetupCommand {
         @InjectRepository(ActionDescriptor) private readonly actions: Repository<ActionDescriptor>,
     ) {}
 
-    @Command({ name: "general", description: "General setup for a channel." })
-    general(
+    @Command({ name: "default", group: "preset", description: "General setup for a channel. Does not include notifications for posts." })
+    async general(
         @String({
             name: "platform",
             description: "What platform these notifications should be for.",
@@ -52,22 +54,49 @@ export class QuickSetupCommand {
         @String({ name: "channel", description: "The channel's ID or handle.", required: true })
         channelId: string,
         @Interaction() interaction: ChatInputCommandInteraction<"cached">,
-        @Role({ name: "pingrole", description: "A role to ping for whatever you're setting up." }) role?: DiscordRole,
+        @Role({ name: "pingrole", description: "A role to ping for whatever you're setting up." }) pingRole?: DiscordRole,
+        @String({name: "talent-name", description: "Talent name to use for announcements. Required if notif-channel is set."}) talentName?: string,
         @Channel({ name: "notif-channel", description: "Channel to send notifications in." })
-        notifChannel?: DiscordChannel,
+        notifChannel?: TextChannel | NewsChannel,
         @Channel({
-            name: "stream-chat",
-            description: "Stream chat. If you want to set up temporary threads, enable temp-threads.",
+            name: "stream-channel",
+            description: "Stream channel. If you want to set up temporary threads here, enable temp-threads.",
         })
-        streamChat?: DiscordChannel,
-        @Channel({ name: "tags-channel", description: "Channel to send tags in after a stream is over." })
-        tagsChannel?: DiscordChannel,
+        streamChannel?: TextChannel | PublicThreadChannel,
+        @String({
+            name: "stream-channel-name",
+            description: "Name to use as base for renaming Actions. Prefixed with 🔴/⚫."
+        })
+        streamChannelName?: string,
+        @Channel({ name: "tags-channel", description: "Channel to send tags in after a stream is over. If not set and temp-threads is enabled, sends in temp thread." })
+        tagsChannel?: TextChannel | PublicThreadChannel,
         @Boolean({
             name: "temp-threads",
             description: "Use temporary chats in stream-chat for all stream related actions.",
         })
-        useTempThreads?: boolean,
-    ) {}
+        tempThreads?: boolean,
+    ) {
+        if (!notifChannel && !streamChannel && !tagsChannel) throw new SlashCommandError()
+            .setName("What exactly do you want me to do?")
+            .setReason("At least one of \`notif-channel\`, \`stream-chanel\` or \`tags-channel\` need to be set.");
+
+        await interaction.deferReply();
+        const base = { guildId: interaction.guildId, platform, channelId };
+
+        const actions = this.actions.create(makeGeneralActions({...base, pingRoleId: pingRole.id, notifChannelId: notifChannel.id, streamChannelId: streamChannel.id, streamChannelName: streamChannelName ?? streamChannel.name, tagsChannelId: tagsChannel.id, tempThreads}));
+        await this.actions.insert(actions);
+
+        return {
+            embeds: [
+                new EmbedBuilder()
+                    .setColor(Colors.Green)
+                    .setTitle("Quick setup completed")
+                    .setDescription(`Added ${actions.length} Actions: `)
+                    .addFields(actions.map(action => action.toEmbedField())),
+            ],
+        };
+
+    }
 
     @Command({ name: "rename", group: "preset", description: "Set up live indicator emojis for a channel." })
     async rename(
