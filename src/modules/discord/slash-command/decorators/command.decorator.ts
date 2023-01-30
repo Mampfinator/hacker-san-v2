@@ -1,5 +1,6 @@
 import { RequireAtLeastOne } from "yt-scraping-utilities/dist/util";
 import { addHandler, CommandIdentifier, ensureData } from "../slash-command.constants";
+import { descriptionSchema, nameSchema } from "../slash-command.schemas";
 import { OptionType } from "./option.decorator.types";
 
 /**
@@ -23,12 +24,14 @@ export const Command = (options?: RequireAtLeastOne<CommandOptions, "name" | "gr
     return (target, key, _descriptor) => {
         const data = ensureData(target.constructor);
         if (options) {
-            const { name: subcommandName, group: subcommandGroupName } = options;
+            const subcommandName = nameSchema.parse(options.name);
+            const subcommandGroupName = options.group ? nameSchema.parse(options.group) : undefined;
+            const description = descriptionSchema.parse(options.description);
 
             const subcommand = {
                 type: OptionType.Subcommand,
                 name: subcommandName,
-                description: options.description,
+                description,
                 options: [],
             };
 

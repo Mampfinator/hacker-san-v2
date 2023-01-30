@@ -1,4 +1,5 @@
 import { addParameter } from "../slash-command.constants";
+import { descriptionSchema, nameSchema } from "../slash-command.schemas";
 import {
     Options,
     OptionType,
@@ -18,6 +19,8 @@ import {
  */
 export const Option = (options: Options): ParameterDecorator => {
     return (target, key, index) => {
+        nameSchema.parse(options.name);
+        descriptionSchema.parse(options.description);
         addParameter(target.constructor, key, index, { type: "options", value: options });
     };
 };

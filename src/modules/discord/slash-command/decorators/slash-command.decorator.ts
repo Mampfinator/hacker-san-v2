@@ -1,6 +1,7 @@
 import { APIApplicationCommandSubcommandGroupOption } from "discord.js";
 import { ElementType, Util } from "../../../../shared/util/util";
 import { ensureData } from "../slash-command.constants";
+import { descriptionSchema, nameSchema } from "../slash-command.schemas";
 import { OptionType } from "./option.decorator.types";
 
 // TODO: add subcommandGroups option for descriptions and stuff.
@@ -16,8 +17,8 @@ export interface SlashCommandOptions {
 export const SlashCommand = (options: SlashCommandOptions): ClassDecorator => {
     return target => {
         const data = ensureData(target);
-        data.name = options.name;
-        data.description = options.description;
+        data.name = nameSchema.parse(options.name);
+        data.description = descriptionSchema.parse(options.description);
 
         if (!options.subcommandGroups || options.subcommandGroups.length === 0) return;
         const toFullOption = (option: ElementType<SlashCommandOptions["subcommandGroups"]>) =>
@@ -29,6 +30,9 @@ export const SlashCommand = (options: SlashCommandOptions): ClassDecorator => {
 
         if (data.options) {
             for (const group of options.subcommandGroups.map(toFullOption)) {
+                nameSchema.parse(group.name);
+                descriptionSchema.parse(group.description);
+
                 const existingOption = data.options.find(
                     ({ type, name }) => type === OptionType.SubcommandGroup && name === group.name,
                 );
