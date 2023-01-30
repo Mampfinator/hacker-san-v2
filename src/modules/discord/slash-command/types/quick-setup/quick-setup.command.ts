@@ -101,6 +101,7 @@ export class QuickSetupCommand {
             makeGeneralActions({
                 ...base,
                 pingRoleId: pingRole.id,
+                talentName,
                 notifChannelId: notifChannel.id,
                 streamChannelId: streamChannel.id,
                 streamChannelName: streamChannelName ?? streamChannel.name,
