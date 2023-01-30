@@ -18,11 +18,11 @@ import {
     extractCommunityPosts,
 } from "yt-scraping-utilities";
 import { ytInitialData } from "yt-scraping-utilities/dist/youtube-types";
-import { DiscordClientService } from "./client/discord-client.service";
+import { DiscordClientService } from "./discord-client.service";
 import { QueryBus } from "@nestjs/cqrs";
 import { getActions, getActionType } from "./actions/decorators/action";
-import { Util } from "../../util";
-import { Logger } from "@nestjs/common";
+import { Util } from "../../shared/util/util";
+import { Body, Logger } from "@nestjs/common";
 import { DiscordRESTService } from "./discord-rest.service";
 import { Routes } from "discord-api-types/v10";
 import { DiscordAPIError as DiscordAPIRESTError } from "@discordjs/rest";
@@ -59,7 +59,7 @@ export namespace DiscordUtil {
             .setURL(`https://youtube.com/post/${postId}`)
             .setColor("#ff0000")
             .setFooter({
-                text: `ID: ${postId}`
+                text: `ID: ${postId}`,
             });
 
         switch (attachmentType) {
@@ -200,3 +200,18 @@ export async function ignoreDiscordAPIErrors(error: any) {
     await Util.ignore(error, discordAPIError);
     ignoreLogger.warn(error);
 }
+
+export enum HammertimeFlag {
+    FullTime = "T",
+    Remaining = "R",
+}
+
+export function toHammertime(date: Date, flag?: HammertimeFlag): string {
+    const timestamp = Math.floor(Number(date) / 1000);
+    return `<t:${timestamp}${flag ? `:${flag}` : ""}>`;
+}
+
+export const PLATFORM_CHOICES: { name: string; value: Platform }[] = [
+    { name: "YouTube", value: "youtube" },
+    { name: "Twitter", value: "twitter" },
+];

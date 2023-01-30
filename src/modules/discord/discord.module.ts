@@ -6,20 +6,23 @@ import { ActionOrchestrator } from "./actions/action.orchestrator";
 import { actionTypeFactory } from "./actions/actions-helper";
 import { StreamDiscordChannelMap } from "./actions/model/stream-thread-map.entity";
 import { ActionTypes } from "./actions/types";
-import { getCommands } from "./slash-commands/slash-command";
-import { slashcommandFactory } from "./slash-commands/slash-commands.provider";
-import { DiscordClientService } from "./client/discord-client.service";
+import { DiscordClientService } from "./discord-client.service";
 import { DiscordRESTService } from "./discord-rest.service";
 import { DiscordService } from "./discord.service";
 import { ActionDescriptor } from "./models/action.entity";
 import { GuildSettings } from "./models/settings.entity";
 import { EventHandlers } from "./actions/events";
+import { DiscoveryModule } from "@nestjs-plus/discovery";
+import { SlashCommandDiscovery } from "./slash-command/slash-command.discovery";
+import { SlashCommandDispatcher } from "./slash-command/slash-command.dispatcher";
+import { SlashCommands } from "./slash-command/types";
 
 @Module({
     imports: [
         ConfigModule,
         TypeOrmModule.forFeature([GuildSettings, ActionDescriptor, StreamDiscordChannelMap]),
         CqrsModule,
+        DiscoveryModule,
     ],
     providers: [
         DiscordService,
@@ -27,10 +30,11 @@ import { EventHandlers } from "./actions/events";
         DiscordClientService,
         ActionOrchestrator,
         ...EventHandlers,
-        slashcommandFactory,
-        ...getCommands(),
         ...ActionTypes,
         actionTypeFactory,
+        SlashCommandDiscovery,
+        SlashCommandDispatcher,
+        ...SlashCommands,
     ],
     exports: [DiscordClientService],
 })

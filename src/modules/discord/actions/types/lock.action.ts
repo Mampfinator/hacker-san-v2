@@ -1,5 +1,5 @@
 import { ChannelType } from "discord.js";
-import { DiscordClientService } from "../../client/discord-client.service";
+import { DiscordClientService } from "../../discord-client.service";
 import { ActionExecuteOptions } from "../action.interfaces";
 import { interpolate } from "../action.util";
 import { Action, IActionType } from "../decorators/action";

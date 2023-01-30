@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { DiscordClientService } from "../client/discord-client.service";
+import { DiscordClientService } from "../discord-client.service";
 import { ActionDescriptor } from "../models/action.entity";
 import { Event } from "../../../constants";
 import { getActionGrouper, IActionType } from "./decorators/action";
@@ -55,7 +55,7 @@ export class ActionOrchestrator implements OnModuleInit {
             for (const result of results) {
                 if (result.status === "fulfilled") return;
 
-                this.logger.warn(`Action failed to execute: ${result.reason}`);                
+                this.logger.warn(`Action failed to execute: ${result.reason}`);
             }
         }
     }

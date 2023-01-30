@@ -18,7 +18,7 @@ import { launch } from "puppeteer";
 import { CookieJar } from "tough-cookie";
 import { getStoreByPage } from "puppeteer-tough-cookie-store";
 import { wrapper } from "axios-cookiejar-support";
-import { Primitive } from "../../util";
+import { Primitive } from "../../shared/util/util";
 import { FullChannelCrawlCommand } from "./commands/full-channel-crawl.command";
 import { VideoRenderer } from "yt-scraping-utilities";
 import { FindChannelQuery } from "../platforms/queries";

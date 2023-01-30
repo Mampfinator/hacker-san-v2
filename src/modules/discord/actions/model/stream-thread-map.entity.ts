@@ -10,7 +10,6 @@ export class StreamDiscordChannelMap {
 
     @Column()
     platform: Platform;
-
     @Column()
     platformId: string;
 

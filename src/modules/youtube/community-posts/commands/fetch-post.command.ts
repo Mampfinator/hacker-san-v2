@@ -1,5 +1,5 @@
 import { ICommand } from "@nestjs/cqrs";
-import { Util } from "../../../../util";
+import { Util } from "../../../../shared/util/util";
 
 export interface FetchPostCommandOptions {
     postId: string;

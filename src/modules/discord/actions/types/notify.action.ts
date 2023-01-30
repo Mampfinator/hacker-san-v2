@@ -1,5 +1,5 @@
 import { ChannelType, EmbedBuilder } from "discord.js";
-import { DiscordClientService } from "../../client/discord-client.service";
+import { DiscordClientService } from "../../discord-client.service";
 import { Action, IActionType } from "../decorators/action";
 import { generateEmbed, interpolate, needsEmbed } from "../action.util";
 import { ActionExecuteOptions } from "../action.interfaces";
@@ -19,7 +19,7 @@ export class NotifyAction implements IActionType {
             content: interpolate(message, { descriptor, payload }),
             embeds: needsEmbed(payload) ? [generateEmbed(payload)] : undefined,
         };
-        
+
         await channel.send(notification);
     }
 }

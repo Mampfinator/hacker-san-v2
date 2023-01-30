@@ -1,7 +1,6 @@
 import { ICommand } from "@nestjs/cqrs";
 import { CommunityPost } from "yt-scraping-utilities";
-import { RequireOnlyOne } from "yt-scraping-utilities/dist/util";
-import { Util } from "../../../../util";
+import { Util, RequireOnlyOne } from "../../../../shared/util/util";
 
 export interface SyncPostsCommandOptions {
     /**
