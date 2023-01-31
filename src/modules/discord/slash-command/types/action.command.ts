@@ -14,13 +14,13 @@ import { SlashCommand } from "../decorators/slash-command.decorator";
 import { CHANNELID_OPTIONS, DEFAULT_EVENT_OPTIONS, PLATFORM_OPTIONS } from "../slash-command.constants";
 
 const TEMP_THREAD_OPTION: Omit<BooleanOption, "type"> = {
-    name: "use_temp_thread",
+    name: "use-temp-thread",
     description: "Execute this command in a temporary thread instead of a regular channel.",
     required: false,
 };
 
 const FOR_CHANNEL_OPTION: Omit<ChannelOption, "type"> = {
-    name: "for_channel",
+    name: "for-channel",
     description: "Channel to execute this action in. If not provided, defaults to this channel.",
     channel_types: TEXT_CHANNEL_TYPES,
 };
@@ -115,7 +115,7 @@ export class ActionCommand {
             .setDescription(
                 "It'll be activated and inserted once the channel in question has been synced to avoid notification spam.",
             )
-            .setColor(Colors.Aqua)
+            .setColor(Colors.Yellow)
             .addFields([action.toEmbedField()]);
     }
 
@@ -245,7 +245,7 @@ export class ActionCommand {
         @String({
             name: "name",
             description:
-                "The naming scheme for this channel. Supports {interpolation}. Defaults to stream name and time.",
+                "The naming scheme for this channel. Supports {interpolation}. Defaults to stream name and date.",
         })
         name?: string,
         @String({ name: "message", description: "Message to start the thread with. Supports {interpolation}." })
