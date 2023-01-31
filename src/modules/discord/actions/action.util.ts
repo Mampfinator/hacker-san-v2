@@ -16,19 +16,6 @@ export function interpolate(base: string, options: ActionOptions): string {
     return Util.interpolate(base, dict);
 }
 
-const PLATFORM_DICT_MAKERS: Record<Exclude<Platform, "twitter">, (options: ActionOptions) => ActionDictionary> = {
-    youtube: ({ payload: { channel, post, video }, descriptor }) => {
-        const channelLink = `https://youtube.com/channel/${channel.platformId}`;
-        const link = post
-            ? `https://youtube.com/community/${post.platformId}`
-            : `https://youtube.com/watch?v=${video.platformId}`;
-
-        return {
-            link,
-            channelLink,
-        };
-    },
-};
 
 interface ActionDictionary extends Record<string, string> {
     /**
@@ -39,7 +26,38 @@ interface ActionDictionary extends Record<string, string> {
      * URL to the event's channel.
      */
     channelLink: string;
+
+    /**
+     * Title of the event. Only present if event target is a video.
+     */
+    title: string;
+
+    /**
+     * Date of the event in dd/mm/yyyy.
+     */
+    date: string;
 }
+
+
+const PLATFORM_DICT_MAKERS: Record<Exclude<Platform, "twitter">, (options: ActionOptions) => ActionDictionary> = {
+    youtube: ({ payload: { channel, post, video }, descriptor }) => {
+        const channelLink = `https://youtube.com/channel/${channel.platformId}`;
+        const link = post
+            ? `https://youtube.com/community/${post.platformId}`
+            : `https://youtube.com/watch?v=${video.platformId}`;
+
+        const now = new Date();
+        
+
+        return {
+            link,
+            channelLink,
+            title: video?.title,
+            date: `${now.getUTCDate()}/${now.getUTCMonth()}/${now.getUTCFullYear()}`,
+        };
+    },
+};
+
 
 export function makeDict(options: ActionOptions): ActionDictionary {
     const {
