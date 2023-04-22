@@ -1,6 +1,6 @@
 import { DiscoveryService } from "@nestjs-plus/discovery";
 import { Injectable, Logger, OnModuleInit, Type } from "@nestjs/common";
-import { APIApplicationCommand } from "discord.js";
+import { APIApplicationCommand, ApplicationCommandData, ChatInputApplicationCommandData } from "discord.js";
 import { from, groupBy, lastValueFrom, mergeMap, of, pipe, take, toArray, zip } from "rxjs";
 import { OptionType } from "./decorators/option.decorator.types";
 import {
@@ -27,7 +27,7 @@ interface InternalIdentifier {
 export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModuleInit*/ {
     private readonly logger = new Logger(SlashCommandDiscovery.name);
     private handlerMap: HandlerMap;
-    private readonly apiData: APIApplicationCommand[] = [];
+    private readonly apiData: ApplicationCommandData[] = [];
     constructor(private readonly discoveryService: DiscoveryService) {}
 
     public getHandler(identifier: Partial<CommandIdentifier>): SlashCommandHandler | undefined {
@@ -46,7 +46,7 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
             ?.get(subcommandName ?? DEFAULT_HANDLER);
     }
 
-    public getApiData(): APIApplicationCommand[] {
+    public getApiData(): ApplicationCommandData[] {
         return [...this.apiData];
     }
 
@@ -55,7 +55,9 @@ export class SlashCommandDiscovery implements ISlashCommandDiscovery /*, OnModul
     }
 
     async discover() {
-        const providers = await this.discoveryService.providersWithMetaAtKey<APIApplicationCommand>(SLASHCOMMAND_DATA);
+        const providers = await this.discoveryService.providersWithMetaAtKey<ChatInputApplicationCommandData>(
+            SLASHCOMMAND_DATA,
+        );
 
         const handlers: { identifier: InternalIdentifier; handler: SlashCommandHandler }[] = [];
 
